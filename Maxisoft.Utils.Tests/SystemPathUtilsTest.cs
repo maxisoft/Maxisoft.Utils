@@ -8,15 +8,27 @@ namespace Maxisoft.Utils.Tests
         [Fact]
         public void TestPathAddBackslash()
         {
-            Assert.Equal("c:\\windows\\system32\\", SystemPathUtils.PathAddBackslash("c:\\windows\\system32"));
-            Assert.Equal("c:\\windows\\system32\\", SystemPathUtils.PathAddBackslash("c:\\windows\\system32\\"));
-            Assert.Equal("/var/test/", SystemPathUtils.PathAddBackslash("/var/test"));
-            Assert.Equal("/var\\test" + Path.AltDirectorySeparatorChar, SystemPathUtils.PathAddBackslash("/var\\test"));
-            Assert.Equal("/var/test/", SystemPathUtils.PathAddBackslash("/var/test/"));
-            Assert.Equal("/", SystemPathUtils.PathAddBackslash("/"));
-            Assert.Equal("test" + Path.DirectorySeparatorChar, SystemPathUtils.PathAddBackslash("test"));
-            Assert.Equal("\\", SystemPathUtils.PathAddBackslash("\\"));
-            Assert.Equal(Path.DirectorySeparatorChar.ToString(), SystemPathUtils.PathAddBackslash(""));
+            if (Path.DirectorySeparatorChar == '\\')
+            {
+                Assert.Equal("c:\\windows\\system32" + Path.DirectorySeparatorChar, SystemPathUtils.PathAddBackslash("c:\\windows\\system32"));
+                Assert.Equal("c:\\windows\\system32\\", SystemPathUtils.PathAddBackslash("c:\\windows\\system32\\"));
+                Assert.Equal("/var/test/", SystemPathUtils.PathAddBackslash("/var/test"));
+                Assert.Equal("/var\\test" + Path.AltDirectorySeparatorChar, SystemPathUtils.PathAddBackslash("/var\\test"));
+                Assert.Equal("/var/test/", SystemPathUtils.PathAddBackslash("/var/test/"));
+                Assert.Equal("/", SystemPathUtils.PathAddBackslash("/"));
+                Assert.Equal("test" + Path.DirectorySeparatorChar, SystemPathUtils.PathAddBackslash("test"));
+                Assert.Equal("\\", SystemPathUtils.PathAddBackslash("\\"));
+                Assert.Equal(Path.DirectorySeparatorChar.ToString(), SystemPathUtils.PathAddBackslash(""));
+            }
+            else //assume unix style '/'
+            {
+                Assert.Equal("/var/test/", SystemPathUtils.PathAddBackslash("/var/test"));
+                Assert.Equal("/var/test/", SystemPathUtils.PathAddBackslash("/var/test/"));
+                Assert.Equal("/", SystemPathUtils.PathAddBackslash("/"));
+                Assert.Equal("test" + Path.DirectorySeparatorChar, SystemPathUtils.PathAddBackslash("test"));
+                Assert.Equal(Path.DirectorySeparatorChar.ToString(), SystemPathUtils.PathAddBackslash(""));
+            }
+
         }
         
         [Fact]
