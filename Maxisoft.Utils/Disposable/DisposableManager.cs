@@ -6,8 +6,16 @@ namespace Maxisoft.Utils.Disposable
 {
     public class DisposableManager : IDisposableManager
     {
-        private readonly LinkedList<WeakReference<IDisposable>> _linkedDisposable =
-            new LinkedList<WeakReference<IDisposable>>();
+        private readonly LinkedList<WeakReference<IDisposable>> _linkedDisposable;
+
+        public DisposableManager() : this(new LinkedList<WeakReference<IDisposable>>())
+        {
+        }
+
+        protected DisposableManager(LinkedList<WeakReference<IDisposable>> collection)
+        {
+            _linkedDisposable = collection;
+        }
 
         public void LinkDisposable(IDisposable disposable)
         {
@@ -18,14 +26,15 @@ namespace Maxisoft.Utils.Disposable
                 _linkedDisposable.AddLast(new WeakReference<IDisposable>(disposable));
             }
         }
-        
+
         public void UnlinkDisposable(IDisposable disposable)
         {
             if (ReferenceEquals(disposable, this)) return;
             lock (_linkedDisposable)
             {
                 CleanupLinkedDisposable();
-                _linkedDisposable.RemoveAll(reference => reference.TryGetTarget(out IDisposable tmp) && ReferenceEquals(tmp, disposable));
+                _linkedDisposable.RemoveAll(reference => reference.TryGetTarget(out IDisposable tmp) &&
+                                                         ReferenceEquals(tmp, disposable));
             }
         }
 
