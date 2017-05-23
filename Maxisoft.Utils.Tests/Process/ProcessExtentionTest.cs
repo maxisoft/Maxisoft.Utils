@@ -34,7 +34,7 @@ namespace Maxisoft.Utils.Tests.Process
         [Fact]
         public async Task TestWaitForExitAsync_WithToken()
         {
-            ProcessStartInfo info = new ProcessStartInfo();
+            var info = new ProcessStartInfo();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 info.FileName = "cmd";
@@ -45,6 +45,9 @@ namespace Maxisoft.Utils.Tests.Process
                 info.FileName = "sh";
                 info.Arguments = "-c \"ping -c 50 127.0.0.1\"";
             }
+            info.RedirectStandardOutput = true;
+            info.RedirectStandardError = true;
+            
             var cts = new CancellationTokenSource();
             var process = System.Diagnostics.Process.Start(info);
             cts.CancelAfter(TimeSpan.FromSeconds(1));

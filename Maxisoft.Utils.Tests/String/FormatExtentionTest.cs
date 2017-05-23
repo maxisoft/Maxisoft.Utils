@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Maxisoft.Utils.Tests.String
 {
-    public class ProcessExtensionTest
+    public class FormatExtentionTest
     {
         [Fact]
         public void FormatFromDictionaryTest_Nominal()
