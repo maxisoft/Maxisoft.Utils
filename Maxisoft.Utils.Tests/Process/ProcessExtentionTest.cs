@@ -15,24 +15,27 @@ namespace Maxisoft.Utils.Tests.Process
         [Fact]
         public async Task TestWaitForExitAsync_Nominal()
         {
-            ProcessStartInfo info = new ProcessStartInfo();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                info.FileName = "cmd";
-                info.Arguments = "/c \"ping 127.0.0.1 -n 2\"";
-            }
-            else //assume unix
-            {
-                info.FileName = "sh";
-                info.Arguments = "-c \"ping -c 2 127.0.0.1\"";
-            }
-            var process = System.Diagnostics.Process.Start(info);
+            var process = StartPingProcess();
             await process.WaitForExitAsync().ToObservable().Timeout(TimeSpan.FromSeconds(5));
             Assert.True(process.HasExited);
         }
 
         [Fact]
         public async Task TestWaitForExitAsync_WithToken()
+        {
+            var process = StartPingProcess();
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(1));
+            await Assert.ThrowsAsync<TaskCanceledException>(async () => await process.WaitForExitAsync(cts.Token)
+                .ToObservable().Timeout(TimeSpan.FromSeconds(5)));
+            Assert.False(process.HasExited);
+            process.Kill();
+            cts = new CancellationTokenSource();
+            await process.WaitForExitAsync(cts.Token).ToObservable().Timeout(TimeSpan.FromSeconds(5));
+            Assert.True(process.HasExited);
+        }
+
+        private static System.Diagnostics.Process StartPingProcess()
         {
             var info = new ProcessStartInfo();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -47,17 +50,9 @@ namespace Maxisoft.Utils.Tests.Process
             }
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = true;
-            
-            var cts = new CancellationTokenSource();
+
             var process = System.Diagnostics.Process.Start(info);
-            cts.CancelAfter(TimeSpan.FromSeconds(1));
-            await Assert.ThrowsAsync<TaskCanceledException>(async () => await process.WaitForExitAsync(cts.Token)
-                .ToObservable().Timeout(TimeSpan.FromSeconds(5)));
-            Assert.False(process.HasExited);
-            process.Kill();
-            cts = new CancellationTokenSource();
-            await process.WaitForExitAsync(cts.Token).ToObservable().Timeout(TimeSpan.FromSeconds(5));
-            Assert.True(process.HasExited);
+            return process;
         }
     }
 }
