@@ -8,7 +8,7 @@ namespace Maxisoft.Utils.Tests
         [Fact]
         public void TestPathAddBackslash()
         {
-            if (Path.DirectorySeparatorChar == '\\')
+            if (Path.DirectorySeparatorChar == '\\') // ie windows
             {
                 Assert.Equal("c:\\windows\\system32" + Path.DirectorySeparatorChar, SystemPathUtils.PathAddBackslash("c:\\windows\\system32"));
                 Assert.Equal("c:\\windows\\system32\\", SystemPathUtils.PathAddBackslash("c:\\windows\\system32\\"));
@@ -28,7 +28,6 @@ namespace Maxisoft.Utils.Tests
                 Assert.Equal("test" + Path.DirectorySeparatorChar, SystemPathUtils.PathAddBackslash("test"));
                 Assert.Equal(Path.DirectorySeparatorChar.ToString(), SystemPathUtils.PathAddBackslash(""));
             }
-
         }
         
         [Fact]
