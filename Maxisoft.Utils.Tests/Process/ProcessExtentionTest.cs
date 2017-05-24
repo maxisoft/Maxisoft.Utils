@@ -46,7 +46,7 @@ namespace Maxisoft.Utils.Tests.Process
             else //assume unix
             {
                 info.FileName = "sh";
-                info.Arguments = "-c \"ping -c {count} 127.0.0.1\"";
+                info.Arguments = $"-c \"ping -c {count} 127.0.0.1\"";
             }
             info.RedirectStandardOutput = true;
             info.RedirectStandardError = true;
