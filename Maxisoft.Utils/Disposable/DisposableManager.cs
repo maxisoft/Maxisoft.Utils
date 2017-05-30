@@ -11,6 +11,14 @@ namespace Maxisoft.Utils.Disposable
         public DisposableManager() : this(new LinkedList<WeakReference<IDisposable>>())
         {
         }
+        
+        public DisposableManager(IEnumerable<IDisposable> disposables) : this(new LinkedList<WeakReference<IDisposable>>())
+        {
+            foreach (var disposable in disposables)
+            {
+                LinkDisposable(disposable);
+            }
+        }
 
         protected DisposableManager(LinkedList<WeakReference<IDisposable>> collection)
         {
