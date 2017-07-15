@@ -19,6 +19,10 @@ namespace Maxisoft.Utils.Time
 
         public static MonotonicTimestamp Now => new MonotonicTimestamp(Native.GetTickCount64());
 
+        public static MonotonicTimestamp FromLuaTime(double time)
+        {
+            return new MonotonicTimestamp((ulong) (time * 1000));
+        }
 
         public static explicit operator ulong(MonotonicTimestamp t)
         {
