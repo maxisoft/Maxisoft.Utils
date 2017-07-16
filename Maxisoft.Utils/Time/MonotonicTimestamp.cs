@@ -12,11 +12,18 @@ namespace Maxisoft.Utils.Time
         public static readonly MonotonicTimestamp MaxValue = new MonotonicTimestamp(ulong.MaxValue);
         public static readonly TimeSpan Precision = TimeSpan.FromMilliseconds(64);
 
-        private MonotonicTimestamp(ulong timestamp)
+        public MonotonicTimestamp(long timestamp) : this((ulong)timestamp)
+        {
+            
+        }
+        
+        public MonotonicTimestamp(ulong timestamp)
         {
             _timestamp = timestamp;
         }
 
+        public bool IsZero => _timestamp == 0;
+        
         public static MonotonicTimestamp Now => new MonotonicTimestamp(Native.GetTickCount64());
 
         public static MonotonicTimestamp FromLuaTime(double time)
