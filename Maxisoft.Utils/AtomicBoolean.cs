@@ -59,5 +59,10 @@ namespace Maxisoft.Utils
             var originalValue = result == TrueValue;
             return originalValue == whenValue;
         }
+
+        public static implicit operator bool(AtomicBoolean ab)
+        {
+            return ab.Value;
+        }
     }
 }
