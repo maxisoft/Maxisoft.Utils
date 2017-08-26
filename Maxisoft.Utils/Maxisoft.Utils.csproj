@@ -3,9 +3,9 @@
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <TargetFrameworks>netstandard1.6;net461</TargetFrameworks>
   </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="System.Diagnostics.Process">
-            <Version>4.3.0</Version>
-        </PackageReference>
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.Process">
+      <Version>4.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
 </Project>
