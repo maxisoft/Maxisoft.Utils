@@ -23,9 +23,9 @@ namespace Maxisoft.Utils.Random
 
         internal TimeSpan DoNext()
         {
-            var ri = Random.Next((int) Min.Ticks, (int) Max.Ticks);
+            var ri = Random.NextDouble() * (Max.Ticks - Min.Ticks) + Min.Ticks;
 
-            Value = TimeSpan.FromTicks(ri);
+            Value = TimeSpan.FromTicks((long) ri);
             Debug.Assert(Value >= Min);
             Debug.Assert(Value <= Max);
             return Value;
