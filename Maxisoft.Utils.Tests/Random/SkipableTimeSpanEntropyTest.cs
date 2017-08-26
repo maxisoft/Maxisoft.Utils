@@ -150,5 +150,23 @@ namespace Maxisoft.Utils.Tests.Random
                 Assert.True(value >= TimeSpan.Zero , "value >= 0");
             }
         }
+        
+        [Fact]
+        public void TestBuggyCaseWithBigNumber()
+        {
+            TimeSpan p = TimeSpan.FromMinutes(100);
+            var tse = SkipableTimeSpanEntropy.FromPercent(p, 200, 40);
+            
+            for (var i = 0; i < Iteration; i++)
+            {
+                var value = tse.Next();
+                if (tse.IsSkipTimeStamp)
+                {
+                    continue;
+                }
+                Assert.True(value <= tse.Max, "value <= max");
+                Assert.True(value >= TimeSpan.Zero , "value >= 0");
+            }
+        }
     }
 }
