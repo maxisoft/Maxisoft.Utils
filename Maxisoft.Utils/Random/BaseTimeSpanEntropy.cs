@@ -36,7 +36,7 @@ namespace Maxisoft.Utils.Random
             return DoNext();
         }
 
-        public static readonly System.Random Random = new System.Random();
+        protected static readonly RandomThreadSafe Random = new RandomThreadSafe();
 
         public static implicit operator TimeSpan(BaseTimeSpanEntropy tse) => tse.Value;
 

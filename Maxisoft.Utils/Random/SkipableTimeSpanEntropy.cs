@@ -28,6 +28,7 @@ namespace Maxisoft.Utils.Random
             {
                 return true;
             }
+
             return Random.NextDouble() * 100 < SkipChancePercent;
         }
 
@@ -51,7 +52,7 @@ namespace Maxisoft.Utils.Random
             var ret = DoNext();
             return IsSkipTimeStamp ? @default : ret;
         }
-        
+
         public TimeSpan Next(Func<TimeSpan> @default)
         {
             var ret = DoNext();
