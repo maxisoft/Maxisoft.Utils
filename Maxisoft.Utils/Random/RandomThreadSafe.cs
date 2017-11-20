@@ -1,67 +1,45 @@
 ﻿namespace Maxisoft.Utils.Random
 {
-    public class RandomThreadSafe
+    public class RandomThreadSafe : System.Random
     {
-        private readonly System.Random _random;
+        private readonly object _lock = new object();
 
-        public RandomThreadSafe()
+        public override int Next()
         {
-            _random = new System.Random();
-        }
-
-        public RandomThreadSafe(int seed)
-        {
-            _random = new System.Random(seed);
-        }
-
-        public int Next()
-        {
-            lock (_random)
+            lock (_lock)
             {
-                return _random.Next();
+                return base.Next();
             }
         }
 
-        public int Next(int minValue, int maxValue)
+        public override int Next(int minValue, int maxValue)
         {
-            lock (_random)
-                return _random.Next(minValue, maxValue);
+            lock (_lock)
+                return base.Next(minValue, maxValue);
         }
 
-        public int Next(int maxValue)
+        public override int Next(int maxValue)
         {
-            lock (_random)
-                return _random.Next(maxValue);
+            lock (_lock)
+                return base.Next(maxValue);
         }
 
-        public double NextDouble()
+        public override double NextDouble()
         {
-            lock (_random)
-                return _random.NextDouble();
+            lock (_lock)
+                return base.NextDouble();
         }
 
-        public void NextBytes(byte[] buffer)
+        public override void NextBytes(byte[] buffer)
         {
-            lock (_random)
-                _random.NextBytes(buffer);
+            lock (_lock)
+                base.NextBytes(buffer);
         }
 
         public override string ToString()
         {
-            lock (_random)
-                return _random.ToString();
-        }
-
-        public override bool Equals(object obj)
-        {
-            lock (_random)
-                return _random.Equals(obj);
-        }
-
-        public override int GetHashCode()
-        {
-            lock (_random)
-                return _random.GetHashCode();
+            lock (_lock)
+                return base.ToString();
         }
     }
 }

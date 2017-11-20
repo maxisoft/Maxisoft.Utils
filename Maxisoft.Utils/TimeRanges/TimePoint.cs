@@ -5,19 +5,22 @@ namespace Maxisoft.Utils.TimeRanges
     public struct TimePoint : IEquatable<TimePoint>, IComparable<TimePoint>, IComparable
     {
         public const int MinuteToSecond = 60;
-        public const int HoursToSecond = MinuteToSecond * 24;
+        public const int HoursToSecond = MinuteToSecond * 60;
         
         public readonly int Hours;
         public readonly int Minutes;
         public readonly int Seconds;
 
+        public static readonly TimePoint Max = new TimePoint(23, 59, 59);
+        public static readonly TimePoint Min = new TimePoint(0);
+        
         public TimePoint(int h = 0, int m = 0, int s = 0)
         {
-            if (!ValidHour(h)) throw new ArgumentOutOfRangeException(nameof(h), h, "must be in (0,24)");
+            if (!ValidHour(h)) throw new ArgumentOutOfRangeException(nameof(h), h, "must be in (0,24(");
             Hours = h;
-            if (!ValidMinute(m)) throw new ArgumentOutOfRangeException(nameof(m), m, "must be in (0,60)");
+            if (!ValidMinute(m)) throw new ArgumentOutOfRangeException(nameof(m), m, "must be in (0,60(");
             Minutes = m;
-            if (!ValidSecond(s)) throw new ArgumentOutOfRangeException(nameof(s), s, "must be in (0,60)");
+            if (!ValidSecond(s)) throw new ArgumentOutOfRangeException(nameof(s), s, "must be in (0,60(");
             Seconds = s;
         }
 
@@ -65,6 +68,11 @@ namespace Maxisoft.Utils.TimeRanges
         public static bool ValidHour(int h)
         {
             return 0 <= h && h < 24;
+        }
+
+        public bool Valid()
+        {
+            return Min <= this && this <= Max;
         }
 
         public static readonly TimePoint Zero = default(TimePoint);
@@ -177,7 +185,7 @@ namespace Maxisoft.Utils.TimeRanges
 
         public override string ToString()
         {
-            return $"TimePoint({nameof(Hours)}: {Hours}, {nameof(Minutes)}: {Minutes}, {nameof(Seconds)}: {Seconds})";
+            return $"{Hours:00}:{Minutes:00}:{Seconds:00}";
         }
     }
 }

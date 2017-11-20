@@ -21,7 +21,7 @@ namespace Maxisoft.Utils.TimeRanges
         
         public bool IsValid()
         {
-            return From <= To;
+            return From.Valid() && To.Valid() && From <= To;
         }
 
         public bool IsEmpty()
@@ -87,12 +87,14 @@ namespace Maxisoft.Utils.TimeRanges
 
         public override string ToString()
         {
-            return $"TimeRange({nameof(From)}: {From}, {nameof(To)}: {To})";
+            return $"{From} -> {To}";
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
+
+        public long TotalSeconds => To.TotalSeconds - From.TotalSeconds;
     }
 }
