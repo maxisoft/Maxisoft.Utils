@@ -25,13 +25,13 @@ namespace Maxisoft.Utils.Tests.TimeRanges
             Assert.Equal(5, hourOnly.Hours);
             Assert.Equal(0, hourOnly.Minutes);
             Assert.Equal(0, hourOnly.Seconds);
-            Assert.Equal(5 * 24 *60, hourOnly.TotalSeconds);
+            Assert.Equal(5 * 60 * 60, hourOnly.TotalSeconds);
             
             var details = new TimePoint(3, 5, 30);
             Assert.Equal(3, details.Hours);
             Assert.Equal(5, details.Minutes);
             Assert.Equal(30, details.Seconds);
-            Assert.Equal(3 * 24 *60 + 5 * 60 + 30, details.TotalSeconds);
+            Assert.Equal(3 * 60 * 60 + 5 * 60 + 30, details.TotalSeconds);
         }
         
         [Fact]
@@ -126,7 +126,7 @@ namespace Maxisoft.Utils.Tests.TimeRanges
         public void TestTimePointToString()
         {
             var someDate = new TimePoint(5, 30, 58);
-            Assert.Equal("TimePoint(Hours: 5, Minutes: 30, Seconds: 58)", someDate.ToString());
+            Assert.Equal("05:30:58", someDate.ToString());
         }
     }
 }

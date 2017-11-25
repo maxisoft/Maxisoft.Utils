@@ -41,5 +41,15 @@ namespace Maxisoft.Utils.Tests.TimeRanges
             Assert.False(Parser.TryParse("8:f -> 8:50", out tr));
             Assert.False(Parser.TryParse("8:f -> 8:50", out tr));
         }
+        
+        [Fact]
+        public void TestParseTimeRangeToString()
+        {
+            TimeRange tr = new TimeRange(new TimePoint(8, 30), new TimePoint(8, 50, 30));
+            var tostring = tr.ToString();
+            TimeRange parsed;
+            Assert.True(Parser.TryParse(tostring, out parsed));
+            Assert.Equal(tr, parsed);
+        }
     }
 }
