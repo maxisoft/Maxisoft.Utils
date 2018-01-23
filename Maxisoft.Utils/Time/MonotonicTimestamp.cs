@@ -38,56 +38,27 @@ namespace Maxisoft.Utils.Time
 
         public static TimeSpan operator +(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            if (to._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(to));
-            if (from._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(from));
-
             return TimeSpan.FromMilliseconds((ulong) to + (ulong) from);
         }
 
         public static TimeSpan operator -(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            if (to._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(to));
-            if (from._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(from));
-
             return TimeSpan.FromMilliseconds((double) (new BigInteger((ulong) to) - new BigInteger((ulong) from)));
         }
 
         public static MonotonicTimestamp operator +(MonotonicTimestamp to, TimeSpan ts)
         {
-            if (to._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(to));
-
             return new MonotonicTimestamp((ulong) ((ulong) to + ts.TotalMilliseconds));
         }
 
         public static MonotonicTimestamp operator -(MonotonicTimestamp to, TimeSpan ts)
         {
-            if (to._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(to));
-
             return new MonotonicTimestamp((ulong) ((ulong) to - ts.TotalMilliseconds));
         }
 
 
         public static bool operator ==(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            if (to._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(to));
-            if (from._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(from));
-
             return (ulong) to == (ulong) from;
         }
 
@@ -98,25 +69,11 @@ namespace Maxisoft.Utils.Time
 
         public static bool operator >(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            if (to._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(to));
-            if (from._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(from));
-
             return (ulong) to > (ulong) from;
         }
 
         public static bool operator <(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            if (to._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(to));
-            if (from._timestamp == 0)
-                throw new ArgumentException(
-                    "Must be created using MonotonicTimestamp.Now, not default(MonotonicTimestamp)", nameof(from));
-
             return (ulong) to < (ulong) from;
         }
 
