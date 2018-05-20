@@ -6,13 +6,13 @@ namespace Maxisoft.Utils.Disposable
 {
     public class DisposableManager : IDisposableManager
     {
-        private readonly LinkedList<WeakReference<IDisposable>> _linkedDisposable;
+        private readonly LinkedList<OptinalWeakDisposable> _linkedDisposable;
 
-        public DisposableManager() : this(new LinkedList<WeakReference<IDisposable>>())
+        public DisposableManager() : this(new LinkedList<IDisposable>())
         {
         }
-        
-        public DisposableManager(IEnumerable<IDisposable> disposables) : this(new LinkedList<WeakReference<IDisposable>>())
+
+        public DisposableManager(IEnumerable<IDisposable> disposables) : this(new LinkedList<IDisposable>())
         {
             foreach (var disposable in disposables)
             {
@@ -20,9 +20,17 @@ namespace Maxisoft.Utils.Disposable
             }
         }
 
-        protected DisposableManager(LinkedList<WeakReference<IDisposable>> collection)
+        protected DisposableManager(LinkedList<IDisposable> collection) : this(new LinkedList<OptinalWeakDisposable>())
         {
-            _linkedDisposable = collection;
+            foreach (var disposable in collection)
+            {
+                LinkDisposable(disposable);
+            }
+        }
+
+        protected DisposableManager(LinkedList<OptinalWeakDisposable> linkedDisposable)
+        {
+            _linkedDisposable = linkedDisposable;
         }
 
         public void LinkDisposable(IDisposable disposable)
@@ -31,7 +39,17 @@ namespace Maxisoft.Utils.Disposable
             lock (_linkedDisposable)
             {
                 CleanupLinkedDisposable();
-                _linkedDisposable.AddLast(new WeakReference<IDisposable>(disposable));
+                _linkedDisposable.AddLast(new OptinalWeakDisposable(disposable));
+            }
+        }
+        
+        public void LinkDisposable(WeakReference<IDisposable> disposable)
+        {
+            if (!disposable.TryGetTarget(out var tmp) || ReferenceEquals(tmp, this)) return;
+            lock (_linkedDisposable)
+            {
+                CleanupLinkedDisposable();
+                _linkedDisposable.AddLast(new OptinalWeakDisposable(disposable));
             }
         }
 
@@ -41,8 +59,7 @@ namespace Maxisoft.Utils.Disposable
             lock (_linkedDisposable)
             {
                 CleanupLinkedDisposable();
-                _linkedDisposable.RemoveAll(reference => reference.TryGetTarget(out IDisposable tmp) &&
-                                                         ReferenceEquals(tmp, disposable));
+                _linkedDisposable.RemoveAll(d => d == disposable);
             }
         }
 
@@ -50,8 +67,7 @@ namespace Maxisoft.Utils.Disposable
         {
             lock (_linkedDisposable)
             {
-                _linkedDisposable.RemoveAll(reference => !reference.TryGetTarget(out IDisposable tmp) ||
-                                                         ReferenceEquals(null, tmp));
+                _linkedDisposable.RemoveAll(d => !d.IsValid());
             }
         }
 
@@ -60,16 +76,16 @@ namespace Maxisoft.Utils.Disposable
         {
             lock (_linkedDisposable)
             {
-                foreach (var wearref in _linkedDisposable.Reverse())
+                foreach (var disposable in _linkedDisposable.Reverse())
                 {
-                    if (wearref.TryGetTarget(out IDisposable disposable))
-                    {
-                        disposable?.Dispose();
-                    }
+                    disposable.Dispose();
                 }
+
                 _linkedDisposable.Clear();
             }
         }
+        
+        
 
         public virtual void Dispose()
         {
