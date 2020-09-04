@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using Maxisoft.Utils.Collection;
 using Xunit;
 
-namespace Maxisoft.Utils.Tests
+namespace Maxisoft.Utils.Tests.Collection
 {
     public class LinkedListExtensionsTests
     {
