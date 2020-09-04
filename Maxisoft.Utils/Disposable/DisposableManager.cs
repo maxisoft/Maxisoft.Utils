@@ -76,7 +76,7 @@ namespace Maxisoft.Utils.Disposable
         {
             lock (_linkedDisposable)
             {
-                foreach (var disposable in _linkedDisposable.Reverse())
+                foreach (var disposable in _linkedDisposable.ReversedIterator())
                 {
                     disposable.Dispose();
                 }
