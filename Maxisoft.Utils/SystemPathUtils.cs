@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Maxisoft.Utils
 {
@@ -6,49 +7,33 @@ namespace Maxisoft.Utils
     {
         public static string PathAddBackslash(string path)
         {
-            // They're always one character but EndsWith is shorter than
-            // array style access to last path character. Change this
-            // if performance are a (measured) issue.
-            var separator1 = Path.DirectorySeparatorChar.ToString();
-            var separator2 = Path.AltDirectorySeparatorChar.ToString();
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return Path.DirectorySeparatorChar.ToString();
+            }
 
-            // Trailing white spaces are always ignored but folders may have
-            // leading spaces. It's unusual but it may happen. If it's an issue
-            // then just replace TrimEnd() with Trim(). Tnx Paul Groke to point this out.
             path = path.TrimEnd();
+            var lastChar = path[path.Length - 1];
 
-            // Argument is always a directory name then if there is one
-            // of allowed separators then I have nothing to do.
-            if (path.EndsWith(separator1) || path.EndsWith(separator2))
+            if (lastChar == Path.DirectorySeparatorChar || lastChar == Path.AltDirectorySeparatorChar)
             {
                 return path;
             }
 
-            // If there is the "alt" separator then I add a trailing one.
-            // Note that URI format (file://drive:\path\filename.ext) is
-            // not supported in most .NET I/O functions then we don't support it
-            // here too. If you have to then simply revert this check:
-            // if (path.Contains(separator1))
-            //     return path + separator1;
-            //
-            // return path + separator2;
-            if (path.Contains(separator2))
+            var index = path.LastIndexOfAny(new[] {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar});
+            if (index < 0)
             {
-                return path + separator2;
+                return path + Path.DirectorySeparatorChar;
             }
 
-            // If there is not an "alt" separator I add a "normal" one.
-            // It means path may be with normal one or it has not any separator
-            // (for example if it's just a directory name). In this case I
-            // default to normal as users expect.
-            return path + separator1;
+            var sep = path[index];
+            return path + sep;
         }
 
-        public static string GetTemporaryDirectory()
+        [Obsolete("use Maxisoft.Utils.TemporaryDirectory")]
+        public static string CreateTemporaryDirectory()
         {
-            var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(tempDirectory);
-            return tempDirectory;
+            return new TemporaryDirectory().Path;
         }
 
         public static string PathSlashToUnix(string path)

@@ -1,19 +1,21 @@
+using System;
 using System.IO;
 using Xunit;
 
 namespace Maxisoft.Utils.Tests
 {
-    public class SystemPathUtilsTest
+    public class SystemPathUtilsTests
     {
         [Fact]
         public void TestPathAddBackslash()
         {
             if (Path.DirectorySeparatorChar == '\\') // ie windows
             {
-                Assert.Equal("c:\\windows\\system32" + Path.DirectorySeparatorChar, SystemPathUtils.PathAddBackslash("c:\\windows\\system32"));
+                Assert.Equal("c:\\windows\\system32" + Path.DirectorySeparatorChar,
+                    SystemPathUtils.PathAddBackslash("c:\\windows\\system32"));
                 Assert.Equal("c:\\windows\\system32\\", SystemPathUtils.PathAddBackslash("c:\\windows\\system32\\"));
                 Assert.Equal("/var/test/", SystemPathUtils.PathAddBackslash("/var/test"));
-                Assert.Equal("/var\\test" + Path.AltDirectorySeparatorChar, SystemPathUtils.PathAddBackslash("/var\\test"));
+                Assert.Equal("/var\\test\\", SystemPathUtils.PathAddBackslash("/var\\test"));
                 Assert.Equal("/var/test/", SystemPathUtils.PathAddBackslash("/var/test/"));
                 Assert.Equal("/", SystemPathUtils.PathAddBackslash("/"));
                 Assert.Equal("test" + Path.DirectorySeparatorChar, SystemPathUtils.PathAddBackslash("test"));
@@ -29,16 +31,7 @@ namespace Maxisoft.Utils.Tests
                 Assert.Equal(Path.DirectorySeparatorChar.ToString(), SystemPathUtils.PathAddBackslash(""));
             }
         }
-        
-        [Fact]
-        public void TestGetTemporaryDirectory()
-        {
-            var result = SystemPathUtils.GetTemporaryDirectory();
-            Assert.NotNull(result);
-            Assert.NotEmpty(result);
-            Assert.True(Directory.Exists(result));
-        }
-        
+
         [Fact]
         public void TestPathSlashToUnix()
         {
