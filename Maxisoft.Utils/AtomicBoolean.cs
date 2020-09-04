@@ -6,7 +6,12 @@ namespace Maxisoft.Utils
     {
         private const int TrueValue = 1;
         private const int FalseValue = 0;
-        private int _zeroOrOne = FalseValue;
+        private int _value = FalseValue;
+        
+        private static int BoolToInt(bool value)
+        {
+            return value ? TrueValue : FalseValue;
+        }
 
         public AtomicBoolean()
             : this(false)
@@ -19,12 +24,12 @@ namespace Maxisoft.Utils
         }
 
         /// <summary>
-        ///     Provides (non-thread-safe) access to the backing value
+        ///     non-thread-safe boolean value
         /// </summary>
         public bool Value
         {
-            get { return _zeroOrOne == TrueValue; }
-            set { _zeroOrOne = value ? TrueValue : FalseValue; }
+            get => _value != FalseValue;
+            set => _value = BoolToInt(value);
         }
 
         /// <summary>
@@ -33,7 +38,7 @@ namespace Maxisoft.Utils
         /// <returns>Whether the value was (atomically) changed from false to true.</returns>
         public bool FalseToTrue()
         {
-            return SetWhen(true, false);
+            return CompareExchange(true, false);
         }
 
         /// <summary>
@@ -42,7 +47,7 @@ namespace Maxisoft.Utils
         /// <returns>Whether the value was (atomically) changed from true to false.</returns>
         public bool TrueToFalse()
         {
-            return SetWhen(false, true);
+            return CompareExchange(false, true);
         }
 
         /// <summary>
@@ -52,10 +57,10 @@ namespace Maxisoft.Utils
         /// <param name="setToValue"></param>
         /// <param name="whenValue"></param>
         /// <returns></returns>
-        public bool SetWhen(bool setToValue, bool whenValue)
+        public bool CompareExchange(bool setToValue, bool whenValue)
         {
-            var comparand = whenValue ? TrueValue : FalseValue;
-            var result = Interlocked.CompareExchange(ref _zeroOrOne, setToValue ? TrueValue : FalseValue, comparand);
+            var comparand = BoolToInt(whenValue);
+            var result = Interlocked.CompareExchange(ref _value, BoolToInt(setToValue), comparand);
             var originalValue = result == TrueValue;
             return originalValue == whenValue;
         }
