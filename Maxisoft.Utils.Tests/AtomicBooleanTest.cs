@@ -27,12 +27,12 @@ namespace Maxisoft.Utils.Tests
             Assert.False(b.TrueToFalse());
             Assert.False(b.Value);
 
-            //Value not changed if SetWhen fails
+            //Value not changed if CompareExchange fails
             b.Value = false;
             Assert.False(b.CompareExchange(true, true));
             Assert.False(b.Value);
 
-            //Value not changed if SetWhen fails
+            //Value not changed if CompareExchange fails
             b.Value = true;
             Assert.False(b.CompareExchange(false, false));
             Assert.True(b.Value);
