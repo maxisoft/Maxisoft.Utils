@@ -4,6 +4,14 @@
     {
         private readonly object _lock = new object();
 
+        public RandomThreadSafe()
+        {
+        }
+
+        public RandomThreadSafe(int seed) : base(seed)
+        {
+        }
+
         public override int Next()
         {
             lock (_lock)
