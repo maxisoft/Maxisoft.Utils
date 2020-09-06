@@ -15,10 +15,11 @@ namespace Maxisoft.Utils.Collection
                 {
                     linkedList.Remove(node);
                 }
+
                 node = next;
             }
         }
-        
+
         public static void RemoveAll<T>(this LinkedList<T> linkedList,
             Func<LinkedListNode<T>, bool> predicate)
         {
@@ -29,21 +30,26 @@ namespace Maxisoft.Utils.Collection
                 {
                     linkedList.Remove(node);
                 }
+
                 node = next;
             }
         }
-        
-        public static IEnumerable<T> ReversedIterator<T>(this LinkedList<T> list) {
+
+        public static IEnumerable<T> ReversedIterator<T>(this LinkedList<T> list)
+        {
             var el = list.Last;
-            while (el != null) {
+            while (el != null)
+            {
                 yield return el.Value;
                 el = el.Previous;
             }
         }
-        
-        public static IEnumerable<LinkedListNode<T>> ReversedNodeIterator<T>(this LinkedList<T> list) {
+
+        public static IEnumerable<LinkedListNode<T>> ReversedNodeIterator<T>(this LinkedList<T> list)
+        {
             var el = list.Last;
-            while (el != null) {
+            while (el != null)
+            {
                 yield return el;
                 el = el.Previous;
             }
