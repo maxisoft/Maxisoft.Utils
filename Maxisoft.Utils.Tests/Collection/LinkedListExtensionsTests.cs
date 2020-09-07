@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Maxisoft.Utils.Collection;
@@ -78,7 +79,7 @@ namespace Maxisoft.Utils.Tests.Collection
             Assert.Empty(list);
             Assert.DoesNotContain(list, i => i == 5);
         }
-        
+
         [Fact]
         public void TestRemoveAll_LinkedListPredicate()
         {
@@ -125,10 +126,11 @@ namespace Maxisoft.Utils.Tests.Collection
                     break;
                 }
             }
+
             Assert.Equal(list.Count, c);
             Assert.False(it.MoveNext());
         }
-        
+
         [Fact]
         public void Test_ReversedNodeIterator()
         {
@@ -155,8 +157,103 @@ namespace Maxisoft.Utils.Tests.Collection
                     break;
                 }
             }
+
             Assert.Equal(list.Count, c);
             Assert.False(it.MoveNext());
+        }
+
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(64)]
+        public void TestAt(int size)
+        {
+            var l = new LinkedList<int>();
+            for (var i = 0; i < size; i++)
+            {
+                l.AddLast(i);
+            }
+
+            Assert.Equal(size, l.Count);
+
+            for (var i = 0; i < size; i++)
+            {
+                Assert.Equal(i, l.At(i).Value);
+            }
+        }
+
+        private const int DefaultSize = 8;
+
+        [Theory]
+        [InlineData(DefaultSize)]
+        [InlineData(DefaultSize + 1)]
+        [InlineData(DefaultSize + 2)]
+        [InlineData(-1)]
+        [InlineData(-2)]
+        [InlineData(-DefaultSize)]
+        [InlineData(int.MinValue)]
+        public void TestAt_OutOfBound(int index)
+        {
+            var l = new LinkedList<int>();
+            for (var i = 0; i < DefaultSize; i++)
+            {
+                l.AddLast(i);
+            }
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => l.At(index));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(64)]
+        public void TestInsert(int size)
+        {
+            for (var i = 0; i <= size; i++)
+            {
+                var l = LinkedListExtensions.Range(size);
+                var adversarial = Enumerable.Range(0, size).ToList();
+                Assert.Equal(l, adversarial);
+
+                l.Insert(i, -i);
+                adversarial.Insert(i, -i);
+                Assert.Equal(l, adversarial);
+            }
+        }
+        
+        
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(64)]
+        public void TestRemoveAt(int size)
+        {
+            for (var i = 0; i < size; i++)
+            {
+                var l = LinkedListExtensions.Range(size);
+                var adversarial = Enumerable.Range(0, size).ToList();
+                Assert.Equal(l, adversarial);
+
+                l.RemoveAt(i);
+                adversarial.RemoveAt(i);
+                Assert.Equal(l, adversarial);
+            }
+        }
+        
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(64)]
+        public void TestIndexOf(int size)
+        {
+            var l = LinkedListExtensions.Range(size);
+            var adversarial = Enumerable.Range(0, size).ToList();
+            Assert.Equal(l, adversarial);
+            for (var i = -2; i < size + 2; i++)
+            {
+                Assert.Equal(adversarial.IndexOf(i), l.IndexOf(i));
+            }
         }
     }
 }
