@@ -38,6 +38,7 @@ namespace Maxisoft.Utils.Collection
         public bool IsEmpty => LongLength == 0;
 
         public int Length => (int) LongLength;
+        // ReSharper disable once MemberCanBePrivate.Global
         public long LongLength { get; protected set; }
 
         public T this[long index]
@@ -115,7 +116,7 @@ namespace Maxisoft.Utils.Collection
             }
 
             var (index, p) = Find(item);
-            return DoRemoveAt(index, in p);
+            return RemoveAtDispatch(index, in p);
         }
 
         public int Count => Length;
@@ -305,18 +306,18 @@ namespace Maxisoft.Utils.Collection
             var p = GetPointerForIndex(index);
             if (index >= LongLength / 2)
             {
-                DoInsertRight(index, p, in item);
+                InsertRight(p, in item);
             }
             else
             {
-                DoInsertLeft(index, p, in item);
+                InsertLeft(p, in item);
             }
         }
 
         public void RemoveAt(int index)
         {
             var p = GetPointerForIndex(index);
-            var res = DoRemoveAt(index, p);
+            var res = RemoveAtDispatch(index, p);
             Debug.Assert(res);
         }
 
@@ -333,7 +334,7 @@ namespace Maxisoft.Utils.Collection
             {
                 @sizeof = Marshal.SizeOf<T>();
             }
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
             }
 
@@ -460,7 +461,7 @@ namespace Maxisoft.Utils.Collection
         {
         }
 
-        private bool DoRemoveAt(long index, in InternalPointer pointer)
+        private bool RemoveAtDispatch(long index, in InternalPointer pointer)
         {
             if (index < 0)
             {
@@ -470,17 +471,17 @@ namespace Maxisoft.Utils.Collection
 
             if (index >= LongLength / 2)
             {
-                DoRemoveRight(index, in pointer);
+                RemoveRight(in pointer);
             }
             else
             {
-                DoRemoveLeft(index, in pointer);
+                RemoveLeft(in pointer);
             }
 
             return true;
         }
 
-        private void DoRemoveRight(long index, in InternalPointer pointer)
+        private void RemoveRight(in InternalPointer pointer)
         {
             using var ug = new UpdateGuard(this) {Increment = true};
             var node = pointer.Node;
@@ -507,7 +508,7 @@ namespace Maxisoft.Utils.Collection
             }
         }
 
-        private void DoRemoveLeft(long index, in InternalPointer pointer)
+        private void RemoveLeft(in InternalPointer pointer)
         {
             using var ug = new UpdateGuard(this) {Increment = true};
             var node = pointer.Node;
@@ -541,7 +542,7 @@ namespace Maxisoft.Utils.Collection
             }
 
             var (index, p) = FindFastPath(in item);
-            return DoRemoveAt(index, in p);
+            return RemoveAtDispatch(index, in p);
         }
 
         private (long index, InternalPointer pointer) Find(in T item)
@@ -595,7 +596,7 @@ namespace Maxisoft.Utils.Collection
             return FindFastPath(in item).index;
         }
 
-        private void DoInsertLeft(long index, InternalPointer pointer, in T item)
+        private void InsertLeft(InternalPointer pointer, in T item)
         {
             Prepend(_begin.Value);
             using var ug = new UpdateGuard(this);
@@ -627,7 +628,7 @@ namespace Maxisoft.Utils.Collection
             (pointer - 1).Value = item;
         }
 
-        private void DoInsertRight(long index, in InternalPointer pointer, in T item)
+        private void InsertRight(in InternalPointer pointer, in T item)
         {
             Append((_end - 1).Value);
             using var ug = new UpdateGuard(this);
@@ -661,7 +662,8 @@ namespace Maxisoft.Utils.Collection
             pointer.Value = item;
         }
 
-        internal InternalPointer GetPointerForIndex(long index)
+        // ReSharper disable once MemberCanBePrivate.Global
+        protected internal InternalPointer GetPointerForIndex(long index)
         {
             InternalPointer p;
             if (index < 0)
