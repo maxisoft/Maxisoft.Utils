@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Maxisoft.Utils.Collection
 {
     public partial class Deque<T>
     {
-        internal struct UpdateGuard : IDisposable
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+        protected internal struct UpdateGuard : IDisposable
         {
             internal readonly int Version;
             internal readonly Deque<T> Deque;
-            internal bool Increment { get; set; }
+            public bool Increment { get; set; }
 
             public UpdateGuard(Deque<T> deque)
             {
@@ -18,7 +20,7 @@ namespace Maxisoft.Utils.Collection
                 Increment = false;
             }
 
-            internal void Check()
+            internal readonly void Check()
             {
                 if (Deque._version != Version)
                 {
