@@ -5,29 +5,41 @@ namespace Maxisoft.Utils.Collection
 {
     public partial class Deque<T>
     {
-        internal readonly struct InternalPointer
+        protected internal readonly struct InternalPointer
         {
             internal readonly long Index;
+            private readonly LinkedListNode<T[]>? _node;
 
-            public InternalPointer(in LinkedListNode<T[]> node, long index)
+            public InternalPointer(LinkedListNode<T[]>? node, long index)
             {
-                Node = node;
+                _node = node;
                 Index = index;
             }
 
 
-            internal LinkedListNode<T[]> Node { get; }
+            // ReSharper disable once ConvertToAutoProperty
+            // ReSharper disable once ConvertToAutoPropertyWhenPossible
+            internal LinkedListNode<T[]> Node => _node!;
 
             public ref T Value => ref Node.Value[Index];
 
             public long DistanceToBeginning => Index;
             public long DistanceToEnd => Node.Value.LongLength - Index;
 
-            public bool HasNode => !ReferenceEquals(Node, null);
+            public bool HasNode => !ReferenceEquals(_node, null);
             public bool Valid => HasNode && Index >= 0 && Index < Node.Value.LongLength;
+
+            private void ThrowForNullNode()
+            {
+                if (!HasNode)
+                {
+                    throw new InvalidOperationException("This pointer has no node");
+                }
+            }
 
             public static InternalPointer operator +(InternalPointer p, long inc)
             {
+                p.ThrowForNullNode();
                 if (inc < 0)
                 {
                     return p - inc * -1;
@@ -71,6 +83,7 @@ namespace Maxisoft.Utils.Collection
 
             public static InternalPointer operator -(InternalPointer p, long decr)
             {
+                p.ThrowForNullNode();
                 if (decr < 0)
                 {
                     return p + decr * -1;
