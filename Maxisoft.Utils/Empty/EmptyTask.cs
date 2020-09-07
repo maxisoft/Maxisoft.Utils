@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace Maxisoft.Utils.Empty
@@ -42,7 +41,7 @@ namespace Maxisoft.Utils.Empty
         {
         }
     }
-    
+
     public class EmptyTask<T> : Task<T>
     {
         public EmptyTask() : base(new EmptyFunc<T>())

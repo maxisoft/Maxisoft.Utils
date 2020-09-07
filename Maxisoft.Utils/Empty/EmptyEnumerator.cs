@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Maxisoft.Utils.Empty
 {
-    public struct EmptyEnumerator : IEnumerator, IEmpty
+    public readonly struct EmptyEnumerator : IEnumerator, IEmpty
     {
         public bool MoveNext()
         {
@@ -18,7 +18,7 @@ namespace Maxisoft.Utils.Empty
         public object Current => throw new InvalidOperationException("Empty by design");
     }
 
-    public struct EmptyEnumerator<T> : IEnumerator<T>, IEmpty
+    public readonly struct EmptyEnumerator<T> : IEnumerator<T>, IEmpty
     {
         public bool MoveNext()
         {

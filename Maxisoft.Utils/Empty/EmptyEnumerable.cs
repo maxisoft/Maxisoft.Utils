@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Maxisoft.Utils.Empty
 {
-    public struct EmptyEnumerable : IEnumerable, IEmpty
+    public readonly struct EmptyEnumerable : IEnumerable, IEmpty
     {
         public IEnumerator GetEnumerator()
         {
@@ -16,7 +16,7 @@ namespace Maxisoft.Utils.Empty
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <seealso cref="Enumerable.Empty{TResult}" />
-    public struct EmptyEnumerable<T> : IEnumerable<T>, IEmpty
+    public readonly struct EmptyEnumerable<T> : IEnumerable<T>, IEmpty
     {
         public IEnumerator<T> GetEnumerator()
         {

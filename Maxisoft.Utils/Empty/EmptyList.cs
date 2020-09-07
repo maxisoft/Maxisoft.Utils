@@ -63,7 +63,7 @@ namespace Maxisoft.Utils.Empty
             set => throw new InvalidOperationException("This list is empty by design");
         }
     }
-    
+
     public readonly struct EmptyList : IList, IEmpty
     {
         public IEnumerator GetEnumerator()

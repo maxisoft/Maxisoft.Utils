@@ -58,12 +58,10 @@ namespace Maxisoft.Utils.Empty
         public T this[int index]
         {
             get => default!;
-            set
-            {
-            }
+            set { }
         }
     }
-    
+
     public readonly struct NoOpList : IList, IEmpty
     {
         public IEnumerator GetEnumerator()
@@ -102,7 +100,6 @@ namespace Maxisoft.Utils.Empty
 
         public void Insert(int index, object value)
         {
-            
         }
 
         public void Remove(object value)
@@ -120,7 +117,7 @@ namespace Maxisoft.Utils.Empty
         public object this[int index]
         {
             get => default!;
-            set {}
+            set { }
         }
     }
 }
