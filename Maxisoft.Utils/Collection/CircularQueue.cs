@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace Maxisoft.Utils.Collection
 {
-    public class CircularBuffer<T> : ICollection<T>
+    public class CircularQueue<T> : ICollection<T>
     {
         private readonly Queue<T> _queue;
         private readonly int _size;
 
-        public CircularBuffer(int size)
+        public CircularQueue(int size)
         {
             if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "must be positive number");
             _queue = new Queue<T>(size);
