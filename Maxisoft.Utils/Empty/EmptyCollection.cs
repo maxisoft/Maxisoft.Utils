@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Maxisoft.Utils.Empty
 {
@@ -29,7 +28,6 @@ namespace Maxisoft.Utils.Empty
         /// <exception cref="InvalidOperationException"></exception>
         public void Add(T item)
         {
-            Enumerable.Empty<T>();
             throw new InvalidOperationException("This collection must remain empty by design");
         }
 
@@ -54,5 +52,23 @@ namespace Maxisoft.Utils.Empty
         public int Count => 0;
 
         public bool IsReadOnly => false;
+    }
+
+    public readonly struct EmptyCollection : ICollection, IEmpty
+    {
+        public IEnumerator GetEnumerator()
+        {
+            return new EmptyEnumerator();
+        }
+
+        public void CopyTo(Array array, int index)
+        {
+        }
+
+        public int Count => 0;
+
+        public bool IsSynchronized => false;
+
+        public object SyncRoot => this;
     }
 }

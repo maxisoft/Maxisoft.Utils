@@ -2,7 +2,7 @@
 
 namespace Maxisoft.Utils.Empty
 {
-    public struct EmptyConvertible : IConvertible, IEmpty
+    public readonly struct EmptyConvertible : IConvertible, IEmpty
     {
         public TypeCode GetTypeCode()
         {

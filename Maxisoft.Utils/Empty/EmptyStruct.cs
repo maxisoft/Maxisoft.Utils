@@ -1,6 +1,6 @@
 ﻿namespace Maxisoft.Utils.Empty
 {
-    public struct EmptyStruct : IEmpty
+    public readonly struct EmptyStruct : IEmpty
     {
     }
 }

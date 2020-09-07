@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Maxisoft.Utils.Empty
@@ -10,50 +11,45 @@ namespace Maxisoft.Utils.Empty
     /// <seealso cref="EmptyCollection{T}" />
     public readonly struct NoOpCollection<T> : ICollection<T>, IEmpty
     {
-#pragma warning disable 649
-        private readonly EmptyCollection<T> _impl;
-#pragma warning restore 649
-
         public IEnumerator<T> GetEnumerator()
         {
-            return _impl.GetEnumerator();
+            return new EmptyEnumerator<T>();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _impl).GetEnumerator();
+            return GetEnumerator();
         }
 
         /// <summary>
-        ///     Doing nothing silently
+        ///     Instantly throws <c>InvalidOperationException</c>
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">Ignored</param>
+        /// <exception cref="InvalidOperationException"></exception>
         public void Add(T item)
         {
         }
 
         public void Clear()
         {
-            _impl.Clear();
         }
 
         public bool Contains(T item)
         {
-            return _impl.Contains(item);
+            return false;
         }
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            _impl.CopyTo(array, arrayIndex);
         }
 
         public bool Remove(T item)
         {
-            return _impl.Remove(item);
+            return false;
         }
 
-        public int Count => _impl.Count;
+        public int Count => 0;
 
-        public bool IsReadOnly => _impl.IsReadOnly;
+        public bool IsReadOnly => false;
     }
 }
