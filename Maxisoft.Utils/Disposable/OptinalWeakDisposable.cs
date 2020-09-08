@@ -4,9 +4,9 @@ namespace Maxisoft.Utils.Disposable
 {
     public readonly struct OptinalWeakDisposable : IDisposable, IEquatable<OptinalWeakDisposable>, IEquatable<IDisposable>
     {
-        internal readonly IDisposable HardRef;
+        internal readonly IDisposable? HardRef;
 
-        internal readonly WeakReference<IDisposable> WeakReference;
+        internal readonly WeakReference<IDisposable>? WeakReference;
 
         public OptinalWeakDisposable(IDisposable hardRef)
         {
@@ -72,7 +72,7 @@ namespace Maxisoft.Utils.Disposable
             }
 
             return ReferenceEquals(other, HardRef) ||
-                   WeakReference.TryGetTarget(out var d) && ReferenceEquals(other, d);
+                   WeakReference is {} && WeakReference.TryGetTarget(out var d) && ReferenceEquals(other, d);
         }
 
         public override bool Equals(object obj)
