@@ -1,8 +1,10 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Maxisoft.Utils.Empty
 {
+    [Obsolete("Use System.Threading.Tasks.ValueTask")]
     public class EmptyTask : Task
     {
         public EmptyTask() : base(new EmptyAction())
@@ -41,7 +43,8 @@ namespace Maxisoft.Utils.Empty
         {
         }
     }
-
+    
+    [Obsolete("Use System.Threading.Tasks.ValueTask<T>")]
     public class EmptyTask<T> : Task<T>
     {
         public EmptyTask() : base(new EmptyFunc<T>())
