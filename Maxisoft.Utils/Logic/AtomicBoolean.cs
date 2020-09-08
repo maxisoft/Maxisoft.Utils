@@ -2,11 +2,11 @@
 
 namespace Maxisoft.Utils.Logic
 {
-    public class AtomicBoolean
+    public sealed class AtomicBoolean
     {
         private const int TrueValue = 1;
         private const int FalseValue = 0;
-        private int _value = FalseValue;
+        private volatile int _value = FalseValue;
 
         public AtomicBoolean()
             : this(false)
@@ -19,12 +19,16 @@ namespace Maxisoft.Utils.Logic
         }
 
         /// <summary>
-        ///     non-thread-safe boolean value
+        ///     best effort thread-safe boolean value
         /// </summary>
         public bool Value
         {
             get => _value != FalseValue;
-            set => _value = BoolToInt(value);
+            set
+            {
+                Interlocked.MemoryBarrier();
+                _value = BoolToInt(value);
+            }
         }
 
         private static int BoolToInt(bool value)
@@ -35,7 +39,7 @@ namespace Maxisoft.Utils.Logic
         /// <summary>
         ///     Attempt changing the backing value from true to false.
         /// </summary>
-        /// <returns>Whether the value was (atomically) changed from false to true.</returns>
+        /// <returns><c>true</c> on success</returns>
         public bool FalseToTrue()
         {
             return CompareExchange(true, false);
@@ -44,15 +48,15 @@ namespace Maxisoft.Utils.Logic
         /// <summary>
         ///     Attempt changing the backing value from false to true.
         /// </summary>
-        /// <returns>Whether the value was (atomically) changed from true to false.</returns>
+        /// <returns><c>true</c> on success</returns>
         public bool TrueToFalse()
         {
             return CompareExchange(false, true);
         }
 
         /// <summary>
-        ///     Attempt changing from "whenValue" to "set".
-        ///     Fails if this.TriValue is not "whenValue".
+        ///     Attempt changing from "when" to "set".
+        ///     Fails if the current value was not "when".
         /// </summary>
         /// <param name="set"></param>
         /// <param name="when"></param>
@@ -65,9 +69,29 @@ namespace Maxisoft.Utils.Logic
             return originalValue == when;
         }
 
-        public static implicit operator bool(AtomicBoolean ab)
+        public static explicit operator bool(AtomicBoolean ab)
         {
             return ab.Value;
+        }
+        
+        public static explicit operator AtomicBoolean(bool value)
+        {
+            return new AtomicBoolean(value);
+        }
+        
+        public static explicit operator int(AtomicBoolean value)
+        {
+            return BoolToInt((bool) value);
+        }
+        
+        public static bool operator true(AtomicBoolean ab)
+        {
+            return ab._value == TrueValue;
+        }
+
+        public static bool operator false(AtomicBoolean ab)
+        {
+            return ab._value == FalseValue;
         }
     }
 }
