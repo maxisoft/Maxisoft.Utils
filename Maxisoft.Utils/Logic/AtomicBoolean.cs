@@ -1,17 +1,12 @@
 ﻿using System.Threading;
 
-namespace Maxisoft.Utils
+namespace Maxisoft.Utils.Logic
 {
     public class AtomicBoolean
     {
         private const int TrueValue = 1;
         private const int FalseValue = 0;
         private int _value = FalseValue;
-        
-        private static int BoolToInt(bool value)
-        {
-            return value ? TrueValue : FalseValue;
-        }
 
         public AtomicBoolean()
             : this(false)
@@ -30,6 +25,11 @@ namespace Maxisoft.Utils
         {
             get => _value != FalseValue;
             set => _value = BoolToInt(value);
+        }
+
+        private static int BoolToInt(bool value)
+        {
+            return value ? TrueValue : FalseValue;
         }
 
         /// <summary>
@@ -51,18 +51,18 @@ namespace Maxisoft.Utils
         }
 
         /// <summary>
-        ///     Attempt changing from "whenValue" to "setToValue".
-        ///     Fails if this.Value is not "whenValue".
+        ///     Attempt changing from "whenValue" to "set".
+        ///     Fails if this.TriValue is not "whenValue".
         /// </summary>
-        /// <param name="setToValue"></param>
-        /// <param name="whenValue"></param>
+        /// <param name="set"></param>
+        /// <param name="when"></param>
         /// <returns></returns>
-        public bool CompareExchange(bool setToValue, bool whenValue)
+        public bool CompareExchange(bool set, bool when)
         {
-            var comparand = BoolToInt(whenValue);
-            var result = Interlocked.CompareExchange(ref _value, BoolToInt(setToValue), comparand);
+            var comparand = BoolToInt(when);
+            var result = Interlocked.CompareExchange(ref _value, BoolToInt(set), comparand);
             var originalValue = result == TrueValue;
-            return originalValue == whenValue;
+            return originalValue == when;
         }
 
         public static implicit operator bool(AtomicBoolean ab)
