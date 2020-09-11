@@ -6,6 +6,7 @@ using Maxisoft.Utils.Logic;
 
 namespace Maxisoft.Utils.Time
 {
+    [DebuggerDisplay(nameof(Ticks) +" = {" + nameof(Ticks) + "}," + nameof(Frequency) + " = {" + nameof(Frequency) + "}")]
     public readonly partial struct MonotonicTimestamp : IMonotonicTimestamp, IComparable<MonotonicTimestamp>,
         IEquatable<MonotonicTimestamp>
     {
@@ -31,7 +32,7 @@ namespace Maxisoft.Utils.Time
 
         public static explicit operator TimeSpan(MonotonicTimestamp t)
         {
-            return TimeSpan.FromSeconds(t.Ticks / (double) Frequency);
+            return TimeSpan.FromMilliseconds(t.ToMilliseconds());
         }
 
         public static TimeSpan operator +(MonotonicTimestamp to, MonotonicTimestamp from)
@@ -110,12 +111,17 @@ namespace Maxisoft.Utils.Time
 
         public override int GetHashCode()
         {
-            return Ticks.GetHashCode();
+            return typeof(MonotonicTimestamp).GetHashCode() ^ Ticks.GetHashCode();
         }
 
         public int CompareTo(MonotonicTimestamp other)
         {
             return Ticks.CompareTo(other.Ticks);
+        }
+
+        public override string ToString()
+        {
+            return $"Monotonic({(TimeSpan) this})";
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Maxisoft.Utils.Time
 {
+    [DebuggerDisplay(nameof(Ticks) +" = {" + nameof(Ticks) + "}," + nameof(Frequency) + " = {" + nameof(Frequency) + "}")]
     public readonly struct PreciseMonotonicTimestamp : IMonotonicTimestamp, IComparable<PreciseMonotonicTimestamp>, IEquatable<PreciseMonotonicTimestamp>
     {
         public readonly long Ticks;
@@ -105,12 +106,17 @@ namespace Maxisoft.Utils.Time
 
         public override int GetHashCode()
         {
-            return Ticks.GetHashCode();
+            return typeof(PreciseMonotonicTimestamp).GetHashCode() ^ Ticks.GetHashCode();
         }
 
         public int CompareTo(PreciseMonotonicTimestamp other)
         {
             return Ticks.CompareTo(other.Ticks);
+        }
+        
+        public override string ToString()
+        {
+            return $"PreciseMonotonic({(TimeSpan) this})";
         }
     }
 }
