@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using Maxisoft.Utils.Logic;
 
 namespace Maxisoft.Utils.Time
 {
-    [DebuggerDisplay(nameof(Ticks) +" = {" + nameof(Ticks) + "}," + nameof(Frequency) + " = {" + nameof(Frequency) + "}")]
+    [DebuggerDisplay(nameof(Ticks) + " = {" + nameof(Ticks) + "}," + nameof(Frequency) + " = {" + nameof(Frequency) +
+                     "}")]
     public readonly partial struct MonotonicTimestamp : IMonotonicTimestamp, IComparable<MonotonicTimestamp>,
         IEquatable<MonotonicTimestamp>
     {
@@ -19,8 +17,9 @@ namespace Maxisoft.Utils.Time
         }
 
         public bool IsZero => Ticks == 0;
-        
-        private static TickCountProvider<DefaultEnvironment> _tickCountProvider = TickCountProvider<DefaultEnvironment>.Now;
+
+        private static TickCountProvider<DefaultEnvironment> _tickCountProvider =
+            TickCountProvider<DefaultEnvironment>.Now;
 
         public static MonotonicTimestamp Now => new MonotonicTimestamp(_tickCountProvider.TickCount());
 
@@ -93,19 +92,31 @@ namespace Maxisoft.Utils.Time
 
         public int CompareTo(IMonotonicTimestamp other)
         {
-            if (other is MonotonicTimestamp ts) return CompareTo(ts);
+            if (other is MonotonicTimestamp ts)
+            {
+                return CompareTo(ts);
+            }
+
             return ToMilliseconds().CompareTo(other.ToMilliseconds());
         }
 
         public bool Equals(IMonotonicTimestamp other)
         {
-            if (other is MonotonicTimestamp ts) return Equals(ts);
+            if (other is MonotonicTimestamp ts)
+            {
+                return Equals(ts);
+            }
+
             return ToMilliseconds().Equals(other.ToMilliseconds());
         }
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
             return obj is MonotonicTimestamp timestamp && Equals(timestamp);
         }
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading;
 
 namespace Maxisoft.Utils.Time
@@ -17,10 +16,10 @@ namespace Maxisoft.Utils.Time
         }
 
         /// <summary>
-        /// Provide a TickCount measurement with overflow support
+        ///     Provide a TickCount measurement with overflow support
         /// </summary>
         /// <typeparam name="T">Specify a TickCount implementation</typeparam>
-        /// <seealso cref="Environment.TickCount"/>
+        /// <seealso cref="Environment.TickCount" />
         internal struct TickCountProvider<T> where T : struct, IEnvironment
         {
             internal long LastTick
@@ -49,7 +48,7 @@ namespace Maxisoft.Utils.Time
                     return new TickCountProvider<T>
                     {
                         FirstTick = tickCount & int.MaxValue,
-                        LastTick = tickCount & int.MaxValue,
+                        LastTick = tickCount & int.MaxValue
                     };
                 }
             }

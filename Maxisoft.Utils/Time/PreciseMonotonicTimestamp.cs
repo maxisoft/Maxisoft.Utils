@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace Maxisoft.Utils.Time
 {
-    [DebuggerDisplay(nameof(Ticks) +" = {" + nameof(Ticks) + "}," + nameof(Frequency) + " = {" + nameof(Frequency) + "}")]
-    public readonly struct PreciseMonotonicTimestamp : IMonotonicTimestamp, IComparable<PreciseMonotonicTimestamp>, IEquatable<PreciseMonotonicTimestamp>
+    [DebuggerDisplay(nameof(Ticks) + " = {" + nameof(Ticks) + "}," + nameof(Frequency) + " = {" + nameof(Frequency) +
+                     "}")]
+    public readonly struct PreciseMonotonicTimestamp : IMonotonicTimestamp, IComparable<PreciseMonotonicTimestamp>,
+        IEquatable<PreciseMonotonicTimestamp>
     {
         public readonly long Ticks;
         public static long Frequency => Stopwatch.Frequency;
@@ -17,14 +17,14 @@ namespace Maxisoft.Utils.Time
         }
 
         public bool IsZero => Ticks == 0;
-        
+
         public static PreciseMonotonicTimestamp Now => new PreciseMonotonicTimestamp(Stopwatch.GetTimestamp());
 
         public static explicit operator long(PreciseMonotonicTimestamp t)
         {
             return t.Ticks;
         }
-        
+
         public static explicit operator TimeSpan(PreciseMonotonicTimestamp t)
         {
             return TimeSpan.FromSeconds(t.Ticks / (double) Frequency);
@@ -83,13 +83,21 @@ namespace Maxisoft.Utils.Time
 
         public int CompareTo(IMonotonicTimestamp other)
         {
-            if (other is PreciseMonotonicTimestamp ts) return CompareTo(ts);
+            if (other is PreciseMonotonicTimestamp ts)
+            {
+                return CompareTo(ts);
+            }
+
             return ToMilliseconds().CompareTo(other.ToMilliseconds());
         }
 
         public bool Equals(IMonotonicTimestamp other)
         {
-            if (other is PreciseMonotonicTimestamp ts) return Equals(ts);
+            if (other is PreciseMonotonicTimestamp ts)
+            {
+                return Equals(ts);
+            }
+
             return ToMilliseconds().Equals(other.ToMilliseconds());
         }
 
@@ -100,7 +108,11 @@ namespace Maxisoft.Utils.Time
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
             return obj is PreciseMonotonicTimestamp timestamp && Equals(timestamp);
         }
 
@@ -113,7 +125,7 @@ namespace Maxisoft.Utils.Time
         {
             return Ticks.CompareTo(other.Ticks);
         }
-        
+
         public override string ToString()
         {
             return $"PreciseMonotonic({(TimeSpan) this})";
