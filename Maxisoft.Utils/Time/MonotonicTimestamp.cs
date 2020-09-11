@@ -1,65 +1,68 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Maxisoft.Utils.Logic;
 
 namespace Maxisoft.Utils.Time
 {
-    public struct MonotonicTimestamp : IComparable<MonotonicTimestamp>, IEquatable<MonotonicTimestamp>
+    public readonly partial struct MonotonicTimestamp : IMonotonicTimestamp, IComparable<MonotonicTimestamp>,
+        IEquatable<MonotonicTimestamp>
     {
-        private readonly ulong _timestamp;
+        public readonly long Ticks;
+        public static long Frequency => 1000;
 
-        public static readonly MonotonicTimestamp MinValue = new MonotonicTimestamp(1);
-        public static readonly MonotonicTimestamp MaxValue = new MonotonicTimestamp(ulong.MaxValue);
-        public static readonly TimeSpan Precision = TimeSpan.FromMilliseconds(64);
-
-        public MonotonicTimestamp(long timestamp) : this((ulong)timestamp)
+        public MonotonicTimestamp(long timestamp)
         {
-            
+            Ticks = timestamp;
         }
+
+        public bool IsZero => Ticks == 0;
         
-        public MonotonicTimestamp(ulong timestamp)
+        private static TickCountProvider<DefaultEnvironment> _tickCountProvider = TickCountProvider<DefaultEnvironment>.Now;
+
+        public static MonotonicTimestamp Now => new MonotonicTimestamp(_tickCountProvider.TickCount());
+
+
+        public static explicit operator long(MonotonicTimestamp t)
         {
-            _timestamp = timestamp;
+            return t.Ticks;
         }
 
-        public bool IsZero => _timestamp == 0;
-        
-        public static MonotonicTimestamp Now => new MonotonicTimestamp(Native.GetTickCount64());
-
-        public static MonotonicTimestamp FromLuaTime(double time)
+        public static explicit operator TimeSpan(MonotonicTimestamp t)
         {
-            return new MonotonicTimestamp((ulong) (time * 1000));
-        }
-
-        public static explicit operator ulong(MonotonicTimestamp t)
-        {
-            return t._timestamp;
+            return TimeSpan.FromSeconds(t.Ticks / (double) Frequency);
         }
 
         public static TimeSpan operator +(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            return TimeSpan.FromMilliseconds((ulong) to + (ulong) from);
+            return (TimeSpan) to + (TimeSpan) from;
         }
 
         public static TimeSpan operator -(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            return TimeSpan.FromMilliseconds((double) (new BigInteger((ulong) to) - new BigInteger((ulong) from)));
+            return (TimeSpan) to - (TimeSpan) from;
+        }
+
+        private static MonotonicTimestamp TimeSpanToTimestamp(TimeSpan ts)
+        {
+            return new MonotonicTimestamp((long) (ts.TotalSeconds * Frequency));
         }
 
         public static MonotonicTimestamp operator +(MonotonicTimestamp to, TimeSpan ts)
         {
-            return new MonotonicTimestamp((ulong) ((ulong) to + ts.TotalMilliseconds));
+            return TimeSpanToTimestamp((TimeSpan) to + ts);
         }
 
         public static MonotonicTimestamp operator -(MonotonicTimestamp to, TimeSpan ts)
         {
-            return new MonotonicTimestamp((ulong) ((ulong) to - ts.TotalMilliseconds));
+            return TimeSpanToTimestamp((TimeSpan) to - ts);
         }
 
 
         public static bool operator ==(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            return (ulong) to == (ulong) from;
+            return (long) to == (long) from;
         }
 
         public static bool operator !=(MonotonicTimestamp to, MonotonicTimestamp from)
@@ -69,12 +72,12 @@ namespace Maxisoft.Utils.Time
 
         public static bool operator >(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            return (ulong) to > (ulong) from;
+            return (long) to > (long) from;
         }
 
         public static bool operator <(MonotonicTimestamp to, MonotonicTimestamp from)
         {
-            return (ulong) to < (ulong) from;
+            return (long) to < (long) from;
         }
 
         public bool Equals(MonotonicTimestamp other)
@@ -82,26 +85,37 @@ namespace Maxisoft.Utils.Time
             return this == other;
         }
 
+        public long ToMilliseconds()
+        {
+            return Ticks;
+        }
+
+        public int CompareTo(IMonotonicTimestamp other)
+        {
+            if (other is MonotonicTimestamp ts) return CompareTo(ts);
+            return ToMilliseconds().CompareTo(other.ToMilliseconds());
+        }
+
+        public bool Equals(IMonotonicTimestamp other)
+        {
+            if (other is MonotonicTimestamp ts) return Equals(ts);
+            return ToMilliseconds().Equals(other.ToMilliseconds());
+        }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is MonotonicTimestamp && Equals((MonotonicTimestamp) obj);
+            return obj is MonotonicTimestamp timestamp && Equals(timestamp);
         }
 
         public override int GetHashCode()
         {
-            return _timestamp.GetHashCode();
+            return Ticks.GetHashCode();
         }
 
         public int CompareTo(MonotonicTimestamp other)
         {
-            return _timestamp.CompareTo(other._timestamp);
-        }
-
-        private static class Native
-        {
-            [DllImport("kernel32.dll")]
-            public static extern ulong GetTickCount64();
+            return Ticks.CompareTo(other.Ticks);
         }
     }
 }
