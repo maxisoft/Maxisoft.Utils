@@ -8,7 +8,7 @@ namespace Maxisoft.Utils.String
 {
     public static class StringUtils
     {
-        public static string FormatFromDictionary<TValue>(this string formatString, Dictionary<string, TValue> valueDict)
+        public static string FormatWithDictionary<TValue>(this string formatString, Dictionary<string, TValue> valueDict)
         {
             var i = 0;
             var f = formatString;

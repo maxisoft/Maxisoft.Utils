@@ -8,19 +8,19 @@ namespace Maxisoft.Utils.Tests.String
     public class FormatExtentionTest
     {
         [Fact]
-        public void FormatFromDictionaryTest_Nominal()
+        public void FormatWithDictionaryTest_Nominal()
         {
-            Assert.Equal("1", "{x}".FormatFromDictionary(new Dictionary<string, object>() {{"x", 1}}));
+            Assert.Equal("1", "{x}".FormatWithDictionary(new Dictionary<string, object>() {{"x", 1}}));
             Assert.Equal("1 ystr",
-                "{x} {y}".FormatFromDictionary(new Dictionary<string, object>() {{"x", 1}, {"y", "ystr"}}));
+                "{x} {y}".FormatWithDictionary(new Dictionary<string, object>() {{"x", 1}, {"y", "ystr"}}));
             Assert.Equal("1 y ystr",
-                "{x} y {y}".FormatFromDictionary(new Dictionary<string, object>() {{"x", 1}, {"y", "ystr"}}));
+                "{x} y {y}".FormatWithDictionary(new Dictionary<string, object>() {{"x", 1}, {"y", "ystr"}}));
             Assert.Throws<FormatException>(
-                () => "{x} y {y}".FormatFromDictionary(new Dictionary<string, object>() {{"x", 1}}));
+                () => "{x} y {y}".FormatWithDictionary(new Dictionary<string, object>() {{"x", 1}}));
             Assert.Throws<FormatException>(() =>
-                "{x}".FormatFromDictionary(new Dictionary<string, object>() {{"y", "ystr"}}));
+                "{x}".FormatWithDictionary(new Dictionary<string, object>() {{"y", "ystr"}}));
             Assert.Equal("ystr",
-                "{y}".FormatFromDictionary(new Dictionary<string, object>() {{"x", 1}, {"y", "ystr"}}));
+                "{y}".FormatWithDictionary(new Dictionary<string, object>() {{"x", 1}, {"y", "ystr"}}));
         }
     }
 }
