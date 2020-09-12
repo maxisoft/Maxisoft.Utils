@@ -1,89 +1,27 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using Maxisoft.Utils.Collection;
+using Maxisoft.Utils.Collection.Queue;
 using Maxisoft.Utils.Random;
-using Optional;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
-namespace Maxisoft.Utils.Tests.Collection
+namespace Maxisoft.Utils.Tests.Collection.Queue
 {
     public class DequeTests
     {
-        private readonly RandomThreadSafe _randomThreadSafe = new RandomThreadSafe();
-        private readonly ITestOutputHelper _testOutputHelper;
         private const long DefaultChunkSize = 7;
         private const long DefaultSize = DefaultChunkSize;
+        private readonly RandomThreadSafe _randomThreadSafe = new RandomThreadSafe();
+        private readonly ITestOutputHelper _testOutputHelper;
 
 
-        internal class DataGenDifferentSizes : IEnumerable<object[]>
+        public DequeTests(ITestOutputHelper testOutputHelper)
         {
-            protected virtual long[] DequeSize => new long[]
-            {
-                0, 1, 2, 3, DefaultChunkSize / 2, DefaultChunkSize, DefaultChunkSize * 2, DefaultChunkSize * 3,
-                DefaultChunkSize * 4, DefaultChunkSize * DefaultChunkSize
-            };
-
-
-            public virtual IEnumerator<object[]> GetEnumerator()
-            {
-                var dejaVu = new HashSet<long>();
-
-                foreach (var size in DequeSize)
-                {
-                    for (var i = -1; i <= 1; i++)
-                    {
-                        var res = size + i;
-                        if (dejaVu.Add(res))
-                        {
-                            yield return new object[] {res};
-                        }
-                    }
-                }
-            }
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            _testOutputHelper = testOutputHelper;
         }
 
-        internal class DataGenDifferentSizesAndChunkSize : DataGenDifferentSizes
-        {
-            protected virtual long[] ChunkSizes => new long[]
-            {
-                1, 2, 3, 5, 7, 11, 13, 17, DefaultChunkSize / 2, DefaultChunkSize, DefaultChunkSize * 2,
-                DefaultChunkSize * 3, DefaultChunkSize * 4, DefaultChunkSize * DefaultChunkSize
-            };
-
-            public override IEnumerator<object[]> GetEnumerator()
-            {
-                var dejaVu = new HashSet<(long, long)>();
-
-                foreach (var size in DequeSize)
-                {
-                    for (var i = -1; i <= 1; i++)
-                    {
-                        var rsize = Math.Max(size + i, 0);
-                        foreach (var chunk in ChunkSizes)
-                        {
-                            for (var j = -1; j <= 1; j++)
-                            {
-                                var rchunk = Math.Max(chunk + j, 1);
-                                if (dejaVu.Add((rsize, rchunk)))
-                                {
-                                    yield return new object[] {rsize, rchunk};
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-        
 
         [Fact]
         public void TestDefaultConstructor()
@@ -156,15 +94,6 @@ namespace Maxisoft.Utils.Tests.Collection
             Assert.Equal(arr, q.ToArray());
         }
 
-        
-
-        public DequeTests(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
-        }
-
-        
-
 
         [Fact]
         public void TestPushBack_LegacyCase()
@@ -185,12 +114,10 @@ namespace Maxisoft.Utils.Tests.Collection
         }
 
 
-        
-
         [Fact]
         public void TestRemove_NonExisting()
         {
-            var q = new Deque<long>() {1L, 8L};
+            var q = new Deque<long> {1L, 8L};
             Assert.False(q.Remove(-1));
             Assert.False(q.Remove(0));
             Assert.False(q.Remove(2));
@@ -203,7 +130,7 @@ namespace Maxisoft.Utils.Tests.Collection
         [Fact]
         public void TestRemove_MultipleTime()
         {
-            var q = new Deque<long>() {1L, 8L};
+            var q = new Deque<long> {1L, 8L};
             Assert.True(q.Remove(1));
             for (var i = 0; i < 3; i++)
             {
@@ -231,7 +158,7 @@ namespace Maxisoft.Utils.Tests.Collection
 
             Assert.Throws<ArgumentOutOfRangeException>(() => q.RemoveAt(index));
         }
-        
+
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -248,15 +175,13 @@ namespace Maxisoft.Utils.Tests.Collection
             }
 
             q.RemoveAt(index);
-            
-            
+
+
             var expected = Enumerable.Range(0, (int) DefaultSize).ToList();
             expected.RemoveAt(index);
 
             Assert.Equal(expected, q);
         }
-
-        
 
 
         [Theory]
@@ -288,7 +213,7 @@ namespace Maxisoft.Utils.Tests.Collection
         [Fact]
         public void TestRemove_DuplicateValues_And_MultipleTimes()
         {
-            var q = new Deque<long>() {1L, 2L, 8L, 8L, 8L};
+            var q = new Deque<long> {1L, 2L, 8L, 8L, 8L};
             Assert.True(q.Remove(1));
             for (var i = 0; i < 3; i++)
             {
@@ -319,9 +244,6 @@ namespace Maxisoft.Utils.Tests.Collection
             expected.Remove(6);
             Assert.Equal(expected, q);
         }
-
-        
-        
 
 
         [Fact]
@@ -360,9 +282,8 @@ namespace Maxisoft.Utils.Tests.Collection
             var actual = q.ToArray();
             Assert.Equal(expected, actual);
         }
-        
-        
-        
+
+
         [Fact]
         public void TestInsert_MultipleTimes()
         {
@@ -373,11 +294,11 @@ namespace Maxisoft.Utils.Tests.Collection
             q.Insert(6, 7);
             q.Insert(6, 6);
             q.Insert(9, 9);
-            
+
 
             Assert.Equal(Enumerable.Range(0, 10).Select(i => (long) i), q);
         }
-        
+
         [Theory]
         [InlineData(0, 16, 0)]
         [InlineData(14, 3, 10)]
@@ -396,19 +317,19 @@ namespace Maxisoft.Utils.Tests.Collection
 
             Assert.Equal(size, q.LongLength);
             Assert.Equal(arr, q.ToArray());
-            
+
             var element = _randomThreadSafe.Next() * -1;
-            
+
             q.Insert((int) index, element);
             var expected = arr.ToList();
             expected.Insert((int) index, element);
 
             var actual = q.ToArray();
-            
+
             Assert.Equal(expected, q);
             Assert.Equal(expected, actual);
         }
-        
+
         [Theory]
         [InlineData(DefaultSize)]
         [InlineData(DefaultChunkSize + 1)]
@@ -423,126 +344,189 @@ namespace Maxisoft.Utils.Tests.Collection
             {
                 q.PushBack(i);
             }
+
             Assert.Equal(size, q.Count);
-            
+
             q.Clear();
-            
+
             Assert.Empty(q);
             Assert.Empty(q.ToArray());
         }
-        
+
         [Fact]
         public void TestBack()
         {
             var expected = new object();
-            var q = new Deque<object>() {new object(), expected};
+            var q = new Deque<object> {new object(), expected};
             Assert.Same(expected, q.Back());
-            
-            q = new Deque<object>() {expected};
+
+            q = new Deque<object> {expected};
             Assert.Same(expected, q.Back());
         }
-        
+
         [Fact]
         public void TestBack_IsAssignable()
         {
             var initial = new object();
             var replacement = new object();
             Assert.NotSame(initial, replacement);
-            var q = new Deque<object>() {new object(), initial};
+            var q = new Deque<object> {new object(), initial};
             Assert.Same(initial, q.Back());
 
             q.Back() = replacement; // assign front to a new obj
             Assert.Same(replacement, q.Back());
             Assert.NotSame(initial, q.Back());
         }
-        
+
         [Fact]
         public void TestBack_WithEmptyDequeShouldThrow()
         {
             var q = new Deque<object>();
             Assert.Throws<InvalidOperationException>(() => q.Back());
         }
-        
-        
+
+
         [Fact]
         public void TestFront()
         {
             var expected = new object();
-            var q = new Deque<object>() {expected, new object()};
+            var q = new Deque<object> {expected, new object()};
             Assert.Same(expected, q.Front());
-            
-            q = new Deque<object>() {expected};
+
+            q = new Deque<object> {expected};
             Assert.Same(expected, q.Front());
         }
-        
+
         [Fact]
         public void TestFront_IsAssignable()
         {
             var initial = new object();
             var replacement = new object();
             Assert.NotSame(initial, replacement);
-            var q = new Deque<object>() {initial, new object()};
+            var q = new Deque<object> {initial, new object()};
             Assert.Same(initial, q.Front());
 
             q.Front() = replacement; // assign front to a new obj
             Assert.Same(replacement, q.Front());
             Assert.NotSame(initial, q.Front());
         }
-        
+
         [Fact]
         public void TestFront_WithEmptyDequeShouldThrow()
         {
             var q = new Deque<object>();
             Assert.Throws<InvalidOperationException>(() => q.Front());
         }
-        
+
         [Fact]
         public void TestTryPeekFront()
         {
             var expected = new object();
-            var q = new Deque<object>() {expected, new object()};
+            var q = new Deque<object> {expected, new object()};
             Assert.True(q.TryPeekFront(out var actual));
             Assert.Same(expected, actual);
-            
+
             q = new Deque<object>();
             Assert.Empty(q);
             Assert.False(q.TryPeekFront(out _));
         }
-        
+
         [Fact]
         public void TestTryPeekBack()
         {
             var expected = new object();
-            var q = new Deque<object>() {new object(), expected};
+            var q = new Deque<object> {new object(), expected};
             Assert.True(q.TryPeekBack(out var actual));
             Assert.Same(expected, actual);
-            
+
             q = new Deque<object>();
             Assert.Empty(q);
             Assert.False(q.TryPeekBack(out _));
         }
-        
+
         [Fact]
         public void TestPopBack()
         {
             var expected = new object();
-            var q = new Deque<object>() {new object(), expected};
+            var q = new Deque<object> {new object(), expected};
             Assert.Same(expected, q.PopBack());
             Assert.Equal(1, q.LongLength);
         }
-        
-        
-        
-        
+
+
         [Fact]
         public void TestPopFront()
         {
             var expected = new object();
-            var q = new Deque<object>() {expected, new object()};
+            var q = new Deque<object> {expected, new object()};
             Assert.Same(expected, q.PopFront());
             Assert.Equal(1, q.LongLength);
         }
-        
-        
+
+
+        internal class DataGenDifferentSizes : IEnumerable<object[]>
+        {
+            protected virtual long[] DequeSize => new[]
+            {
+                0, 1, 2, 3, DefaultChunkSize / 2, DefaultChunkSize, DefaultChunkSize * 2, DefaultChunkSize * 3,
+                DefaultChunkSize * 4, DefaultChunkSize * DefaultChunkSize
+            };
+
+
+            public virtual IEnumerator<object[]> GetEnumerator()
+            {
+                var dejaVu = new HashSet<long>();
+
+                foreach (var size in DequeSize)
+                {
+                    for (var i = -1; i <= 1; i++)
+                    {
+                        var res = size + i;
+                        if (dejaVu.Add(res))
+                        {
+                            yield return new object[] {res};
+                        }
+                    }
+                }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        internal class DataGenDifferentSizesAndChunkSize : DataGenDifferentSizes
+        {
+            protected virtual long[] ChunkSizes => new[]
+            {
+                1, 2, 3, 5, 7, 11, 13, 17, DefaultChunkSize / 2, DefaultChunkSize, DefaultChunkSize * 2,
+                DefaultChunkSize * 3, DefaultChunkSize * 4, DefaultChunkSize * DefaultChunkSize
+            };
+
+            public override IEnumerator<object[]> GetEnumerator()
+            {
+                var dejaVu = new HashSet<(long, long)>();
+
+                foreach (var size in DequeSize)
+                {
+                    for (var i = -1; i <= 1; i++)
+                    {
+                        var rsize = Math.Max(size + i, 0);
+                        foreach (var chunk in ChunkSizes)
+                        {
+                            for (var j = -1; j <= 1; j++)
+                            {
+                                var rchunk = Math.Max(chunk + j, 1);
+                                if (dejaVu.Add((rsize, rchunk)))
+                                {
+                                    yield return new object[] {rsize, rchunk};
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

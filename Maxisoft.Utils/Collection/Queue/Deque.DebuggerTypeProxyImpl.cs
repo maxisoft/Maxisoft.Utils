@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 
-namespace Maxisoft.Utils.Collection
+namespace Maxisoft.Utils.Collection.Queue
 {
     public partial class Deque<T>
     {
@@ -18,10 +18,10 @@ namespace Maxisoft.Utils.Collection
 
             [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
             public long Count => _deque.LongLength;
-            
+
             [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
             public long ChunkSize => _deque.ChunkSize;
-            
+
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             public LinkedList<T[]> Map => _deque._map;
 

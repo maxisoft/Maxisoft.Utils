@@ -8,19 +8,19 @@ using Maxisoft.Utils.Collection.UpdateGuard;
 
 #nullable enable
 
-namespace Maxisoft.Utils.Collection
+namespace Maxisoft.Utils.Collection.Queue
 {
     [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}")]
     [DebuggerTypeProxy(typeof(Deque<>.DebuggerTypeProxyImpl))]
     [Serializable]
+    [JsonDequeConverter]
     public partial class Deque<T> : IDeque<T>, IList<T>, IReadOnlyList<T>, IList, ISerializable
     {
-        protected internal readonly long ChunkSize;
-
         private readonly LinkedList<T[]> _map = new LinkedList<T[]>();
+        private readonly UpdateGuardedContainer _version = new UpdateGuardedContainer();
+        protected internal readonly long ChunkSize;
         private InternalPointer _begin;
         private InternalPointer _end;
-        private readonly UpdateGuardedContainer _version = new UpdateGuardedContainer();
 
         public Deque()
         {
@@ -38,11 +38,38 @@ namespace Maxisoft.Utils.Collection
             ChunkSize = chunkSize;
         }
 
+        protected Deque(
+            SerializationInfo info,
+            StreamingContext context)
+        {
+            _version = (UpdateGuardedContainer) info.GetValue(nameof(_version), typeof(UpdateGuardedContainer));
+            var count = info.GetInt64(nameof(Count));
+            ChunkSize = info.GetInt64(nameof(ChunkSize));
+
+            if (count == 0)
+            {
+                return;
+            }
+
+            T[] array;
+            array = (T[]) info.GetValue(nameof(array), typeof(T[]));
+            if (array.Length != count)
+            {
+                throw new SerializationException("Size mismatch");
+            }
+
+            foreach (var elem in array)
+            {
+                PushBack(in elem);
+            }
+        }
+
         protected bool TrimOnDeletion { get; set; } = false;
 
         public bool IsEmpty => LongLength == 0;
 
         public int Length => (int) LongLength;
+
         // ReSharper disable once MemberCanBePrivate.Global
         public long LongLength { get; protected set; }
 
@@ -332,6 +359,26 @@ namespace Maxisoft.Utils.Collection
         {
             get => At(index);
             set => At(index) = value;
+        }
+
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info));
+            }
+
+            info.AddValue(nameof(_version), _version);
+            info.AddValue(nameof(Count), LongLength);
+            info.AddValue(nameof(ChunkSize), ChunkSize);
+            if (Count <= 0)
+            {
+                return;
+            }
+
+            T[] array = new T[Count];
+            CopyTo(array, 0);
+            info.AddValue(nameof(array), array, typeof(T[]));
         }
 
         protected virtual long OptimalChunkSize()
@@ -701,45 +748,6 @@ namespace Maxisoft.Utils.Collection
         {
             Debug.Assert(LongLength == 0);
             throw new InvalidOperationException($"The {nameof(Deque<T>)} is empty");
-        }
-
-        public virtual void GetObjectData(SerializationInfo info, StreamingContext context) {
-            if (info==null) {
-                throw new ArgumentNullException(nameof(info));
-            }
-            info.AddValue(nameof(_version), _version);
-            info.AddValue(nameof(Count), LongLength);
-            info.AddValue(nameof(ChunkSize), ChunkSize);
-            if (Count <= 0)
-            {
-                return;
-            }
-            
-            T[] array = new T[Count];
-            CopyTo(array, 0);
-            info.AddValue(nameof(array), array, typeof(T[]));
-        }
-        
-        protected Deque(
-            SerializationInfo info, 
-            StreamingContext context)
-        {
-            _version = (UpdateGuardedContainer) info.GetValue(nameof(_version), typeof(UpdateGuardedContainer));
-            var count = info.GetInt64(nameof(Count));
-            ChunkSize = info.GetInt64(nameof(ChunkSize));
-            
-            if (count == 0) return;
-            T[] array;
-            array = (T[]) info.GetValue(nameof(array), typeof(T[]));
-            if (array.Length != count)
-            {
-                throw new SerializationException("Size mismatch");
-            }
-            
-            foreach (var elem in array)
-            {
-                PushBack(in elem);
-            }
         }
     }
 }

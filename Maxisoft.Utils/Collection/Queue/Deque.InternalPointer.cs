@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Maxisoft.Utils.Collection
+namespace Maxisoft.Utils.Collection.Queue
 {
     public partial class Deque<T>
     {
-        [DebuggerDisplay(nameof(Index) + (" = {" + nameof(Index) + "}, ") + nameof(Node) + (" = {" + nameof(Node) + "}"))]
+        [DebuggerDisplay(nameof(Index) + " = {" + nameof(Index) + "}, " + nameof(Node) + " = {" + nameof(Node) + "}")]
         protected internal readonly struct InternalPointer
         {
             internal readonly long Index;

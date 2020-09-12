@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Maxisoft.Utils.Collection
+namespace Maxisoft.Utils.Collection.Queue
 {
     public class CircularQueue<T> : ICollection<T>
     {
@@ -11,7 +11,11 @@ namespace Maxisoft.Utils.Collection
 
         public CircularQueue(int size)
         {
-            if (size <= 0) throw new ArgumentOutOfRangeException(nameof(size), "must be positive number");
+            if (size <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size), "must be positive number");
+            }
+
             _queue = new Queue<T>(size);
             _size = size;
         }
@@ -24,7 +28,9 @@ namespace Maxisoft.Utils.Collection
                 _queue.Enqueue(obj);
             }
             else
+            {
                 _queue.Enqueue(obj);
+            }
         }
 
         public void Clear()
@@ -48,30 +54,23 @@ namespace Maxisoft.Utils.Collection
             {
                 return false;
             }
+
             if (Peek().Equals(item))
             {
                 Read();
                 return true;
             }
+
             if (Contains(item))
             {
                 throw new NotSupportedException();
             }
+
             return false;
         }
 
         public int Count => _queue.Count;
         public bool IsReadOnly => false;
-
-        public T Read() 
-        {
-            return _queue.Dequeue();
-        }
-
-        public T Peek()
-        {
-            return _queue.Peek();
-        }
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -81,6 +80,16 @@ namespace Maxisoft.Utils.Collection
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _queue.GetEnumerator();
+        }
+
+        public T Read()
+        {
+            return _queue.Dequeue();
+        }
+
+        public T Peek()
+        {
+            return _queue.Peek();
         }
     }
 }
