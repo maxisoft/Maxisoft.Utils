@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Soap;
 using Maxisoft.Utils.Collection;
+using Maxisoft.Utils.Logic;
 using Maxisoft.Utils.Random;
 using Xunit;
 using Xunit.Abstractions;
@@ -106,6 +109,30 @@ namespace Maxisoft.Utils.Tests.Collection
             Assert.Equal(size, q.LongLength);
             Assert.Equal(size, q.Length);
             Assert.Equal(arr, q.ToArray());
+        }
+        
+        
+        [Theory]
+        [ClassData(typeof(DequeTests.DataGenDifferentSizesAndChunkSize))]
+        public void Test_Serialization(long size, long chunkSize)
+        {
+            var q = new Deque<int>(chunkSize);
+            for (var i = 0; i < size; i++)
+            {
+                q.PushBack(i);
+            }
+            
+            using var stream = new MemoryStream();
+            var formatter = new SoapFormatter();
+
+            formatter.Serialize(stream, q);
+            stream.Seek(0, 0);
+
+            formatter = new SoapFormatter();
+
+            var actual = (Deque<int>) formatter.Deserialize(stream);
+            Assert.Equal(q.ChunkSize, actual.ChunkSize);
+            Assert.Equal((IEnumerable<int>) q, actual);
         }
         
         [Theory]

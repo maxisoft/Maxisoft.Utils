@@ -3,24 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using Maxisoft.Utils.Collection.UpdateGuard;
 
 #nullable enable
 
 namespace Maxisoft.Utils.Collection
 {
-    public partial class Deque<T> : IDeque<T>, IList<T>, IReadOnlyList<T>, IList
+    [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}")]
+    [DebuggerTypeProxy(typeof(Deque<>.DebuggerTypeProxyImpl))]
+    [Serializable]
+    public partial class Deque<T> : IDeque<T>, IList<T>, IReadOnlyList<T>, IList, ISerializable
     {
-        private readonly long _chunkSize;
+        protected internal readonly long ChunkSize;
 
         private readonly LinkedList<T[]> _map = new LinkedList<T[]>();
         private InternalPointer _begin;
         private InternalPointer _end;
-        private volatile int _version;
+        private readonly UpdateGuardedContainer _version = new UpdateGuardedContainer();
 
         public Deque()
         {
             // ReSharper disable once VirtualMemberCallInConstructor
-            _chunkSize = OptimalChunkSize();
+            ChunkSize = OptimalChunkSize();
         }
 
         internal Deque(long chunkSize)
@@ -30,7 +35,7 @@ namespace Maxisoft.Utils.Collection
                 throw new ArgumentException($"{nameof(chunkSize)} is invalid");
             }
 
-            _chunkSize = chunkSize;
+            ChunkSize = chunkSize;
         }
 
         protected bool TrimOnDeletion { get; set; } = false;
@@ -41,6 +46,8 @@ namespace Maxisoft.Utils.Collection
         // ReSharper disable once MemberCanBePrivate.Global
         public long LongLength { get; protected set; }
 
+        public long Capacity => _map.Count * ChunkSize;
+
         public T this[long index]
         {
             get => At(index);
@@ -50,7 +57,7 @@ namespace Maxisoft.Utils.Collection
         public IEnumerator<T> GetEnumerator()
         {
             var p = _begin;
-            using var ug = new UpdateGuard(this);
+            using var ug = _version.CreateGuard();
             for (long i = 0; i < LongLength; i++)
             {
                 ug.Check();
@@ -71,7 +78,7 @@ namespace Maxisoft.Utils.Collection
 
         public void Clear()
         {
-            using var _ = new UpdateGuard(this) {Increment = true};
+            using var _ = _version.CreateGuard(true);
             while (_map.First != null)
             {
                 Free(_map.First.Value);
@@ -95,7 +102,7 @@ namespace Maxisoft.Utils.Collection
                 return;
             }
 
-            using var ug = new UpdateGuard(this);
+            using var ug = _version.CreateGuard();
             long c = 0;
             var p = _begin;
             while (c < LongLength)
@@ -185,7 +192,7 @@ namespace Maxisoft.Utils.Collection
         public T PopBack()
         {
             var res = Back();
-            using var _ = new UpdateGuard(this) {Increment = true};
+            using var _ = _version.CreateGuard(true);
             LongLength -= 1;
             _end -= 1;
             if (TrimOnDeletion)
@@ -199,7 +206,7 @@ namespace Maxisoft.Utils.Collection
         public T PopFront()
         {
             var res = Front();
-            using var _ = new UpdateGuard(this) {Increment = true};
+            using var _ = _version.CreateGuard(true);
             LongLength -= 1;
             _begin += 1;
             if (TrimOnDeletion)
@@ -343,13 +350,13 @@ namespace Maxisoft.Utils.Collection
 
         private void Init()
         {
-            var middle = (_chunkSize - 1) / 2;
+            var middle = (ChunkSize - 1) / 2;
             if (_begin.HasNode || _end.HasNode)
             {
                 throw new AccessViolationException($"This {nameof(Deque<T>)} is screwed");
             }
 
-            _map.AddFirst(Alloc(_chunkSize));
+            _map.AddFirst(Alloc(ChunkSize));
             _begin = new InternalPointer(_map.First, middle);
             _end = _begin;
         }
@@ -396,7 +403,7 @@ namespace Maxisoft.Utils.Collection
 
         public void TrimExcess()
         {
-            using var _ = new UpdateGuard(this) {Increment = true};
+            using var _ = _version.CreateGuard(true);
             TrimBeginning();
             TrimEnd();
         }
@@ -404,15 +411,15 @@ namespace Maxisoft.Utils.Collection
         private void Prepend(in T item)
         {
             InitIfNeeded();
-            using var _ = new UpdateGuard(this) {Increment = true};
+            using var _ = _version.CreateGuard(true);
             if (_begin.DistanceToBeginning == 0) // chunk is full
             {
                 if (_begin.Node.Previous is null)
                 {
-                    _map.AddFirst(Alloc(_chunkSize));
+                    _map.AddFirst(Alloc(ChunkSize));
                 }
 
-                _begin = new InternalPointer(_begin.Node.Previous!, _chunkSize - 1);
+                _begin = new InternalPointer(_begin.Node.Previous!, ChunkSize - 1);
             }
             else
             {
@@ -427,12 +434,12 @@ namespace Maxisoft.Utils.Collection
         private void Append(in T item)
         {
             InitIfNeeded();
-            using var _ = new UpdateGuard(this) {Increment = true};
+            using var _ = _version.CreateGuard(true);
             if (_end.DistanceToEnd == 0) // chunk is full
             {
                 if (_end.Node.Next is null)
                 {
-                    _map.AddLast(Alloc(_chunkSize));
+                    _map.AddLast(Alloc(ChunkSize));
 
                     if (ReferenceEquals(_begin.Node, _end.Node) && !_begin.Valid)
                     {
@@ -453,7 +460,7 @@ namespace Maxisoft.Utils.Collection
 
         protected virtual T[] Alloc(long size)
         {
-            Debug.Assert(size == _chunkSize);
+            Debug.Assert(size == ChunkSize);
             return new T[size];
         }
 
@@ -483,7 +490,7 @@ namespace Maxisoft.Utils.Collection
 
         private void RemoveRight(in InternalPointer pointer)
         {
-            using var ug = new UpdateGuard(this) {Increment = true};
+            using var ug = _version.CreateGuard(true);
             var node = pointer.Node;
             var initialShift = pointer.DistanceToBeginning;
             while (!(node is null))
@@ -510,7 +517,7 @@ namespace Maxisoft.Utils.Collection
 
         private void RemoveLeft(in InternalPointer pointer)
         {
-            using var ug = new UpdateGuard(this) {Increment = true};
+            using var ug = _version.CreateGuard(true);
             var node = pointer.Node;
             var length = pointer.DistanceToBeginning;
             while (!(node is null))
@@ -599,7 +606,7 @@ namespace Maxisoft.Utils.Collection
         private void InsertLeft(InternalPointer pointer, in T item)
         {
             Prepend(_begin.Value);
-            using var ug = new UpdateGuard(this);
+            using var ug = _version.CreateGuard(true);
             var beginIt = _begin + 1;
             var node = beginIt.Node!;
             var initialShift = beginIt.DistanceToBeginning;
@@ -631,7 +638,7 @@ namespace Maxisoft.Utils.Collection
         private void InsertRight(in InternalPointer pointer, in T item)
         {
             Append((_end - 1).Value);
-            using var ug = new UpdateGuard(this);
+            using var ug = _version.CreateGuard(true);
             var endIt = _end - 1;
             var node = endIt.Node!;
             var effectiveLength = endIt.DistanceToBeginning;
@@ -694,6 +701,45 @@ namespace Maxisoft.Utils.Collection
         {
             Debug.Assert(LongLength == 0);
             throw new InvalidOperationException($"The {nameof(Deque<T>)} is empty");
+        }
+
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context) {
+            if (info==null) {
+                throw new ArgumentNullException(nameof(info));
+            }
+            info.AddValue(nameof(_version), _version);
+            info.AddValue(nameof(Count), LongLength);
+            info.AddValue(nameof(ChunkSize), ChunkSize);
+            if (Count <= 0)
+            {
+                return;
+            }
+            
+            T[] array = new T[Count];
+            CopyTo(array, 0);
+            info.AddValue(nameof(array), array, typeof(T[]));
+        }
+        
+        protected Deque(
+            SerializationInfo info, 
+            StreamingContext context)
+        {
+            _version = (UpdateGuardedContainer) info.GetValue(nameof(_version), typeof(UpdateGuardedContainer));
+            var count = info.GetInt64(nameof(Count));
+            ChunkSize = info.GetInt64(nameof(ChunkSize));
+            
+            if (count == 0) return;
+            T[] array;
+            array = (T[]) info.GetValue(nameof(array), typeof(T[]));
+            if (array.Length != count)
+            {
+                throw new SerializationException("Size mismatch");
+            }
+            
+            foreach (var elem in array)
+            {
+                PushBack(in elem);
+            }
         }
     }
 }
