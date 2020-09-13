@@ -32,7 +32,7 @@ namespace Maxisoft.Utils.Collection.Queue
         {
             if (chunkSize <= 0)
             {
-                throw new ArgumentException($"{nameof(chunkSize)} is invalid");
+                throw new ArgumentException("negative size", nameof(chunkSize));
             }
 
             ChunkSize = chunkSize;
@@ -45,6 +45,7 @@ namespace Maxisoft.Utils.Collection.Queue
             _version = (UpdateGuardedContainer) info.GetValue(nameof(_version), typeof(UpdateGuardedContainer));
             var count = info.GetInt64(nameof(Count));
             ChunkSize = info.GetInt64(nameof(ChunkSize));
+            TrimOnDeletion = info.GetBoolean(nameof(TrimOnDeletion));
 
             if (count == 0)
             {
@@ -64,7 +65,7 @@ namespace Maxisoft.Utils.Collection.Queue
             }
         }
 
-        protected bool TrimOnDeletion { get; set; } = false;
+        public bool TrimOnDeletion { get; set; } = false;
 
         public bool IsEmpty => LongLength == 0;
 
@@ -134,7 +135,6 @@ namespace Maxisoft.Utils.Collection.Queue
             var p = _begin;
             while (c < LongLength)
             {
-                ug.Check();
                 var added = Math.Min(p.DistanceToEnd, LongLength - c);
                 Array.Copy(p.Node.Value, p.Index, array, c + arrayIndex, added);
                 c += added;
@@ -371,6 +371,7 @@ namespace Maxisoft.Utils.Collection.Queue
             info.AddValue(nameof(_version), _version);
             info.AddValue(nameof(Count), LongLength);
             info.AddValue(nameof(ChunkSize), ChunkSize);
+            info.AddValue(nameof(TrimOnDeletion), TrimOnDeletion);
             if (Count <= 0)
             {
                 return;
@@ -381,7 +382,7 @@ namespace Maxisoft.Utils.Collection.Queue
             info.AddValue(nameof(array), array, typeof(T[]));
         }
 
-        protected virtual long OptimalChunkSize()
+        public virtual long OptimalChunkSize()
         {
             var @sizeof = IntPtr.Size;
             try
