@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
 using Maxisoft.Utils.Collection.Queue;
 
 namespace Maxisoft.Utils.Collection

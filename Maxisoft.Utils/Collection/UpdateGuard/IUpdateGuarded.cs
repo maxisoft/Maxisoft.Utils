@@ -1,4 +1,4 @@
-﻿namespace Maxisoft.Utils.Collection.UpdateGuard
+﻿﻿namespace Maxisoft.Utils.Collection.UpdateGuard
 {
     public interface IUpdateGuarded
     {
