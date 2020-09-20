@@ -6,6 +6,10 @@ using System.Runtime.CompilerServices;
 namespace Maxisoft.Utils.Collection
 {
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>Prefer .NET Standard 2.1 <see cref="System.Index"/> when available</remarks>
     public readonly struct WrappedIndex
     {
         public readonly int Value;
