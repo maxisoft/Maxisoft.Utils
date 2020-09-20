@@ -31,7 +31,7 @@ namespace Maxisoft.Utils.Algorithm
 
         public static long Fibo(int n)
         {
-            if (n < 0)
+            if (n <= 0)
             {
                 return 0;
             }
@@ -44,7 +44,7 @@ namespace Maxisoft.Utils.Algorithm
             throw new OverflowException($"Use {nameof(ComputeImprecise)} method");
         }
 
-        public static long Compute(int n)
+        internal static long Compute(int n)
         {
             long a = 0;
             long b = 1;
