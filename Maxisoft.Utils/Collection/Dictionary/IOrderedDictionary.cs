@@ -7,5 +7,9 @@ namespace Maxisoft.Utils.Collection.Dictionary
         public TValue this[int index] { get; set; }
         public void Insert (int index, in TKey key, in TValue value);
         public void RemoveAt (int index);
+
+        public int IndexOf(in TKey key);
+
+        public int IndexOf(in TValue value);
     }
 }
