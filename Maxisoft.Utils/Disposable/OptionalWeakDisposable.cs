@@ -2,19 +2,19 @@
 
 namespace Maxisoft.Utils.Disposable
 {
-    public readonly struct OptinalWeakDisposable : IDisposable, IEquatable<OptinalWeakDisposable>, IEquatable<IDisposable>
+    public readonly struct OptionalWeakDisposable : IDisposable, IEquatable<OptionalWeakDisposable>, IEquatable<IDisposable>
     {
         internal readonly IDisposable? HardRef;
 
         internal readonly WeakReference<IDisposable>? WeakReference;
 
-        public OptinalWeakDisposable(IDisposable hardRef)
+        public OptionalWeakDisposable(IDisposable hardRef)
         {
             HardRef = hardRef;
             WeakReference = null;
         }
 
-        public OptinalWeakDisposable(WeakReference<IDisposable> weakReference)
+        public OptionalWeakDisposable(WeakReference<IDisposable> weakReference)
         {
             HardRef = null;
             WeakReference = weakReference;
@@ -39,34 +39,34 @@ namespace Maxisoft.Utils.Disposable
             return !ReferenceEquals(null, HardRef);
         }
 
-        public static bool operator ==(OptinalWeakDisposable left, OptinalWeakDisposable right)
+        public static bool operator ==(OptionalWeakDisposable left, OptionalWeakDisposable right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(OptinalWeakDisposable left, OptinalWeakDisposable right)
+        public static bool operator !=(OptionalWeakDisposable left, OptionalWeakDisposable right)
         {
             return !left.Equals(right);
         }
 
-        public static bool operator ==(OptinalWeakDisposable left, IDisposable right)
+        public static bool operator ==(OptionalWeakDisposable left, IDisposable right)
         {
             return left.Equals(right);
         }
 
-        public static bool operator !=(OptinalWeakDisposable left, IDisposable right)
+        public static bool operator !=(OptionalWeakDisposable left, IDisposable right)
         {
             return !left.Equals(right);
         }
 
-        public bool Equals(OptinalWeakDisposable other)
+        public bool Equals(OptionalWeakDisposable other)
         {
             return Equals(HardRef, other.HardRef) && Equals(WeakReference, other.WeakReference);
         }
 
         public bool Equals(IDisposable other)
         {
-            if (other is OptinalWeakDisposable disposable)
+            if (other is OptionalWeakDisposable disposable)
             {
                 return Equals(disposable);
             }
@@ -78,7 +78,7 @@ namespace Maxisoft.Utils.Disposable
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            if (obj is OptinalWeakDisposable disposable)
+            if (obj is OptionalWeakDisposable disposable)
             {
                 return Equals(disposable);
             }

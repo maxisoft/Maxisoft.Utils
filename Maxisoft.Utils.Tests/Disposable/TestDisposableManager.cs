@@ -13,7 +13,7 @@ namespace Maxisoft.Utils.Tests.Disposable
         [Fact]
         public void TestDisposableManager_Basics()
         {
-            var disposables = new Mock<LinkedList<OptinalWeakDisposable>> {CallBase = true};
+            var disposables = new Mock<LinkedList<OptionalWeakDisposable>> {CallBase = true};
             var dm = new TDisposableManager(disposables.Object);
             var disposable = AddDisposable(dm);
             
@@ -32,8 +32,8 @@ namespace Maxisoft.Utils.Tests.Disposable
             }
             dm.CleanupLinkedDisposable();
             Assert.True(disposables.Object.Count == 1, "there's a weak linked disposables left");
-            Assert.True(disposables.Object.FirstOrDefault(r => r == disposable.Object) == default(OptinalWeakDisposable), "there's hard linked disposables left");
-            Assert.True(disposables.Object.FirstOrDefault(r => r == weakdisposable.Object) != default(OptinalWeakDisposable), "there's no weak linked disposables left");
+            Assert.True(disposables.Object.FirstOrDefault(r => r == disposable.Object) == default(OptionalWeakDisposable), "there's hard linked disposables left");
+            Assert.True(disposables.Object.FirstOrDefault(r => r == weakdisposable.Object) != default(OptionalWeakDisposable), "there's no weak linked disposables left");
             disposable.Verify(d => d.Dispose(), Times.Once);
             weakdisposable.Verify(d => d.Dispose(), Times.Never);
         }
@@ -41,7 +41,7 @@ namespace Maxisoft.Utils.Tests.Disposable
         [Fact]
         public void TestDisposableManager_WeakRef()
         {
-            var disposables = new Mock<LinkedList<OptinalWeakDisposable>> {CallBase = true};
+            var disposables = new Mock<LinkedList<OptionalWeakDisposable>> {CallBase = true};
             var dm = new TDisposableManager(disposables.Object);
             //add a disposable via another function scope
             {
@@ -59,7 +59,7 @@ namespace Maxisoft.Utils.Tests.Disposable
                 GC.WaitForPendingFinalizers();
             }
             Assert.False(count >= 500);
-            Assert.True(disposables.Object.FirstOrDefault(reference => reference.WeakReference != null && reference.WeakReference.TryGetTarget(out var tmp) && tmp is EmptyDisposable) == default(OptinalWeakDisposable));
+            Assert.True(disposables.Object.FirstOrDefault(reference => reference.WeakReference != null && reference.WeakReference.TryGetTarget(out var tmp) && tmp is EmptyDisposable) == default(OptionalWeakDisposable));
         }
 
         private static Mock<IDisposable> AddDisposable(IDisposableManager disposableManager)
@@ -78,7 +78,7 @@ namespace Maxisoft.Utils.Tests.Disposable
 
         private class TDisposableManager : DisposableManager
         {
-            protected internal TDisposableManager(LinkedList<OptinalWeakDisposable> collection) : base(collection)
+            protected internal TDisposableManager(LinkedList<OptionalWeakDisposable> collection) : base(collection)
             {
             }
         }

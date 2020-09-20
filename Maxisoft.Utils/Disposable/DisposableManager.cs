@@ -7,7 +7,7 @@ namespace Maxisoft.Utils.Disposable
 {
     public class DisposableManager : IDisposableManager
     {
-        private readonly LinkedList<OptinalWeakDisposable> _linkedDisposable;
+        private readonly LinkedList<OptionalWeakDisposable> _linkedDisposable;
 
         public DisposableManager() : this(new LinkedList<IDisposable>())
         {
@@ -21,7 +21,7 @@ namespace Maxisoft.Utils.Disposable
             }
         }
 
-        protected DisposableManager(LinkedList<IDisposable> collection) : this(new LinkedList<OptinalWeakDisposable>())
+        protected DisposableManager(LinkedList<IDisposable> collection) : this(new LinkedList<OptionalWeakDisposable>())
         {
             foreach (var disposable in collection)
             {
@@ -29,7 +29,7 @@ namespace Maxisoft.Utils.Disposable
             }
         }
 
-        protected DisposableManager(LinkedList<OptinalWeakDisposable> linkedDisposable)
+        protected DisposableManager(LinkedList<OptionalWeakDisposable> linkedDisposable)
         {
             _linkedDisposable = linkedDisposable;
         }
@@ -40,7 +40,7 @@ namespace Maxisoft.Utils.Disposable
             lock (_linkedDisposable)
             {
                 CleanupLinkedDisposable();
-                _linkedDisposable.AddLast(new OptinalWeakDisposable(disposable));
+                _linkedDisposable.AddLast(new OptionalWeakDisposable(disposable));
             }
         }
         
@@ -50,7 +50,7 @@ namespace Maxisoft.Utils.Disposable
             lock (_linkedDisposable)
             {
                 CleanupLinkedDisposable();
-                _linkedDisposable.AddLast(new OptinalWeakDisposable(disposable));
+                _linkedDisposable.AddLast(new OptionalWeakDisposable(disposable));
             }
         }
 
