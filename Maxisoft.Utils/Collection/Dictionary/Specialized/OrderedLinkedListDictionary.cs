@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Maxisoft.Utils.Collection.Dictionary.Specialized
 {
-    public class OrderedLinkedListDictionary<TKey, TValue> : BaseOrderedDictionary<TKey, TValue, LinkedListAsIList<TKey>, Dictionary<TKey, TValue>>, IOrderedDequeDictionary<TKey, TValue>
+    public class OrderedLinkedListDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, LinkedListAsIList<TKey>, Dictionary<TKey, TValue>>, IOrderedDequeDictionary<TKey, TValue>
     {
         public OrderedLinkedListDictionary()
         {

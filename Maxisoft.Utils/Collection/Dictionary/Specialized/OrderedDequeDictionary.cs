@@ -5,7 +5,7 @@ using Maxisoft.Utils.Collection.Queue;
 
 namespace Maxisoft.Utils.Collection.Dictionary.Specialized
 {
-    public class OrderedDequeDictionary<TKey, TValue> : BaseOrderedDictionary<TKey, TValue, Deque<TKey>, Dictionary<TKey, TValue>>, IOrderedDequeDictionary<TKey, TValue>
+    public class OrderedDequeDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, Deque<TKey>, Dictionary<TKey, TValue>>, IOrderedDequeDictionary<TKey, TValue>
     {
         public OrderedDequeDictionary()
         {

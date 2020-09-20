@@ -24,14 +24,14 @@
             return new BoundedDeque<T>(deque, capacity);
         }
 
-        public sealed class CircularDequeWrapper<T, TDeque> : BaseCircularDeque<T, TDeque> where TDeque : IDeque<T>
+        public sealed class CircularDequeWrapper<T, TDeque> : CircularDeque<T, TDeque> where TDeque : IDeque<T>
         {
             internal CircularDequeWrapper(TDeque deque, long capacity) : base(deque, capacity)
             {
             }
         }
 
-        public sealed class BoundedDequeWrapper<T, TDeque> : BaseBoundedDeque<T, TDeque> where TDeque : IDeque<T>
+        public sealed class BoundedDequeWrapper<T, TDeque> : BoundedDeque<T, TDeque> where TDeque : IDeque<T>
         {
             internal BoundedDequeWrapper(TDeque deque, long capacity) : base(deque, capacity)
             {
