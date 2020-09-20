@@ -9,5 +9,7 @@ namespace Maxisoft.Utils.Objects
         public static T[] WrapIntoArray<T>(in T value) => new[] {value};
 
         public static WeakReference<T> WeakReference<T>(in T value) where T : class => new WeakReference<T>(value);
+        
+        public static IntPtr GetPointer<T>(in T value) where T : class => PointerHelper.GetPointer(in value); 
     }
 }
