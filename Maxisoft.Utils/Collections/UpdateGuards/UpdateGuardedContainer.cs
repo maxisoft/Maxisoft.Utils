@@ -1,6 +1,6 @@
-﻿﻿using System;
+﻿using System;
 
- namespace Maxisoft.Utils.Collections.UpdateGuard
+namespace Maxisoft.Utils.Collections.UpdateGuards
 {
     [Serializable]
     public class UpdateGuardedContainer : IUpdateGuarded

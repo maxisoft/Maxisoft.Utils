@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using Maxisoft.Utils.Collections.UpdateGuard;
+using Maxisoft.Utils.Collections.UpdateGuards;
 
 #nullable enable
 

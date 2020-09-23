@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Maxisoft.Utils.Collections.UpdateGuard;
+using Maxisoft.Utils.Collections.UpdateGuards;
 
 namespace Maxisoft.Utils.Collections.Dictionaries
 {

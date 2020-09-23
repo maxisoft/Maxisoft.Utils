@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Maxisoft.Utils.Collections.UpdateGuard
+namespace Maxisoft.Utils.Collections.UpdateGuards
 {
     public struct UpdateGuard<T> : IDisposable where T : class, IUpdateGuarded
     {
