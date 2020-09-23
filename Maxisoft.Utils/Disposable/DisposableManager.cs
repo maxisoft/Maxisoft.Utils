@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Maxisoft.Utils.Collection;
+using Maxisoft.Utils.Collections;
 
 namespace Maxisoft.Utils.Disposable
 {
