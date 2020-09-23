@@ -3,7 +3,7 @@
 #pragma warning disable 8603
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
     public readonly struct EmptyFunc<TResult> : IEmpty
     {

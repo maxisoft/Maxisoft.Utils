@@ -2,14 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
     /// <summary>
-    ///     Empty collection preventing any modification
+    ///     Empty collection silently ignoring any modifications
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <seealso cref="NoOpCollection{T}" />
-    public readonly struct EmptyCollection<T> : ICollection<T>, IEmpty
+    /// <seealso cref="EmptyCollection{T}" />
+    public readonly struct NoOpCollection<T> : ICollection<T>, IEmpty
     {
         public IEnumerator<T> GetEnumerator()
         {
@@ -28,7 +28,6 @@ namespace Maxisoft.Utils.Empty
         /// <exception cref="InvalidOperationException"></exception>
         public void Add(T item)
         {
-            throw new InvalidOperationException("This collection must remain empty by design");
         }
 
         public void Clear()
@@ -52,23 +51,5 @@ namespace Maxisoft.Utils.Empty
         public int Count => 0;
 
         public bool IsReadOnly => false;
-    }
-
-    public readonly struct EmptyCollection : ICollection, IEmpty
-    {
-        public IEnumerator GetEnumerator()
-        {
-            return new EmptyEnumerator();
-        }
-
-        public void CopyTo(Array array, int index)
-        {
-        }
-
-        public int Count => 0;
-
-        public bool IsSynchronized => false;
-
-        public object SyncRoot => this;
     }
 }

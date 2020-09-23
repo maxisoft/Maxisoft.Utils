@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
     public readonly struct EmptyEnumerable : IEnumerable, IEmpty
     {

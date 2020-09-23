@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Maxisoft.Utils.Empty;
+using Maxisoft.Utils.Empties;
 
 namespace Maxisoft.Utils.Collections.Dictionaries
 {

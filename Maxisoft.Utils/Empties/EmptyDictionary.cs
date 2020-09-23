@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
     public readonly struct EmptyDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IEmpty
     {

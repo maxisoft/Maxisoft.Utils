@@ -2,7 +2,7 @@
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
     public readonly struct EmptyAction : IEmpty
     {

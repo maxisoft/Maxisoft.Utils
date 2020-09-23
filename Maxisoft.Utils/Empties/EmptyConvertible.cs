@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
     public readonly struct EmptyConvertible : IConvertible, IEmpty
     {

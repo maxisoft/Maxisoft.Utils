@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Maxisoft.Utils.Collections.Dictionaries;
-using Maxisoft.Utils.Empty;
+using Maxisoft.Utils.Empties;
 using Moq;
 using Xunit;
 

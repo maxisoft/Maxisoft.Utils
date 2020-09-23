@@ -1,4 +1,4 @@
-﻿namespace Maxisoft.Utils.Empty
+﻿namespace Maxisoft.Utils.Empties
 {
     /// <summary>
     ///     The implementation should try to suit the following behaviors:

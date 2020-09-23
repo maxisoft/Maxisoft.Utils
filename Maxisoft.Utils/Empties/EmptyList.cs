@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
-    public readonly struct NoOpList<T> : IList<T>, IEmpty
+    public readonly struct EmptyList<T> : IList<T>, IEmpty
     {
         public IEnumerator<T> GetEnumerator()
         {
@@ -18,6 +18,7 @@ namespace Maxisoft.Utils.Empty
 
         public void Add(T item)
         {
+            throw new InvalidOperationException("This list must remain empty by design");
         }
 
         public void Clear()
@@ -49,6 +50,7 @@ namespace Maxisoft.Utils.Empty
 
         public void Insert(int index, T item)
         {
+            throw new InvalidOperationException("This list must remain empty by design");
         }
 
         public void RemoveAt(int index)
@@ -57,12 +59,12 @@ namespace Maxisoft.Utils.Empty
 
         public T this[int index]
         {
-            get => default!;
-            set { }
+            get => throw new InvalidOperationException("This list is empty by design");
+            set => throw new InvalidOperationException("This list is empty by design");
         }
     }
 
-    public readonly struct NoOpList : IList, IEmpty
+    public readonly struct EmptyList : IList, IEmpty
     {
         public IEnumerator GetEnumerator()
         {
@@ -81,7 +83,7 @@ namespace Maxisoft.Utils.Empty
 
         public int Add(object value)
         {
-            return 0;
+            throw new InvalidOperationException("This list must remain empty by design");
         }
 
         public void Clear()
@@ -100,6 +102,7 @@ namespace Maxisoft.Utils.Empty
 
         public void Insert(int index, object value)
         {
+            throw new InvalidOperationException("This list must remain empty by design");
         }
 
         public void Remove(object value)
@@ -116,8 +119,8 @@ namespace Maxisoft.Utils.Empty
 
         public object this[int index]
         {
-            get => default!;
-            set { }
+            get => throw new InvalidOperationException("This list is empty by design");
+            set => throw new InvalidOperationException("This list is empty by design");
         }
     }
 }

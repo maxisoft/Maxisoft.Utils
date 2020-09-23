@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
     [Obsolete("Use System.Threading.Tasks.ValueTask")]
     public class EmptyTask : Task

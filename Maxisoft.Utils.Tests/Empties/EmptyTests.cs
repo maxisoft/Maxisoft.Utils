@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Maxisoft.Utils.Empty;
+using Maxisoft.Utils.Empties;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Maxisoft.Utils.Tests.Empty
+namespace Maxisoft.Utils.Tests.Empties
 {
     public class EmptyTests
     {

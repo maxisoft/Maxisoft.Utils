@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 
-namespace Maxisoft.Utils.Empty
+namespace Maxisoft.Utils.Empties
 {
     public readonly struct EmptyDictionaryEnumerator : IDictionaryEnumerator, IEmpty
     {
