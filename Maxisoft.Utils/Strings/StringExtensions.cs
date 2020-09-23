@@ -7,7 +7,7 @@ namespace Maxisoft.Utils.Strings
 {
     public static class StringExtensions
     {
-        public static string FormatWithDictionary<TValue>(this string formatString, Dictionary<string, TValue> valueDict)
+        public static string FormatWithDictionary<TValue>(this string formatString, IDictionary<string, TValue> valueDict)
         {
             var i = 0;
             var f = formatString;
