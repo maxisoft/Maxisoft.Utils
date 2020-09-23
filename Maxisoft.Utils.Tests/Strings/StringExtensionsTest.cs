@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using Maxisoft.Utils.String;
+using Maxisoft.Utils.Strings;
 using Xunit;
 
-namespace Maxisoft.Utils.Tests.String
+namespace Maxisoft.Utils.Tests.Strings
 {
-    public class FormatExtentionTest
+    public class StringExtensionTest
     {
         [Fact]
         public void FormatWithDictionaryTest_Nominal()

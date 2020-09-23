@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Maxisoft.Utils.String
+namespace Maxisoft.Utils.Strings
 {
-    public static class StringUtils
+    public static class StringExtensions
     {
         public static string FormatWithDictionary<TValue>(this string formatString, Dictionary<string, TValue> valueDict)
         {
