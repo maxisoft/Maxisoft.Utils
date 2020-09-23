@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Linq;
 
-namespace Maxisoft.Utils.Algorithm
+namespace Maxisoft.Utils.Algorithms
 {
     public static class Fibonacci
     {

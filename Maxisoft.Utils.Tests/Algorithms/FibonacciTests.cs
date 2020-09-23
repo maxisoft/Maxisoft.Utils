@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Maxisoft.Utils.Algorithm;
+using Maxisoft.Utils.Algorithms;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Maxisoft.Utils.Tests.Algorithm
+namespace Maxisoft.Utils.Tests.Algorithms
 {
     public class FibonacciTests
     {
