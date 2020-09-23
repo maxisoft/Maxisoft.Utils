@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Maxisoft.Utils.Collections.Dictionary
+namespace Maxisoft.Utils.Collections.Dictionaries
 {
     public static class DictionaryExtensions
     {

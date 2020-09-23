@@ -1,9 +1,9 @@
 ﻿using System.Collections.Specialized;
 using System.Linq;
-using Maxisoft.Utils.Collections.Dictionary.Specialized;
+using Maxisoft.Utils.Collections.Dictionaries.Specialized;
 using Xunit;
 
-namespace Maxisoft.Utils.Tests.Collections.Dictionary.Specialized
+namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
 {
     public class OrderedLinkedListDictionaryTests
     {

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Maxisoft.Utils.Collection;
+using Maxisoft.Utils.Collections;
 using Xunit;
 
-namespace Maxisoft.Utils.Tests.Collection
+namespace Maxisoft.Utils.Tests.Collections
 {
     public class LinkedListExtensionsTests
     {

@@ -1,6 +1,6 @@
 ﻿﻿using System.Collections.Generic;
 
- namespace Maxisoft.Utils.Collections.Dictionary
+ namespace Maxisoft.Utils.Collections.Dictionaries
 {
     public interface IOrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {

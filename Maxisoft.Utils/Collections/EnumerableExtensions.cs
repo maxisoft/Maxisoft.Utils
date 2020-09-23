@@ -1,7 +1,7 @@
-﻿﻿using System.Collections.Generic;
-using Maxisoft.Utils.Collection.Queue;
+﻿using System.Collections.Generic;
+using Maxisoft.Utils.Collections.Queue;
 
-namespace Maxisoft.Utils.Collection
+namespace Maxisoft.Utils.Collections
 {
     public static class EnumerableExtensions
     {

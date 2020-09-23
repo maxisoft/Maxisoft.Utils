@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Maxisoft.Utils.Empty;
 
-namespace Maxisoft.Utils.Collection.Dictionary
+namespace Maxisoft.Utils.Collections.Dictionaries
 {
     public abstract class DictionaryChain<TKey, TValue, TDictionary> : IDictionary<TKey, TValue>
         where TDictionary : class, IDictionary<TKey, TValue>

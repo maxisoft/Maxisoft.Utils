@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Maxisoft.Utils.Collections.Dictionary;
+using Maxisoft.Utils.Collections.Dictionaries;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Maxisoft.Utils.Tests.Collections.Dictionary
+namespace Maxisoft.Utils.Tests.Collections.Dictionaries
 {
     public class OrderedDictionaryTests
     {

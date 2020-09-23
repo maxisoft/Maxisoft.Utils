@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Maxisoft.Utils.Collection.Dictionary;
+using Maxisoft.Utils.Collections.Dictionaries;
 using Maxisoft.Utils.Empty;
 using Moq;
 using Xunit;
 
-namespace Maxisoft.Utils.Tests.Collection.Dictionary
+namespace Maxisoft.Utils.Tests.Collections.Dictionaries
 {
     public class DictionaryChainTests
     {

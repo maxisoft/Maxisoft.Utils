@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Maxisoft.Utils.Collections.Dictionary.Specialized
+namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
 {
     public interface IOrderedDequeDictionary<TKey, TValue> : IOrderedDictionary<TKey, TValue>
     {

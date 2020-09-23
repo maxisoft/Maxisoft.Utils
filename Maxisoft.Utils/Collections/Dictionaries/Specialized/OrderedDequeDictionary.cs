@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Maxisoft.Utils.Collections.Queue;
 
-namespace Maxisoft.Utils.Collections.Dictionary.Specialized
+namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
 {
     public class OrderedDequeDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, Deque<TKey>, Dictionary<TKey, TValue>>, IOrderedDequeDictionary<TKey, TValue>
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Maxisoft.Utils.Collections.Dictionary.Specialized
+namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
 {
     public class OrderedLinkedListDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, LinkedListAsIList<TKey>, Dictionary<TKey, TValue>>, IOrderedDequeDictionary<TKey, TValue>
     {

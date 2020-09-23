@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Maxisoft.Utils.Collections.UpdateGuard;
 
-namespace Maxisoft.Utils.Collections.Dictionary
+namespace Maxisoft.Utils.Collections.Dictionaries
 {
     /// <summary>
     ///     OrderedDictionary abstraction. Implement most <see cref="IOrderedDictionary{TKey,TValue}" />'s operations using
