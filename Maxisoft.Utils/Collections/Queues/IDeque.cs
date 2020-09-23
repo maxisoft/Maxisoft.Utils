@@ -1,6 +1,6 @@
 ﻿﻿using System.Collections.Generic;
 
- namespace Maxisoft.Utils.Collections.Queue
+ namespace Maxisoft.Utils.Collections.Queues
 {
     public interface IDeque<T> : ICollection<T>
     {

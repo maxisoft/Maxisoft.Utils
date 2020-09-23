@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 
-namespace Maxisoft.Utils.Collections.Queue
+namespace Maxisoft.Utils.Collections.Queues
 {
     public partial class Deque<T>
     {

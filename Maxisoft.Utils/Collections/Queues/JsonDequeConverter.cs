@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Maxisoft.Utils.Collections.Queue
+namespace Maxisoft.Utils.Collections.Queues
 {
     public class JsonDequeConverterAttribute : JsonConverterAttribute
     {

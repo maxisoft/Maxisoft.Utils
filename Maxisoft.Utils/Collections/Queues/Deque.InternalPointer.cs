@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Maxisoft.Utils.Collections.Queue
+namespace Maxisoft.Utils.Collections.Queues
 {
     public partial class Deque<T>
     {

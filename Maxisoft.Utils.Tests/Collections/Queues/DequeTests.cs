@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Maxisoft.Utils.Collections.Queue;
+using Maxisoft.Utils.Collections.Queues;
 using Maxisoft.Utils.Random;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Maxisoft.Utils.Tests.Collections.Queue
+namespace Maxisoft.Utils.Tests.Collections.Queues
 {
     public class DequeTests
     {

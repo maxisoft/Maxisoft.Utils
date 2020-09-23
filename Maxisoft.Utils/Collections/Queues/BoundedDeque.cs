@@ -4,32 +4,32 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Maxisoft.Utils.Collections.Queue
+namespace Maxisoft.Utils.Collections.Queues
 {
-    public abstract class CircularDeque<T, TDeque> : ICircularDeque<T> where TDeque : IDeque<T>
+    public abstract class BoundedDeque<T, TDeque> : IBoundedDeque<T> where TDeque : IDeque<T>
     {
         protected readonly TDeque Deque;
 
-        public CircularDeque(TDeque deque, long capacity)
+        public BoundedDeque(TDeque deque, long cappedSize)
         {
-            if (capacity < 0)
+            if (cappedSize < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(capacity), capacity, "negative size");
+                throw new ArgumentOutOfRangeException(nameof(cappedSize), cappedSize, "negative size");
             }
 
-            if (deque.Count > capacity)
+            if (deque.Count > cappedSize)
             {
-                throw new ArgumentOutOfRangeException(nameof(capacity), capacity,
+                throw new ArgumentOutOfRangeException(nameof(cappedSize), cappedSize,
                     "deque's size already bigger than capped size");
             }
 
             Deque = deque;
-            Capacity = capacity;
+            CappedSize = cappedSize;
         }
 
-        public bool IsFull => Deque.Count >= Capacity;
+        public bool IsFull => Deque.Count >= CappedSize;
 
-        public long Capacity { get; }
+        public long CappedSize { get; }
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -97,22 +97,36 @@ namespace Maxisoft.Utils.Collections.Queue
 
         public void PushBack(in T element)
         {
-            if (DequeOverflow())
-            {
-                Deque.PopFront();
-            }
-
+            ThrowForDequeFull();
             Deque.PushBack(in element);
         }
 
         public void PushFront(in T element)
         {
+            ThrowForDequeFull();
+            Deque.PushFront(in element);
+        }
+
+        public bool TryPushBack(in T element)
+        {
             if (DequeOverflow())
             {
-                Deque.PopBack();
+                return false;
+            }
+
+            Deque.PushBack(in element);
+            return true;
+        }
+
+        public bool TryPushFront(in T element)
+        {
+            if (DequeOverflow())
+            {
+                return false;
             }
 
             Deque.PushFront(in element);
+            return true;
         }
 
         public T PopBack()
@@ -138,20 +152,27 @@ namespace Maxisoft.Utils.Collections.Queue
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected bool DequeOverflow(int elementToAdd = 1)
         {
-            Debug.Assert(Deque.Count <= Capacity);
-            return Deque.Count + elementToAdd > Capacity;
+            Debug.Assert(Deque.Count <= CappedSize);
+            return Deque.Count + elementToAdd > CappedSize;
+        }
+
+        protected void ThrowForDequeFull(int elementToAdd = 1)
+        {
+            if (DequeOverflow(elementToAdd))
+            {
+                throw new InvalidOperationException("Deque full");
+            }
         }
     }
 
-
     [Serializable]
-    public class CircularDeque<T> : CircularDeque<T, Deque<T>>, IList<T>, IReadOnlyList<T>
+    public class BoundedDeque<T> : BoundedDeque<T, Deque<T>>, IList<T>, IReadOnlyList<T>
     {
-        internal CircularDeque(Deque<T> deque, long capacity) : base(deque, capacity)
+        internal BoundedDeque(Deque<T> deque, long cappedSize) : base(deque, cappedSize)
         {
         }
 
-        public CircularDeque(long cappedSize) : this(new Deque<T>(OptimalChunkSize(cappedSize)), cappedSize)
+        public BoundedDeque(long cappedSize) : this(new Deque<T>(OptimalChunkSize(cappedSize)), cappedSize)
         {
         }
 
@@ -178,7 +199,14 @@ namespace Maxisoft.Utils.Collections.Queue
 
         internal static long OptimalChunkSize(long cappedSize)
         {
-            return BoundedDeque<T>.OptimalChunkSize(cappedSize);
+            if (cappedSize <= 1)
+            {
+                return 2;
+            }
+
+            var mult = 1 / Math.Log(cappedSize + 1, 2);
+
+            return checked((long) (Math.Max(1, mult) * cappedSize));
         }
     }
 }

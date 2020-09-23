@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Linq;
-using Maxisoft.Utils.Collections.Queue;
+using Maxisoft.Utils.Collections.Queues;
 using Xunit;
 
-namespace Maxisoft.Utils.Tests.Collections.Queue
+namespace Maxisoft.Utils.Tests.Collections.Queues
 {
-    public class CircularQueueTests
+    public class BoundedDequeTests
     {
         [Fact]
-        public void Test_CircularQueue()
+        public void Test_BoundedQueue()
         {
             const int maxSize = 16;
-            var q = new CircularDeque<int>(maxSize);
+            var q = new BoundedDeque<int>(maxSize);
             Assert.False(q.IsFull);
             for (var i = 0; i < maxSize; i++)
             {
@@ -23,10 +23,12 @@ namespace Maxisoft.Utils.Tests.Collections.Queue
             Assert.Equal(maxSize, q.Count);
             Assert.True(q.IsFull);
 
-            q.PushBack(maxSize);
-            Assert.Equal(Enumerable.Range(1, maxSize), q);
-            q.PushFront(0);
-            Assert.Equal(Enumerable.Range(0, maxSize), q);
+            Assert.Throws<InvalidOperationException>(() => q.Add(0));
+            Assert.Throws<InvalidOperationException>(() => q.PushBack(0));
+            Assert.Throws<InvalidOperationException>(() => q.PushFront(0));
+            Assert.False(q.TryPushBack(0));
+            Assert.False(q.TryPushFront(0));
+
 
             {
                 Assert.True(q.TryPeekBack(out var tmp));
@@ -37,7 +39,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queue
                 Assert.True(q.TryPopBack(out var actual));
                 Assert.Equal(expected, actual);
                 Assert.False(q.IsFull);
-                q.PushBack(expected);
+                Assert.True(q.TryPushBack(expected));
                 Assert.True(q.IsFull);
             }
 
@@ -51,7 +53,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queue
                 Assert.Equal(expected, actual);
 
                 Assert.False(q.IsFull);
-                q.PushFront(expected);
+                Assert.True(q.TryPushFront(expected));
                 Assert.True(q.IsFull);
             }
 

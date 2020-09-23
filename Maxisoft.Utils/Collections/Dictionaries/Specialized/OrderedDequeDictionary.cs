@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Maxisoft.Utils.Collections.Queue;
+using Maxisoft.Utils.Collections.Queues;
 
 namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
 {

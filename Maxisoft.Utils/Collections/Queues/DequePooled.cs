@@ -2,7 +2,7 @@
 using System.Buffers;
 using System.Runtime.InteropServices;
 
-namespace Maxisoft.Utils.Collections.Queue
+namespace Maxisoft.Utils.Collections.Queues
 {
     /// <summary>
     /// A <see cref="Deque{T}"/> using <see cref="ArrayPool"/>'s arrays as base storage

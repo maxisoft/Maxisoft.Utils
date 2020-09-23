@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using Maxisoft.Utils.Collections;
-using Maxisoft.Utils.Collections.Queue;
+using Maxisoft.Utils.Collections.Queues;
 using Xunit;
 
-namespace Maxisoft.Utils.Tests.Collections.Queue
+namespace Maxisoft.Utils.Tests.Collections.Queues
 {
     public class DequePooledTests
     {

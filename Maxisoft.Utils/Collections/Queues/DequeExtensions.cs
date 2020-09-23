@@ -1,4 +1,4 @@
-﻿namespace Maxisoft.Utils.Collections.Queue
+﻿namespace Maxisoft.Utils.Collections.Queues
 {
     public static class DequeExtensions
     {

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Maxisoft.Utils.Collections.Queue;
+using Maxisoft.Utils.Collections.Queues;
 
 namespace Maxisoft.Utils.Collections
 {

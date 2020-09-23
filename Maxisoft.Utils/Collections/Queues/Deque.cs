@@ -8,7 +8,7 @@ using Maxisoft.Utils.Collections.UpdateGuard;
 
 #nullable enable
 
-namespace Maxisoft.Utils.Collections.Queue
+namespace Maxisoft.Utils.Collections.Queues
 {
     [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}")]
     [DebuggerTypeProxy(typeof(Deque<>.DebuggerTypeProxyImpl))]

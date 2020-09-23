@@ -6,14 +6,14 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.Text.Json;
 using Maxisoft.Utils.Collections;
-using Maxisoft.Utils.Collections.Queue;
+using Maxisoft.Utils.Collections.Queues;
 using Maxisoft.Utils.Logic;
 using Maxisoft.Utils.Random;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Maxisoft.Utils.Tests.Collections.Queue
+namespace Maxisoft.Utils.Tests.Collections.Queues
 {
     public class DequeFuzzingTests
     {
