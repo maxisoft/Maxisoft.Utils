@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Maxisoft.Utils.Tests.Collections.Queues.Specialized
 {
-    public class CircularQueueTests
+    public class CircularDequeTests
     {
         [Fact]
         public void Test_CircularQueue()
