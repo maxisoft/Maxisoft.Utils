@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Maxisoft.Utils.Disposable
+namespace Maxisoft.Utils.Disposables
 {
     public interface IDisposableManager : IDisposable
     {

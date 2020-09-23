@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Maxisoft.Utils.Disposable;
+using Maxisoft.Utils.Disposables;
 using Moq;
-using Optional.Collections;
 using Xunit;
 
-namespace Maxisoft.Utils.Tests.Disposable
+namespace Maxisoft.Utils.Tests.Disposables
 {
     public class TestDisposableManager
     {

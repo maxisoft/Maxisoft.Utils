@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Maxisoft.Utils.Collections;
 
-namespace Maxisoft.Utils.Disposable
+namespace Maxisoft.Utils.Disposables
 {
     public class DisposableManager : IDisposableManager
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Maxisoft.Utils.Disposable
+namespace Maxisoft.Utils.Disposables
 {
     public readonly struct OptionalWeakDisposable : IDisposable, IEquatable<OptionalWeakDisposable>, IEquatable<IDisposable>
     {
