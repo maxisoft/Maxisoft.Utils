@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace Maxisoft.Utils
 {
@@ -11,12 +10,16 @@ namespace Maxisoft.Utils
             const int numbit = sizeof(int) * 8;
             unchecked
             {
-                if (x <= 0) return x < 0 ? 0 : numbit;
+                if (x <= 0)
+                {
+                    return x < 0 ? 0 : numbit;
+                }
+
                 var res = (int) NumberOfTrailingZeros((ulong) x) - numbit;
                 return res;
             }
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint NumberOfTrailingZeros(uint x)
         {
@@ -33,25 +36,33 @@ namespace Maxisoft.Utils
         {
             unchecked
             {
-                if (x <= 0) return x < 0 ? 0 : (sizeof(long) * 8);
+                if (x <= 0)
+                {
+                    return x < 0 ? 0 : sizeof(long) * 8;
+                }
+
                 var res = (long) NumberOfTrailingZeros((ulong) x);
                 return res;
             }
         }
+
         public static ulong NumberOfTrailingZeros(ulong i)
         {
             unchecked
             {
                 const ulong log2Of64 = 6;
                 const ulong numbit = sizeof(ulong) * 8;
-                if (i == 0) return numbit;
+                if (i == 0)
+                {
+                    return numbit;
+                }
+
                 var n = numbit - 1;
-                ulong y;
                 for (ulong j = 0; j < log2Of64; j++)
                 {
                     var power = (int) (numbit >> (int) (j + 1));
 
-                    y = i << power;
+                    var y = i << power;
                     if (y != 0)
                     {
                         n -= (ulong) power;
