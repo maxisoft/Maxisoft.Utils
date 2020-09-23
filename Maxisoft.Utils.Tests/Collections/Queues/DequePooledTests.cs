@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Maxisoft.Utils.Collections;
 using Maxisoft.Utils.Collections.Queues;
+using Maxisoft.Utils.Collections.Queues.Specialized;
 using Xunit;
 
 namespace Maxisoft.Utils.Tests.Collections.Queues

@@ -7,7 +7,7 @@ using Maxisoft.Utils.Random;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Maxisoft.Utils.Tests.Collections.Queues
+namespace Maxisoft.Utils.Tests.Collections.Queues.Specialized
 {
     public class DequeTests
     {

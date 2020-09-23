@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Maxisoft.Utils.Collections.Queues
+namespace Maxisoft.Utils.Collections.Queues.Specialized
 {
     public abstract class CircularDeque<T, TDeque> : ICircularDeque<T> where TDeque : IDeque<T>
     {

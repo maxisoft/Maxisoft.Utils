@@ -9,6 +9,7 @@ using Maxisoft.Utils.Collections;
 using Maxisoft.Utils.Collections.Queues;
 using Maxisoft.Utils.Logic;
 using Maxisoft.Utils.Random;
+using Maxisoft.Utils.Tests.Collections.Queues.Specialized;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
