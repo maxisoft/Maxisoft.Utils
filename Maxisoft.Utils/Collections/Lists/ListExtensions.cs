@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Maxisoft.Utils.Collections
+namespace Maxisoft.Utils.Collections.Lists
 {
     public static class ListExtensions
     {

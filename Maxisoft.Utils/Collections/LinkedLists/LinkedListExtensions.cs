@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Maxisoft.Utils.Collections
+namespace Maxisoft.Utils.Collections.LinkedLists
 {
     public static class LinkedListExtensions
     {

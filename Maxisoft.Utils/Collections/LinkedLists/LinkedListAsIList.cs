@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Maxisoft.Utils.Collections
+namespace Maxisoft.Utils.Collections.LinkedLists
 {
     /// <summary>
     ///     A linked list which implement <see cref="IList{T}"/>

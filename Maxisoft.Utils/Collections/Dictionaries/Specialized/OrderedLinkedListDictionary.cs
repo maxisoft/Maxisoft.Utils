@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Maxisoft.Utils.Collections.LinkedLists;
 
 namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
 {

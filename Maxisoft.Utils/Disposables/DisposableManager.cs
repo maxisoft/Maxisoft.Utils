@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Maxisoft.Utils.Collections;
+using Maxisoft.Utils.Collections.LinkedLists;
 
 namespace Maxisoft.Utils.Disposables
 {
