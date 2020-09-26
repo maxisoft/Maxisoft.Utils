@@ -18,5 +18,10 @@ namespace Maxisoft.Utils.Collections.Lists
         {
             return At<T, IList<T>>(list, index);
         }
+
+        public static ArrayListWrapper<T> WrapAsList<T>(this T[] array)
+        {
+            return new ArrayListWrapper<T>(array);
+        }
     }
 }

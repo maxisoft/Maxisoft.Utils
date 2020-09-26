@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Maxisoft.Utils.Collections.LinkedLists;
+using Maxisoft.Utils.Collections.Lists;
 using Maxisoft.Utils.Collections.Queues;
 
 namespace Maxisoft.Utils.Collections
@@ -9,8 +11,8 @@ namespace Maxisoft.Utils.Collections
         {
             return ToDeque<T, Deque<T>>(enumerable);
         }
-        
-        public static TDeque ToDeque<T, TDeque>(IEnumerable<T> enumerable) where TDeque: IDeque<T>, new()
+
+        public static TDeque ToDeque<T, TDeque>(IEnumerable<T> enumerable) where TDeque : IDeque<T>, new()
         {
             var res = new TDeque();
             foreach (var element in enumerable)
@@ -20,13 +22,63 @@ namespace Maxisoft.Utils.Collections
 
             return res;
         }
-        
-        public static LinkedList<T> ToLinkedList<T>(this IEnumerable<T> enumerable)
+
+        public static LinkedListAsIList<T> ToLinkedList<T>(this IEnumerable<T> enumerable)
         {
-            return ToLinkedList<T, LinkedList<T>>(enumerable);
+            return ToLinkedList<T, LinkedListAsIList<T>>(enumerable);
         }
 
-        public static TLinkedList ToLinkedList<T, TLinkedList>(IEnumerable<T> enumerable) where TLinkedList: LinkedList<T>, new()
+        public static ArrayList<T> ToArrayList<T>(this IEnumerable<T> enumerable)
+        {
+            var res = new ArrayList<T>();
+            foreach (var element in enumerable)
+            {
+                res.Add(element);
+            }
+
+            return res;
+        }
+
+        public static ArrayList<T> ToArrayList<T>(this ICollection<T> collection)
+        {
+            var res = new ArrayList<T>(collection.Count);
+            foreach (var element in collection)
+            {
+                res.Add(element);
+            }
+
+            return res;
+        }
+
+        public static ArrayList<T> ToArrayList<T>(this IReadOnlyCollection<T> collection)
+        {
+            var res = new ArrayList<T>(collection.Count);
+            foreach (var element in collection)
+            {
+                res.Add(element);
+            }
+
+            return res;
+        }
+
+        public static ArrayList<T> ToArrayList<T>(this T[] array, bool copy = true)
+        {
+            if (!copy)
+            {
+                return new ArrayList<T>(array);
+            }
+
+            var res = new ArrayList<T>(array.Length);
+            foreach (var element in array)
+            {
+                res.Add(element);
+            }
+
+            return res;
+        }
+
+        public static TLinkedList ToLinkedList<T, TLinkedList>(IEnumerable<T> enumerable)
+            where TLinkedList : LinkedList<T>, new()
         {
             var res = new TLinkedList();
             foreach (var element in enumerable)
