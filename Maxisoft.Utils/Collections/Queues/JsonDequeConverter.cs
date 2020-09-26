@@ -36,17 +36,12 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public override bool CanConvert(Type typeToConvert)
         {
-            if (typeToConvert == typeof(Queue<>))
-            {
-                return true;
-            }
-
-            return base.CanConvert(typeToConvert);
+            return typeToConvert.IsAssignableFrom(typeof(Queue<>)) || typeof(Queue<>).IsAssignableFrom(typeToConvert) || base.CanConvert(typeToConvert);
         }
 
-        public override Deque<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+
+        private static void ReadDequeData(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options, in Deque<T> q)
         {
-            var q = new Deque<T>();
             if (reader.TokenType != JsonTokenType.StartArray || !reader.Read())
             {
                 throw new JsonException();
@@ -61,13 +56,67 @@ namespace Maxisoft.Utils.Collections.Queues
                     throw new JsonException();
                 }
             }
+            
+        }
 
+        public override Deque<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var q = new Deque<T>();
+            if (reader.TokenType != JsonTokenType.StartObject)
+            {
+                throw new JsonException();
+            }
+
+            var chunkSize = q.ChunkSize;
+            var trimOnDeletion = q.TrimOnDeletion;
+            var initialChunkRatio = 0.5f;
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndObject)
+                {
+                    return q;
+                }
+                if (reader.TokenType != JsonTokenType.PropertyName)
+                {
+                    throw new JsonException();
+                }
+                string propertyName = reader.GetString();
+                if (!reader.Read()) break;
+                switch (propertyName)
+                {
+                    case nameof(Deque<T>.ChunkSize):
+                        //note that if Data property came before ChunkSize the later is silently ignored
+                        chunkSize = reader.GetInt64();
+                        break;
+                    case nameof(Deque<T>.TrimOnDeletion):
+                        trimOnDeletion = reader.GetBoolean();
+                        q.TrimOnDeletion = trimOnDeletion;
+                        break;
+                    case nameof(Deque<T>.InitialChunkRatio):
+                        initialChunkRatio = reader.GetSingle();
+                        q.InitialChunkRatio = initialChunkRatio;
+                        break;
+                    case "Data":
+                        q = new Deque<T>(chunkSize, initialChunkRatio){ TrimOnDeletion = trimOnDeletion};
+                        ReadDequeData(ref reader, typeToConvert, options, in q);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(propertyName), propertyName, null);
+                }
+            }
+            throw new JsonException();
             return q;
         }
 
         public override void Write(Utf8JsonWriter writer, Deque<T> value, JsonSerializerOptions options)
         {
-            writer.WriteStartArray();
+            
+            writer.WriteStartObject();
+            writer.WriteNumber(nameof(Deque<T>.ChunkSize), value.ChunkSize);
+            writer.WriteBoolean(nameof(Deque<T>.TrimOnDeletion), value.TrimOnDeletion);
+            writer.WriteNumber(nameof(Deque<T>.InitialChunkRatio), value.InitialChunkRatio);
+            writer.WriteStartArray("Data");
 
 
             foreach (var item in value)
@@ -76,6 +125,7 @@ namespace Maxisoft.Utils.Collections.Queues
             }
 
             writer.WriteEndArray();
+            writer.WriteEndObject();
         }
     }
 }

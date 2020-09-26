@@ -151,7 +151,8 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
         {
         }
 
-        public CircularDeque(long cappedSize) : this(new Deque<T>(OptimalChunkSize(cappedSize)), cappedSize)
+        public CircularDeque(long cappedSize, DequeInitialUsage usage = DequeInitialUsage.Both) : this(
+            new Deque<T>(OptimalChunkSize(cappedSize), usage), cappedSize)
         {
         }
 

@@ -7,7 +7,7 @@ using Maxisoft.Utils.Random;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Maxisoft.Utils.Tests.Collections.Queues.Specialized
+namespace Maxisoft.Utils.Tests.Collections.Queues
 {
     public class DequeTests
     {
@@ -461,6 +461,74 @@ namespace Maxisoft.Utils.Tests.Collections.Queues.Specialized
             var q = new Deque<object> {expected, new object()};
             Assert.Same(expected, q.PopFront());
             Assert.Equal(1, q.LongLength);
+        }
+
+
+        [Fact]
+        public void Test_DequeUsage_Lifo()
+        {
+            const DequeInitialUsage usage = DequeInitialUsage.Lifo;
+            const int chunkSize = 32;
+            var q = new Deque<byte>(chunkSize, usage);
+            Assert.Equal(chunkSize, q.ChunkSize);
+            Assert.Equal(0, q.InitialChunkRatio);
+            for (var i = 0; i < chunkSize; i++)
+            {
+                q.PushBack((byte) i);
+                Assert.Equal(i, q[i]);
+                Assert.True(q.TryPeekBack(out var back));
+                Assert.Equal(i, back);
+                Assert.Equal(i, q.Back());
+            }
+
+
+            Assert.Equal(q.Count, q.Capacity);
+        }
+
+
+        [Fact]
+        public void Test_DequeUsage_Fifo()
+        {
+            const DequeInitialUsage usage = DequeInitialUsage.Fifo;
+            const int chunkSize = 32;
+            var q = new Deque<byte>(chunkSize, usage);
+            Assert.Equal(chunkSize, q.ChunkSize);
+            Assert.Equal(1, q.InitialChunkRatio);
+            for (var i = 0; i < chunkSize; i++)
+            {
+                q.PushFront((byte) i);
+                Assert.Equal(i, q[0]);
+                Assert.True(q.TryPeekFront(out var front));
+                Assert.Equal(i, front);
+                Assert.Equal(i, q.Front());
+            }
+
+
+            Assert.Equal(q.Count, q.Capacity);
+        }
+
+        [Fact]
+        public void Test_DequeUsage_Both()
+        {
+            const DequeInitialUsage usage = DequeInitialUsage.Both;
+            const int chunkSize = 32;
+            var q = new Deque<byte>(chunkSize);
+            Assert.Equal(chunkSize, q.ChunkSize);
+            Assert.Equal(0.5f, q.InitialChunkRatio);
+            for (var i = 0; i < chunkSize; i++)
+            {
+                if (i % 2 == 0)
+                {
+                    q.PushBack((byte) i);
+                }
+                else
+                {
+                    q.PushFront((byte) i);
+                }
+            }
+
+
+            Assert.True(q.Capacity < q.Count * 3 / 2 + 1);
         }
 
 

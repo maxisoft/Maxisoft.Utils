@@ -5,12 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.Text.Json;
-using Maxisoft.Utils.Collections;
 using Maxisoft.Utils.Collections.LinkedLists;
 using Maxisoft.Utils.Collections.Queues;
 using Maxisoft.Utils.Logic;
 using Maxisoft.Utils.Random;
-using Maxisoft.Utils.Tests.Collections.Queues.Specialized;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
@@ -99,12 +97,14 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
 
             var data = JsonSerializer.Serialize(q);
             var reconstruction = JsonSerializer.Serialize(q.ToArray());
-            Assert.Equal(reconstruction, data);
+            Assert.Contains(reconstruction, data);
 
             var actual = JsonSerializer.Deserialize<Deque<TriBool>>(data);
 
             Assert.Equal(q, actual);
-            //Can't test Equality for chunk size
+            Assert.Equal(chunkSize, actual.ChunkSize);
+            Assert.Equal(q.InitialChunkRatio, actual.InitialChunkRatio);
+            Assert.Equal(q.TrimOnDeletion, actual.TrimOnDeletion);
         }
 
         [Theory]

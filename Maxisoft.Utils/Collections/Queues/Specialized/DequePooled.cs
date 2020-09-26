@@ -5,30 +5,14 @@ using System.Runtime.InteropServices;
 namespace Maxisoft.Utils.Collections.Queues.Specialized
 {
     /// <summary>
-    /// A <see cref="Deque{T}"/> using <see cref="ArrayPool"/>'s arrays as base storage
+    ///     A <see cref="Deque{T}" /> using <see cref="ArrayPool" />'s arrays as base storage
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <seealso cref="Deque{T}"/>
-    public class DequePooled<T> : Deque<T>
+    /// <seealso cref="Deque{T}" />
+    public class DequePooled<T> : Deque<T>, IDisposable
     {
-        // ReSharper disable MemberCanBePrivate.Global
-        public const int MaxArrayByteLength = 65536;
-
-        public const int MaxArraysPerBucket = 16;
-
         /// <summary>
-        /// The default <see cref="ArrayPool"/>
-        /// </summary>
-        /// <remarks>Use <see cref="Lazy{T}"/> in order to <b>prevent</b> the <see cref="ArrayPool"/> to be created as soon as this assembly is loaded</remarks>
-        public static readonly Lazy<ArrayPool<T>> DefaultPool =
-            new Lazy<ArrayPool<T>>(() => ArrayPool<T>.Create(ComputeOptimalChunkSize(), MaxArraysPerBucket));
-
-        
-        public readonly ArrayPool<T> ArrayPool;
-        // ReSharper restore MemberCanBePrivate.Global
-
-        /// <summary>
-        /// Construct a new <see cref="Deque{T}"/> using the <see cref="DefaultPool"/>
+        ///     Construct a new <see cref="Deque{T}" /> using the <see cref="DefaultPool" />
         /// </summary>
         public DequePooled() : this(ComputeOptimalChunkSize())
         {
@@ -40,16 +24,23 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
             TrimOnDeletion = true;
         }
 
-        public DequePooled(ArrayPool<T> pool, long chunkSize) : base(chunkSize)
+        public DequePooled(ArrayPool<T> pool, long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize,
+            usage)
         {
             ArrayPool = pool;
             TrimOnDeletion = true;
         }
 
-        private DequePooled(long chunkSize) : base(chunkSize)
+        private DequePooled(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize, usage)
         {
             ArrayPool = DefaultPool.Value;
             TrimOnDeletion = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         internal static int ComputeOptimalChunkSize()
@@ -81,5 +72,42 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
         {
             return ComputeOptimalChunkSize();
         }
+
+        private void ReleaseUnmanagedResources()
+        {
+            Clear();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            ReleaseUnmanagedResources();
+            if (disposing)
+            {
+            }
+        }
+
+        ~DequePooled()
+        {
+            Dispose(false);
+        }
+
+        // ReSharper disable MemberCanBePrivate.Global
+        public const int MaxArrayByteLength = 65536;
+
+        public const int MaxArraysPerBucket = 16;
+
+        /// <summary>
+        ///     The default <see cref="ArrayPool" />
+        /// </summary>
+        /// <remarks>
+        ///     Use <see cref="Lazy{T}" /> in order to <b>prevent</b> the <see cref="ArrayPool" /> to be created as soon as
+        ///     this assembly is loaded
+        /// </remarks>
+        public static readonly Lazy<ArrayPool<T>> DefaultPool =
+            new Lazy<ArrayPool<T>>(() => ArrayPool<T>.Create(ComputeOptimalChunkSize(), MaxArraysPerBucket));
+
+
+        public readonly ArrayPool<T> ArrayPool;
+        // ReSharper restore MemberCanBePrivate.Global
     }
 }

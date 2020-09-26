@@ -172,7 +172,8 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
         {
         }
 
-        public BoundedDeque(long cappedSize) : this(new Deque<T>(OptimalChunkSize(cappedSize)), cappedSize)
+        public BoundedDeque(long cappedSize, DequeInitialUsage usage = DequeInitialUsage.Both) : this(
+            new Deque<T>(OptimalChunkSize(cappedSize), usage), cappedSize)
         {
         }
 

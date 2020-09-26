@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Maxisoft.Utils.Collections.UpdateGuards;
@@ -21,6 +22,7 @@ namespace Maxisoft.Utils.Collections.Queues
         protected internal readonly long ChunkSize;
         private InternalPointer _begin;
         private InternalPointer _end;
+        public float InitialChunkRatio { get; protected internal set; } = 0.5f;
 
         public Deque()
         {
@@ -28,13 +30,28 @@ namespace Maxisoft.Utils.Collections.Queues
             ChunkSize = OptimalChunkSize();
         }
 
-        internal Deque(long chunkSize)
+        public Deque(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : this(chunkSize, usage.ToRatio())
+        {
+        }
+
+        public Deque(long chunkSize, float initialChunkRatio)
         {
             if (chunkSize <= 0)
             {
                 throw new ArgumentException("negative size", nameof(chunkSize));
             }
 
+            if (float.IsNaN(initialChunkRatio) || initialChunkRatio < 0)
+            {
+                throw new ArgumentException("negative ratio", nameof(initialChunkRatio));
+            }
+
+            if (initialChunkRatio > 1)
+            {
+                throw new ArgumentException("more than 100% ratio", nameof(initialChunkRatio));
+            }
+
+            InitialChunkRatio = initialChunkRatio;
             ChunkSize = chunkSize;
         }
 
@@ -46,6 +63,7 @@ namespace Maxisoft.Utils.Collections.Queues
             var count = info.GetInt64(nameof(Count));
             ChunkSize = info.GetInt64(nameof(ChunkSize));
             TrimOnDeletion = info.GetBoolean(nameof(TrimOnDeletion));
+            InitialChunkRatio = info.GetSingle(nameof(InitialChunkRatio));
 
             if (count == 0)
             {
@@ -372,6 +390,7 @@ namespace Maxisoft.Utils.Collections.Queues
             info.AddValue(nameof(Count), LongLength);
             info.AddValue(nameof(ChunkSize), ChunkSize);
             info.AddValue(nameof(TrimOnDeletion), TrimOnDeletion);
+            info.AddValue(nameof(InitialChunkRatio), InitialChunkRatio);
             if (Count <= 0)
             {
                 return;
@@ -398,17 +417,19 @@ namespace Maxisoft.Utils.Collections.Queues
 
         private void Init()
         {
-            var middle = (ChunkSize - 1) / 2;
+            var startIndex = (long) (ChunkSize * InitialChunkRatio);
+
             if (_begin.HasNode || _end.HasNode)
             {
-                throw new AccessViolationException($"This {nameof(Deque<T>)} is screwed");
+                throw new AccessViolationException($"This {nameof(Deque<T>)} had already a node");
             }
 
             _map.AddFirst(Alloc(ChunkSize));
-            _begin = new InternalPointer(_map.First, middle);
+            _begin = new InternalPointer(_map.First, startIndex);
             _end = _begin;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void InitIfNeeded()
         {
             if (!_begin.HasNode || !_end.HasNode)
