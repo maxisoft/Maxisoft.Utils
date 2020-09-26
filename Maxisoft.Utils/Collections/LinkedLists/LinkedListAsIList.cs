@@ -6,12 +6,12 @@ using System.Diagnostics.CodeAnalysis;
 namespace Maxisoft.Utils.Collections.LinkedLists
 {
     /// <summary>
-    ///     A linked list which implement <see cref="IList{T}" />
+    ///     A linked list which implement <see cref="IList{T}"/>
     /// </summary>
-    /// <remarks>All <see cref="IList{T}" /> methods added here are in <c>O(n)</c> time</remarks>
+    /// <remarks>All <see cref="IList{T}"/>'s methods added here are in <c>O(n)</c> time</remarks>
     /// <typeparam name="T"></typeparam>
     /// <see cref="LinkedList{T}" />
-    /// <see cref="LinkedListExtensions" />
+    /// <see cref="LinkedListExtensions"/>
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
     public class LinkedListAsIList<T> : LinkedList<T>, IList<T>, IReadOnlyList<T>
