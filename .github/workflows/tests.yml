@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev, CI ]
+  pull_request:
+    branches: [ main, dev, CI ]
+
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+      
+    - uses: microsoft/setup-msbuild@v1.0.0
+      with:
+        vs-version: 16.5
+
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x' # SDK Version to use; x will use the latest version of the 3.1 channel
+    
+
+    - name: Restore using netcore
+      run: dotnet restore
+      timeout-minutes: 5
+    
+    - name: Build Release
+      run: MsBuild Maxisoft.Utils.sln /t:Build /p:Configuration=Release
+      timeout-minutes: 5
+
+    - name: Build Debug
+      run: MsBuild Maxisoft.Utils.sln /t:Build /p:Configuration=Debug
+      timeout-minutes: 5
+
+    - name: Test using netcore
+      run: dotnet test
+      timeout-minutes: 5
+
+    - name: Test Release mode using netcore
+      run: dotnet test --configuration Release
+      timeout-minutes: 5
+     
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Release Build
+        path: Maxisoft.Utils/bin/Release/*/Maxisoft.Utils.*
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Debug Build
+        path: Maxisoft.Utils/bin/Debug/*/Maxisoft.Utils.*
