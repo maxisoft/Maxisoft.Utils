@@ -77,13 +77,10 @@ namespace Maxisoft.Utils.Collections.Lists.Specialized
         {
             Clear();
         }
-
+        
         protected virtual void Dispose(bool disposing)
         {
             ReleaseUnmanagedResources();
-            if (disposing)
-            {
-            }
         }
 
         ~PooledList()
