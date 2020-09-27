@@ -60,6 +60,7 @@ namespace Maxisoft.Utils.Collections.Lists
                 {
                     yield break;
                 }
+
                 yield return element;
             }
         }
@@ -98,7 +99,7 @@ namespace Maxisoft.Utils.Collections.Lists
         public bool Remove(T item)
         {
             var index = IndexOf(item);
-            if (index < -1)
+            if (index < 0)
             {
                 return false;
             }
@@ -142,9 +143,17 @@ namespace Maxisoft.Utils.Collections.Lists
         public T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _array[index];
+            get
+            {
+                CheckForOutOfBounds(index, nameof(index));
+                return _array[index];
+            }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => _array[index] = value;
+            set
+            {
+                CheckForOutOfBounds(index, nameof(index));
+                _array[index] = value;
+            }
         }
 
         protected internal virtual T[] Alloc(int size)
@@ -170,6 +179,12 @@ namespace Maxisoft.Utils.Collections.Lists
         {
             if (capacity == 0)
             {
+                if (ReferenceEquals(array, EmptyArray))
+                {
+                    return;
+                }
+
+                Free(array);
                 array = EmptyArray;
                 return;
             }
@@ -180,7 +195,9 @@ namespace Maxisoft.Utils.Collections.Lists
             }
             else
             {
+                var old = array;
                 Array.Resize(ref array, capacity);
+                Free(old);
             }
         }
 
@@ -271,9 +288,11 @@ namespace Maxisoft.Utils.Collections.Lists
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void CheckForOutOfBounds(int index, string paramName, string message = "")
+        protected void CheckForOutOfBounds(int index, string paramName,
+            string message =
+                "Index was out of range. Must be non-negative and less than the size of the collection. (Parameter 'index')")
         {
-            if ((uint) index > (uint) Count)
+            if ((uint) index >= (uint) Count)
             {
                 throw new ArgumentOutOfRangeException(paramName, index, message);
             }
