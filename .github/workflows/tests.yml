@@ -46,6 +46,19 @@ jobs:
     - name: Test Release mode using netcore
       run: dotnet test --configuration Release
       timeout-minutes: 5
+
+
+    - name: Test using Coverlet Code Coverage
+      run: |
+            dotnet test --configuration Release --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
+            cp Maxisoft.Utils.Tests/TestResults/*/coverage.info Maxisoft.Utils.Tests/TestResults/coverage.info
+      timeout-minutes: 5
+
+    - name: Upload Code Coverage to Coveralls      
+      uses: coverallsapp/github-action@v1.1.2
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN }} 
+        path-to-lcov: Maxisoft.Utils.Tests/TestResults/coverage.info
      
 
     - uses: actions/upload-artifact@v2
@@ -57,3 +70,8 @@ jobs:
       with:
         name: Debug Build
         path: Maxisoft.Utils/bin/Debug/*/Maxisoft.Utils.*
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Coverage
+        path: Maxisoft.Utils.Tests/TestResults/*
