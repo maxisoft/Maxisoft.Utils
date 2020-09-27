@@ -231,19 +231,22 @@ namespace Maxisoft.Utils.Collections.Lists
                 throw new ArgumentOutOfRangeException(nameof(index), index, "out of bound");
             }
 
-            if (collection is ICollection<T> c)
+            switch (collection)
             {
-                InsertRange<ICollection<T>>(index, in c);
-            }
-            else if (collection is IReadOnlyCollection<T> rc)
-            {
-                InsertRange(index, in rc);
-            }
-            else
-            {
-                foreach (var element in collection)
+                case ICollection<T> c:
+                    InsertRange<ICollection<T>>(index, in c);
+                    break;
+                case IReadOnlyCollection<T> rc:
+                    InsertRange(index, in rc);
+                    break;
+                default:
                 {
-                    Insert(index++, element);
+                    foreach (var element in collection)
+                    {
+                        Insert(index++, element);
+                    }
+
+                    break;
                 }
             }
         }
