@@ -131,6 +131,13 @@ namespace Maxisoft.Utils.Tests.Collections.Lists.Specialized
             }
         }
 
+        [Fact]
+        public void Test_Constructor_With_Negative_Capacity()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new PooledList<object>(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new PooledList<object>(-1, new CustomArrayPool<object>()));
+        }
+
         public class CustomArrayPool<T> : ArrayPool<T>
         {
             public override T[] Rent(int minimumLength)
