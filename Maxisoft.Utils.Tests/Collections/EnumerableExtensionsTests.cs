@@ -42,6 +42,14 @@ namespace Maxisoft.Utils.Tests.Collections
             Assert.Equal(enumerable, ((IReadOnlyCollection<long>) enumerable).ToArrayList());
             Assert.Equal(enumerable, ((ICollection<long>) enumerable).ToArrayList());
             Assert.Equal(enumerable, ((IEnumerable<long>) enumerable).ToArrayList());
+            var arr = enumerable.ToArray();
+            Assert.Equal(enumerable, arr.ToArrayList());
+            if (count > 0)
+            {
+                Assert.Same(arr, arr.ToArrayList(copy: false).Data());
+                Assert.NotSame(arr, arr.ToArrayList(copy: true).Data());
+            }
+
             Assert.Equal(enumerable, enumerable.ToArray().ToArrayList());
         }
     }
