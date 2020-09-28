@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Maxisoft.Utils.Collections
 {
-
     /// <summary>
-    /// 
     /// </summary>
-    /// <remarks>Prefer .NET Standard 2.1 <see cref="System.Index"/> when available</remarks>
+    /// <remarks>Prefer .NET Standard 2.1 <see cref="System.Index" /> when available</remarks>
+    [DebuggerDisplay("{" + nameof(Value) + "}")]
     public readonly struct WrappedIndex
     {
         public readonly int Value;
@@ -27,27 +27,27 @@ namespace Maxisoft.Utils.Collections
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Resolve(int size)
         {
-            return Value < 0 ? size + Value : size;
+            return Value >= 0 ? Value : size + Value;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Resolve<T, TCollection>(in TCollection collection) where TCollection: ICollection<T>
+        public int Resolve<T, TCollection>(in TCollection collection) where TCollection : ICollection<T>
         {
             return Resolve(collection.Count);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Resolve<TCollection>(in TCollection collection) where TCollection: ICollection
+        public int Resolve<TCollection>(in TCollection collection) where TCollection : ICollection
         {
             return Resolve(collection.Count);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Resolve(in Array array)
         {
             return Resolve(array.Length);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Resolve<T>(in T[] array)
         {
