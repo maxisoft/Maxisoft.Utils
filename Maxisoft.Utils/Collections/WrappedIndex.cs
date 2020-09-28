@@ -31,9 +31,15 @@ namespace Maxisoft.Utils.Collections
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Resolve<T, TCollection>(in TCollection collection) where TCollection : ICollection<T>
+        public int Resolve<T, TCollection>(in ICollection<T> collection) where TCollection : ICollection<T>
         {
             return Resolve(collection.Count);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Resolve<T>(in ICollection<T> collection)
+        {
+            return Resolve<T,ICollection<T>>(collection);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
