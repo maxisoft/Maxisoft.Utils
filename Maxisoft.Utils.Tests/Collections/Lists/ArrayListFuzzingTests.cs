@@ -498,7 +498,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
 
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
-        public void Test_Indexer_Object(int seed)
+        public void Test_Indexer_Get_Object(int seed)
         {
             var random = new TRandom(seed);
             var mockPool = new Dictionary<EquatableObject, Mock<EquatableObject>>();
@@ -584,6 +584,105 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         }
 
 
+        [Theory]
+        [ClassData(typeof(RandomSeedGenerator))]
+        public void Test_Indexer_Set_Object(int seed)
+        {
+            var random = new TRandom(seed);
+            var mockPool = new Dictionary<EquatableObject, Mock<EquatableObject>>();
+            var adversarial = new List<EquatableObject>();
+
+            var initialNumObjects = random.Next(32);
+            adversarial.Capacity = initialNumObjects;
+            for (var i = 0; i < initialNumObjects; i++)
+            {
+                if (i == 0 || random.NextDouble() < 0.8)
+                {
+                    var mock = new Mock<EquatableObject> {CallBase = true};
+                    Assert.NotNull(mock.Object);
+                    mockPool.Add(mock.Object, mock);
+                    adversarial.Add(mock.Object);
+                }
+                else // insert duplicate
+                {
+                    var index = random.Next(adversarial.Count);
+                    var mock = mockPool[adversarial[index]];
+                    Assert.NotNull(mock.Object);
+                    adversarial.Add(mock.Object);
+                }
+            }
+
+            var listMock = new Mock<ArrayList<EquatableObject>> {CallBase = true};
+            var list = listMock.Object;
+            list.InsertRange(0, adversarial);
+
+            Assert.Equal(adversarial, list);
+            Assert.Equal(adversarial.Count, list.Count);
+
+            void ClearInvocations()
+            {
+                foreach (var pair in mockPool)
+                {
+                    pair.Value.Invocations.Clear();
+                }
+
+                listMock.Invocations.Clear();
+            }
+
+            for (var i = 0; i < initialNumObjects * 5; i++)
+            {
+                ClearInvocations();
+                var index = random.Next(-2, initialNumObjects + 2);
+                EquatableObject obj = null;
+                if (random.NextDouble() < 0.8)
+                {
+                    var mock = new Mock<EquatableObject> {CallBase = true};
+                    mockPool.Add(mock.Object, mock);
+                    obj = mock.Object;
+                }
+
+                Exception error = null;
+                try
+                {
+                    adversarial[index] = obj;
+                }
+                catch (Exception e)
+                {
+                    error = e;
+                }
+
+                try
+                {
+                    list[index] = obj;
+                    Assert.Null(error);
+                }
+                catch (Exception e) when (!(e is XunitException))
+                {
+                    Assert.NotNull(error);
+                    Assert.True(e.GetType().IsInstanceOfType(error) || error.GetType().IsInstanceOfType(e));
+                }
+
+                if (error is null)
+                {
+                    Assert.Equal(obj, list[index]);
+                    Assert.Equal(adversarial[index], list[index]);
+                }
+
+
+                Assert.Equal(adversarial, list);
+                listMock.VerifyNoOtherCalls();
+
+
+                if (obj is {} && mockPool.TryGetValue(obj, out var eqMock))
+                {
+                    eqMock.Verify(mock => mock.Equals(It.IsAny<EquatableObject>()), Times.AtLeast(1));
+                    eqMock.Verify(mock => mock.GetHashCode());
+                    eqMock.VerifyNoOtherCalls();
+                }
+            }
+        }
+
+
         public class EquatableObject : IEquatable<EquatableObject>
         {
             public virtual bool Equals(EquatableObject other)
@@ -620,7 +719,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         internal class RandomSeedGenerator : IEnumerable<object[]>
         {
             internal virtual RandomThreadSafe Random { get; } = new RandomThreadSafe();
-            internal virtual int NumberOfGen => 16;
+            internal virtual int NumberOfGen => 64;
 
             public IEnumerator<object[]> GetEnumerator()
             {

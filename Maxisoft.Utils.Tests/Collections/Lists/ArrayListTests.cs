@@ -78,6 +78,24 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 listMock.Verify(mock => mock.Free(It.IsAny<int[]>()), Times.Once);
                 listMock.VerifyNoOtherCalls();
             }
+
+            // test constructor with size
+            {
+                Assert.Equal(new ArrayList<int>(arr).GetRange(0, 3), new ArrayList<int>(arr, 3));
+                Assert.Equal(new ArrayList<int>(arr, arr.Length), new ArrayList<int>(arr));
+            }
+
+            // throws on negative size
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => new ArrayList<int>(arr, -1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => new ArrayList<int>(arr, int.MinValue));
+            }
+
+            // throws on size larger than array
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => new ArrayList<int>(arr, arr.Length + 1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => new ArrayList<int>(arr, int.MaxValue));
+            }
         }
 
         [Fact]
@@ -108,6 +126,14 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 Assert.Equal(capacity, list.Count);
                 listMock.VerifyNoOtherCalls();
             }
+
+            // throws on negative capacity
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => new ArrayList<int>(-1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => new ArrayList<int>(int.MinValue));
+                // but not on zero capacity
+                Assert.Equal(0, new ArrayList<int>(0).Capacity);
+            }
         }
 
         [Fact]
@@ -117,6 +143,12 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             var list = listMock.Object;
 
             listMock.VerifyNoOtherCalls(); // => no allocation
+
+            // ReSharper disable once xUnit2013
+            Assert.Equal(0, list.Count);
+            Assert.Equal(0, list.Capacity);
+            Assert.False(list.IsReadOnly);
+            Assert.Equal(Enumerable.Empty<int>(), list);
 
             list.Add(99);
             Assert.True(list.Capacity >= 1);
@@ -411,6 +443,38 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     Assert.Equal(default, list.Data()[i]);
                 }
             }
+        }
+
+        [Fact]
+        public void Test_GrowIfNeeded_EdgeCase()
+        {
+            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var list = listMock.Object;
+
+            Assert.Equal(0, list.Capacity);
+            Assert.Empty(list);
+            var data = list.Data();
+
+            list.GrowIfNeeded();
+            Assert.True(list.Capacity > 0);
+            Assert.NotSame(data, list.Data());
+            Assert.Empty(list);
+        }
+
+        [Fact]
+        public void Test_Realloc_EdgeCase()
+        {
+            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var list = listMock.Object;
+
+            Assert.Equal(0, list.Capacity);
+            var data = list.Data();
+
+            list.ReAlloc(ref data, 0, 0);
+            Assert.Equal(0, list.Capacity);
+            Assert.Same(data, list.Data());
+            listMock.Verify(mock => mock.ReAlloc(ref data, 0, 0), Times.Once);
+            listMock.VerifyNoOtherCalls();
         }
     }
 }

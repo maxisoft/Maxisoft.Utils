@@ -276,7 +276,7 @@ namespace Maxisoft.Utils.Collections.Lists
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected bool GrowIfNeeded()
+        protected internal bool GrowIfNeeded()
         {
             if (Capacity > Count)
             {

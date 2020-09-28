@@ -12,7 +12,7 @@ namespace Maxisoft.Utils.Collections.Lists
         public int BinarySearch(int index, int count, in T item, IComparer<T>? comparer = null)
         {
             comparer ??= Comparer<T>.Default;
-            return AsSpan().Slice(index, count).BinarySearch(item, comparer);
+            return GetSlice(index, count).BinarySearch(item, comparer);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -251,19 +251,26 @@ namespace Maxisoft.Utils.Collections.Lists
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Span<T> GetSlice(int index, int count)
+        {
+            return AsSpan().Slice(index, count);
+        }
+
         public TList GetRange<TList>(int index, int count) where TList : ArrayList<T>, new()
         {
-            var span = GetRange(index, count);
+            var span = GetSlice(index, count);
             var res = new TList();
-            res.EnsureCapacity(count);
+            res.Resize(count);
             span.CopyTo(res.Data());
             return res;
         }
 
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<T> GetRange(int index, int count)
+        public ArrayList<T> GetRange(int index, int count)
         {
-            return AsSpan().Slice(index, count);
+            return GetRange<ArrayList<T>>(index, count);
         }
 
         public void RemoveRange(int index, int count, bool clear = true)
@@ -353,7 +360,7 @@ namespace Maxisoft.Utils.Collections.Lists
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reverse(int index, int count) {
-            AsSpan().Slice(index, count).Reverse();
+            GetSlice(index, count).Reverse();
         }
         
         
