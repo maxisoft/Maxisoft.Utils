@@ -78,7 +78,7 @@ namespace Maxisoft.Utils.Collections.Lists.Specialized
             Clear();
         }
         
-        protected virtual void Dispose(bool disposing)
+        protected internal virtual void Dispose(bool disposing)
         {
             ReleaseUnmanagedResources();
         }
