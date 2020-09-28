@@ -116,6 +116,19 @@ namespace Maxisoft.Utils.Tests.Collections.Lists.Specialized
                 Assert.True(list.Capacity <= initialCapacity);
                 Assert.True(list.Capacity >= initialCount / 2);
             }
+            
+            poolMock.Invocations.Clear();
+            listMock.Invocations.Clear();
+
+            // test dispose
+            {
+                var initialData = list.Data();
+                list.Dispose();
+                poolMock.Verify(mock => mock.Return(initialData, It.IsAny<bool>()));
+                listMock.Verify(mock => mock.Dispose(true));
+                Assert.Empty(list);
+                Assert.Equal(0, list.Capacity);
+            }
         }
 
         public class CustomArrayPool<T> : ArrayPool<T>
