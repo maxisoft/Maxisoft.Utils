@@ -2,6 +2,7 @@
 using System.Linq;
 using Maxisoft.Utils.Collections.Lists;
 using Moq;
+using Troschuetz.Random;
 using Xunit;
 using Xunit.Sdk;
 using Range = Moq.Range;
@@ -475,6 +476,73 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             Assert.Same(data, list.Data());
             listMock.Verify(mock => mock.ReAlloc(ref data, 0, 0), Times.Once);
             listMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData(5)]
+        [InlineData(0)]
+        public void Test_Convert_ToSpan(int numElement)
+        {
+            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var list = listMock.Object;
+            var numberGen = new TRandom(numElement.GetHashCode());
+
+            for (var i = 0; i < numElement; i++)
+            {
+                var n = numberGen.Next();
+                list.Add(n);
+                Assert.Equal(n, list[i]);
+            }
+
+            // test AsSpan
+            {
+                var span = list.AsSpan();
+                Assert.Equal(numElement, span.Length);
+                for (var i = 0; i < numElement; i++)
+                {
+                    Assert.Equal(span[i], list[i]);
+                }
+
+                if (numElement > 0)
+                {
+                    // test change a span's value
+                    // read the list changed value
+                    {
+                        var index = numberGen.Next(span.Length);
+                        span[index] = numberGen.Next();
+                        Assert.Equal(span[index], list[index]);
+                    }
+
+                    // test change a list's value
+                    // read the span changed value
+                    {
+                        var index = numberGen.Next(span.Length);
+                        list[index] = numberGen.Next();
+                        Assert.Equal(list[index], span[index]);
+                    }
+                }
+            }
+
+
+            // test implicit cast
+            {
+                Span<int> span = list;
+                Assert.Equal(numElement, span.Length);
+                for (var i = 0; i < numElement; i++)
+                {
+                    Assert.Equal(span[i], list[i]);
+                }
+            }
+
+            // test implicit readonly cast
+            {
+                ReadOnlySpan<int> span = list;
+                Assert.Equal(numElement, span.Length);
+                for (var i = 0; i < numElement; i++)
+                {
+                    Assert.Equal(span[i], list[i]);
+                }
+            }
         }
     }
 }
