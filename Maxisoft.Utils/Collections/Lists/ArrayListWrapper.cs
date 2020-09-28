@@ -32,7 +32,7 @@ namespace Maxisoft.Utils.Collections.Lists
 
         protected internal override int ComputeGrowSize(int size, int capacity)
         {
-            return capacity;
+            throw new InvalidOperationException("Cannot grow");
         }
 
         protected internal override void ReAlloc(ref T[] array, int actualSize, int capacity)
