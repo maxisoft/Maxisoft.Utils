@@ -34,6 +34,7 @@ namespace Maxisoft.Utils.Tests.Collections
                     Assert.Equal(i, index.Resolve((ICollection) arr));
                     Assert.Equal(i, index.Resolve<int, IList<int>>(arr));
                     Assert.Equal(i, index.Resolve(in arr));
+                    Assert.Equal(i, index.Resolve((ICollection<int>)arr));
                     Assert.Equal(i, index.Resolve(arr.Count));
                     Assert.Equal(arr[i], arr.At(index));
                 }
@@ -44,6 +45,7 @@ namespace Maxisoft.Utils.Tests.Collections
                     Assert.Equal(arr.Count - i, index.Resolve((ICollection) arr));
                     Assert.Equal(arr.Count - i, index.Resolve<int, IList<int>>(arr));
                     Assert.Equal(arr.Count - i, index.Resolve(in arr));
+                    Assert.Equal(arr.Count - i, index.Resolve((ICollection<int>)arr));
                     Assert.Equal(arr.Count - i, index.Resolve(arr.Count));
                     Assert.Equal(arr[^i], arr.At(index));
                 }
