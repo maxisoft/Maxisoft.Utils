@@ -183,7 +183,8 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
         }
 
         public void Insert(int index, T item)
-        {
+        {    
+            ThrowForDequeFull();
             Deque.Insert(index, item);
         }
 

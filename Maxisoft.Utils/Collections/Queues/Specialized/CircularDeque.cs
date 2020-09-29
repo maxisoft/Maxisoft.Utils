@@ -163,6 +163,18 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
 
         public void Insert(int index, T item)
         {
+            if (DequeOverflow())
+            {
+                if (index * 2L >= Deque.LongLength)
+                {
+                    Deque.PopFront();
+                }
+                else
+                {
+                    Deque.PopBack();
+                }
+            }
+
             Deque.Insert(index, item);
         }
 
