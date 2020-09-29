@@ -25,7 +25,7 @@ namespace Maxisoft.Utils.Collections.Lists
             var c = 0;
             foreach (var elem in AsSpan())
             {
-                res[c++] = converter(elem);
+                res.Add(converter(elem));
             }
 
             return res;
@@ -38,9 +38,12 @@ namespace Maxisoft.Utils.Collections.Lists
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(int index, T[] array, int arrayIndex, int count)
         {
+            if (Count - index < count) {
+                throw new ArgumentOutOfRangeException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+            }
             Span<T> target = array;
 
-            AsSpan().Slice(index).CopyTo(target.Slice(arrayIndex, count));
+            AsSpan().Slice(index, count).CopyTo(target.Slice(arrayIndex, count));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -59,7 +62,6 @@ namespace Maxisoft.Utils.Collections.Lists
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFindIndex(int startIndex, int count, in Predicate<T> predicate, out int index)
         {
-            CheckForOutOfBounds(startIndex + count - 1, nameof(count));
             index = Array.FindIndex(_array, startIndex, count, predicate);
             return (uint) index < (uint) Count;
         }
@@ -99,14 +101,13 @@ namespace Maxisoft.Utils.Collections.Lists
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFindLastIndex(in Predicate<T> predicate, out int index)
         {
-            index = Array.FindLastIndex(_array, 0, Count, predicate);
+            index = Array.FindLastIndex(_array, predicate);
             return (uint) index < (uint) Count;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryFindLastIndex(int startIndex, int count, in Predicate<T> predicate, out int index)
         {
-            CheckForOutOfBounds(startIndex + count - 1, nameof(count));
             index = Array.FindLastIndex(_array, startIndex, count, predicate);
             return (uint) index < (uint) Count;
         }
@@ -127,13 +128,14 @@ namespace Maxisoft.Utils.Collections.Lists
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int FindLastIndex(int startIndex, in Predicate<T> match)
         {
-            return FindLastIndex(startIndex, Count - startIndex, in match);
+            return FindLastIndex(startIndex, startIndex + 1, in match);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int FindLastIndex(in Predicate<T> match)
         {
-            return FindLastIndex(0, Count, in match);
+            TryFindLastIndex(in match, out var res);
+            return res;
         }
 
         public void ForEach(Action<T> action)
@@ -303,7 +305,7 @@ namespace Maxisoft.Utils.Collections.Lists
 
             if (clear)
             {
-                Array.Clear(Data(), Count, count);
+                Array.Clear(Data(), Count, Count + count);
             }
         }
 
