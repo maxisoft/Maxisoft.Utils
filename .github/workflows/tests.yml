@@ -9,7 +9,11 @@ on:
 jobs:
   build:
     # The type of runner that the job will run on
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_NOLOGO: true
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -17,26 +21,29 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
-      
-    - uses: microsoft/setup-msbuild@v1.0.0
+
+    - uses: actions/cache@v2.1.1
+      name: Cache nuget
       with:
-        vs-version: 16.5
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.x' # SDK Version to use; x will use the latest version of the 3.1 channel
-    
 
     - name: Restore using netcore
       run: dotnet restore
       timeout-minutes: 5
     
     - name: Build Release
-      run: MsBuild Maxisoft.Utils.sln /t:Build /p:Configuration=Release
+      run: dotnet build --configuration Release
       timeout-minutes: 5
 
     - name: Build Debug
-      run: MsBuild Maxisoft.Utils.sln /t:Build /p:Configuration=Debug
+      run: dotnet build --configuration Debug
       timeout-minutes: 5
 
     - name: Test using netcore
