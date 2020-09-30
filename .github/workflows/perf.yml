@@ -37,11 +37,11 @@ jobs:
 
     - name: Run the benchmarks
       if: success() && github.ref == 'refs/heads/perf'
-      run: dotnet run -c Release --project Maxisoft.Utils.Benchmark -- --filter *
+      run: dotnet run -c Release --project Maxisoft.Utils.Benchmarks -- --filter *
 
     - name: Run the benchmarks
       if: success() && github.ref != 'refs/heads/perf'
-      run: dotnet run -c Release --project Maxisoft.Utils.Benchmark -- --job short --filter *
+      run: dotnet run -c Release --project Maxisoft.Utils.Benchmarks -- --job short --filter *
      
 
     - uses: actions/upload-artifact@v2
@@ -53,5 +53,5 @@ jobs:
     - uses: actions/upload-artifact@v2
       name: Artifact with Benchmark results
       with:
-        name: Benchmark
+        name: Benchmarks
         path: BenchmarkDotNet.Artifacts/*
