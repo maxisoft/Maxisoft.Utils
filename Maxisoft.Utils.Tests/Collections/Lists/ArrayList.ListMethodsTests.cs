@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Maxisoft.Utils.Collections.Lists;
 using Maxisoft.Utils.Objects;
 using Maxisoft.Utils.Random;
@@ -24,7 +25,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             var mockList = new Mock<ArrayList<int>>(args: new object[] {numElements}) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
-            
+
             var adversarial = new List<int>(numElements);
 
             for (var i = 0; i < numElements; i++)
@@ -32,7 +33,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             Assert.Equal(adversarial.ToImmutableSortedSet(), list);
 
             var lim = random.Next(maxElements);
@@ -46,7 +47,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
 
                 Exception error = null;
                 int? expected = null;
-                var element =  random.Next(-2, maxElements + 2);
+                var element = random.Next(-2, maxElements + 2);
                 try
                 {
                     expected = adversarial.BinarySearch(element, comparer);
@@ -56,7 +57,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     error = e;
                 }
 
-                
+
                 int? res = null;
                 try
                 {
@@ -76,7 +77,6 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     {
                         Assert.Equal(adversarial[expected.Value], list[expected.Value]);
                     }
-                    
                 }
 
 
@@ -95,7 +95,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             var mockList = new Mock<ArrayList<int>>(args: new object[] {numElements}) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
-        
+
             var adversarial = new List<int>(numElements);
 
             for (var i = 0; i < numElements; i++)
@@ -111,7 +111,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
 
             var expected = adversarial.ConvertAll(Convert);
             var res = list.ConvertAll(Convert);
-            
+
             Assert.Equal(expected, res);
         }
 
@@ -134,10 +134,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -148,13 +148,13 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
                 RandomFill();
                 Exception error = null;
-                var index =  random.Next(-2, maxElements + 2);
+                var index = random.Next(-2, maxElements + 2);
                 var arrayIndex = random.Next(-2, adversarialBuff.Length + 2);
                 var count = random.Next(-2, adversarialBuff.Length + 2);
                 try
@@ -165,7 +165,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     error = e;
                 }
-                
+
                 try
                 {
                     list.CopyTo(index, buff, arrayIndex, count);
@@ -194,8 +194,8 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_CopyTo_Span(int seed)
@@ -214,10 +214,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial[i] = i;
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -228,7 +228,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
@@ -242,7 +242,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     error = e;
                 }
-                
+
                 try
                 {
                     list.CopyTo((Span<int>) buff);
@@ -270,10 +270,8 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 Assert.Equal(adversarial.ToArray(), list);
                 mockList.VerifyNoOtherCalls();
             }
-            
-            
         }
-        
+
 
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
@@ -293,10 +291,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -307,14 +305,14 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
@@ -354,14 +352,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_Find(int seed)
@@ -380,10 +379,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -394,14 +393,14 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
@@ -441,15 +440,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_FindIndex_With_StartIndex_And_Count(int seed)
@@ -468,10 +467,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -482,22 +481,22 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
                 element.Value = random.Next(-2, maxElements + 2);
                 RandomFill();
-                var startIndex =  random.Next(-2, maxElements + 2);
+                var startIndex = random.Next(-2, maxElements + 2);
                 var count = random.Next(-2, adversarialBuff.Length + 2);
-                
+
                 Exception error = null;
                 int? expected = null;
                 try
@@ -532,14 +531,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_FindIndex_NoCount(int seed)
@@ -558,10 +558,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -572,20 +572,20 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
                 element.Value = random.Next(-2, maxElements + 2);
                 RandomFill();
-                var startIndex =  random.Next(-2, maxElements + 2);
+                var startIndex = random.Next(-2, maxElements + 2);
 
                 Exception error = null;
                 int? expected = null;
@@ -621,14 +621,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_FindIndex(int seed)
@@ -647,10 +648,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -661,14 +662,14 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
@@ -709,13 +710,14 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_FindLast(int seed)
@@ -734,10 +736,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -748,14 +750,14 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
@@ -795,14 +797,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_FindLastIndex_With_StartIndex_And_Count(int seed)
@@ -821,10 +824,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -835,22 +838,22 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
                 element.Value = random.Next(-2, maxElements + 2);
                 RandomFill();
-                var startIndex =  random.Next(-2, maxElements + 2);
+                var startIndex = random.Next(-2, maxElements + 2);
                 var count = random.Next(-2, adversarialBuff.Length + 2);
-                
+
                 Exception error = null;
                 int? expected = null;
                 try
@@ -885,14 +888,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_FindLastIndex_NoCount(int seed)
@@ -911,10 +915,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -925,20 +929,20 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
                 element.Value = random.Next(-2, maxElements + 2);
                 RandomFill();
-                var startIndex =  random.Next(-2, maxElements + 2);
+                var startIndex = random.Next(-2, maxElements + 2);
 
                 Exception error = null;
                 int? expected = null;
@@ -974,14 +978,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_FindLastIndex(int seed)
@@ -1000,10 +1005,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -1014,14 +1019,14 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             bool Predicate(int value)
             {
                 return value == element;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
@@ -1062,14 +1067,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_ForEach(int seed)
@@ -1088,10 +1094,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -1102,14 +1108,14 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(0);
 
             void Action(int value)
             {
                 element.Value ^= value;
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
@@ -1159,14 +1165,15 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_IndexOf_With_StartIndex_And_Count(int seed)
@@ -1185,10 +1192,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -1199,7 +1206,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     buff[i] = n;
                 }
             }
-            
+
             var element = new Boxed<int>(random.Next(maxElements));
 
             var times = random.Next(maxElements);
@@ -1207,9 +1214,9 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             {
                 element.Value = random.Next(-2, maxElements + 2);
                 RandomFill();
-                var startIndex =  random.Next(-2, maxElements + 2);
+                var startIndex = random.Next(-2, maxElements + 2);
                 var count = random.Next(-2, adversarialBuff.Length + 2);
-                
+
                 Exception error = null;
                 int? expected = null;
                 try
@@ -1244,6 +1251,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     Assert.Equal(adversarialBuff, buff);
                 }
+
                 Assert.Equal(expected, res);
 
                 Assert.Equal(adversarial, list);
@@ -1270,10 +1278,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -1289,7 +1297,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             for (var _ = 0; _ < times; _++)
             {
                 RandomFill();
-                var index =  random.Next(-2, maxElements + 2);
+                var index = random.Next(-2, maxElements + 2);
 
                 IList<int> randomCollection;
                 if (random.NextDouble() < 0.8)
@@ -1306,8 +1314,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     randomCollection = null; // => insert into self
                 }
-                
-                
+
 
                 Exception error = null;
                 try
@@ -1318,7 +1325,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     error = e;
                 }
-                
+
                 try
                 {
                     list.InsertRange<IList<int>>(index, randomCollection ?? list);
@@ -1346,7 +1353,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 mockList.Invocations.Clear();
             }
         }
-        
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_InsertRange_ReadonlyCollection(int seed)
@@ -1365,10 +1372,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -1384,7 +1391,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             for (var _ = 0; _ < times; _++)
             {
                 RandomFill();
-                var index =  random.Next(-2, maxElements + 2);
+                var index = random.Next(-2, maxElements + 2);
 
                 IReadOnlyCollection<int> randomCollection;
                 if (random.NextDouble() < 0.8)
@@ -1401,8 +1408,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     randomCollection = null; // => insert into self
                 }
-                
-                
+
 
                 Exception error = null;
                 try
@@ -1413,7 +1419,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     error = e;
                 }
-                
+
                 try
                 {
                     // ReSharper disable once RedundantCast
@@ -1442,8 +1448,8 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 mockList.Invocations.Clear();
             }
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_InsertRange_IEnumerable(int seed)
@@ -1462,10 +1468,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             var adversarialBuff = new int[random.Next(maxElements * 2)];
             var buff = new int[adversarialBuff.Length];
-            
+
             //fill up the buffers with random data
             void RandomFill()
             {
@@ -1481,25 +1487,18 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             for (var _ = 0; _ < times; _++)
             {
                 RandomFill();
-                var index =  random.Next(-2, maxElements + 2);
+                var index = random.Next(-2, maxElements + 2);
 
                 IList<int> randomCollection;
-                if (random.NextDouble() < 0.8)
-                {
-                    var capacity = random.Next(maxElements);
-                    randomCollection = new List<int>(capacity);
 
-                    for (var i = 0; i < capacity; i++)
-                    {
-                        ((IList) randomCollection).Add(random.Next());
-                    }
-                }
-                else
+                var capacity = random.Next(maxElements);
+                randomCollection = new List<int>(capacity);
+
+                for (var i = 0; i < capacity; i++)
                 {
-                    randomCollection = null; // => insert into self
+                    ((IList) randomCollection).Add(random.Next());
                 }
-                
-                
+
 
                 Exception error = null;
                 try
@@ -1510,11 +1509,11 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 {
                     error = e;
                 }
-                
+
                 try
                 {
                     // ReSharper disable once RedundantCast
-                    list.InsertRange(index, (IEnumerable<int>) (randomCollection ?? list));
+                    list.InsertRange(index, (IEnumerable<int>) (randomCollection ?? list).Select(i => i));
                     Assert.Null(error);
                 }
                 catch (Exception e) when (!(e is XunitException))
@@ -1539,17 +1538,17 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 mockList.Invocations.Clear();
             }
         }
-        
+
         [Fact]
         public void Test_Regressions()
         {
             Test_FindIndex(seed: 269155879);
             Test_FindIndex_NoCount(seed: 2043079967);
             Test_FindIndex_With_StartIndex_And_Count(seed: 1306383154);
-
+            Test_RemoveAll(seed: 1062117310);
         }
-        
-        
+
+
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]
         public void Test_GetRange(int seed)
@@ -1568,7 +1567,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Add(i);
                 adversarial.Add(i);
             }
-            
+
             void RandomFill()
             {
                 for (var i = 0; i < list.Count; i++)
@@ -1578,16 +1577,16 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                     adversarial[i] = n;
                 }
             }
-            
+
             var times = random.Next(maxElements);
             for (var _ = 0; _ < times; _++)
             {
                 RandomFill();
                 Exception error = null;
-                var index =  random.Next(-2, maxElements + 2);
+                var index = random.Next(-2, maxElements + 2);
                 var count = random.Next(-2, maxElements + 2);
 
-                IList<int> expected = null; 
+                IList<int> expected = null;
                 try
                 {
                     expected = adversarial.GetRange(index, count);
@@ -1626,7 +1625,353 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 mockList.VerifyNoOtherCalls();
             }
         }
-        
+
+        [Theory]
+        [ClassData(typeof(RandomSeedGenerator))]
+        public void Test_RemoveRange(int seed)
+        {
+            const int maxElements = 32;
+            var random = new TRandom(seed: seed);
+            var numElements = random.Next(maxElements);
+            var mockList = new Mock<ArrayList<int>>(args: new object[] {numElements}) {CallBase = true};
+            var list = mockList.Object;
+            mockList.Invocations.Clear();
+
+            var adversarial = new List<int>(numElements);
+
+            for (var i = 0; i < numElements; i++)
+            {
+                list.Add(i);
+                adversarial.Add(i);
+            }
+
+            void RandomFill()
+            {
+                // insert new elements as the current list count is being reduced
+                if (list.Count < numElements / 2)
+                {
+                    for (var i = 0; i < numElements / 2; i++)
+                    {
+                        var n = random.Next();
+                        list.Add(n);
+                        adversarial.Add(n);
+                    }
+                }
+
+                for (var i = 0; i < list.Count; i++)
+                {
+                    var n = random.Next();
+                    list[i] = n;
+                    adversarial[i] = n;
+                }
+            }
+
+            var times = random.Next(maxElements);
+            for (var _ = 0; _ < times; _++)
+            {
+                RandomFill();
+                Exception error = null;
+                var index = random.Next(-2, maxElements + 2);
+                var count = random.Next(-2, maxElements + 2);
+                var clear = random.NextBoolean();
+
+                try
+                {
+                    adversarial.RemoveRange(index, count);
+                }
+                catch (Exception e)
+                {
+                    error = e;
+                }
+
+                try
+                {
+                    list.RemoveRange(index, count, clear);
+                    Assert.Null(error);
+                }
+                catch (Exception e) when (!(e is XunitException))
+                {
+                    try
+                    {
+                        Assert.NotNull(error);
+                        Assert.True(e.GetType().IsInstanceOfType(error) || error.GetType().IsInstanceOfType(e));
+                    }
+                    catch (XunitException exception)
+                    {
+                        throw new AggregateException(e, exception);
+                    }
+                }
+
+                Assert.Equal(adversarial, list);
+                mockList.VerifyNoOtherCalls();
+            }
+        }
+
+
+        [Theory]
+        [ClassData(typeof(RandomSeedGenerator))]
+        public void Test_RemoveAll(int seed)
+        {
+            const int maxElements = 32;
+            var random = new TRandom(seed: seed);
+            var numElements = random.Next(maxElements);
+            var mockList = new Mock<ArrayList<int>>(args: new object[] {numElements}) {CallBase = true};
+            var list = mockList.Object;
+            mockList.Invocations.Clear();
+
+            var adversarial = new List<int>(numElements);
+
+            for (var i = 0; i < numElements; i++)
+            {
+                list.Add(i);
+                adversarial.Add(i);
+            }
+
+            var element = new Boxed<int>(random.Next(maxElements));
+
+            bool Predicate(int value)
+            {
+                return value == element;
+            }
+
+            void RandomFill()
+            {
+                // insert new elements as the current list count is being reduced
+                if (list.Count < numElements / 2)
+                {
+                    for (var i = 0; i < numElements / 2; i++)
+                    {
+                        var n = random.Next(maxElements);
+                        list.Add(n);
+                        adversarial.Add(n);
+                    }
+                }
+
+                for (var i = 0; i < list.Count; i++)
+                {
+                    var n = random.Next(maxElements);
+                    list[i] = n;
+                    adversarial[i] = n;
+                }
+                
+                Assert.Equal(adversarial, list);
+            }
+
+            var times = random.Next(maxElements);
+            for (var _ = 0; _ < times; _++)
+            {
+                RandomFill();
+                element.Value = random.Next(-2, maxElements + 2);
+                Exception error = null;
+                var clear = random.NextBoolean();
+
+                try
+                {
+                    adversarial.RemoveAll(Predicate);
+                }
+                catch (Exception e)
+                {
+                    error = e;
+                }
+
+                try
+                {
+                    list.RemoveAll(Predicate, clear);
+                    Assert.Null(error);
+                }
+                catch (Exception e) when (!(e is XunitException))
+                {
+                    try
+                    {
+                        Assert.NotNull(error);
+                        Assert.True(e.GetType().IsInstanceOfType(error) || error.GetType().IsInstanceOfType(e));
+                    }
+                    catch (XunitException exception)
+                    {
+                        throw new AggregateException(e, exception);
+                    }
+                }
+
+                Assert.Equal(adversarial, list);
+                mockList.VerifyNoOtherCalls();
+            }
+        }
+
+
+        [Theory]
+        [ClassData(typeof(RandomSeedGenerator))]
+        public void Test_Reverse(int seed)
+        {
+            const int maxElements = 32;
+            var random = new TRandom(seed: seed);
+            var numElements = random.Next(maxElements);
+            var mockList = new Mock<ArrayList<int>>(args: new object[] {numElements}) {CallBase = true};
+            var list = mockList.Object;
+            mockList.Invocations.Clear();
+
+            var adversarial = new List<int>(numElements);
+
+            for (var i = 0; i < numElements; i++)
+            {
+                list.Add(i);
+                adversarial.Add(i);
+            }
+
+            void RandomFill()
+            {
+                for (var i = 0; i < list.Count; i++)
+                {
+                    var n = random.Next();
+                    list[i] = n;
+                    adversarial[i] = n;
+                }
+            }
+
+            var times = random.Next(maxElements);
+            for (var _ = 0; _ < times; _++)
+            {
+                RandomFill();
+                Exception error = null;
+                var index = random.Next(-2, maxElements + 2);
+                var count = random.Next(-2, maxElements + 2);
+                var noArgs = random.Next() < 0.2;
+
+                try
+                {
+                    if (noArgs)
+                    {
+                        adversarial.Reverse();
+                    }
+                    else
+                    {
+                        adversarial.Reverse(index, count);
+                    }
+                }
+                catch (Exception e)
+                {
+                    error = e;
+                }
+
+                try
+                {
+                    if (noArgs)
+                    {
+                        list.Reverse();
+                    }
+                    else
+                    {
+                        list.Reverse(index, count);
+                    }
+
+                    Assert.Null(error);
+                }
+                catch (Exception e) when (!(e is XunitException))
+                {
+                    try
+                    {
+                        Assert.NotNull(error);
+                        Assert.True(e.GetType().IsInstanceOfType(error) || error.GetType().IsInstanceOfType(e));
+                    }
+                    catch (XunitException exception)
+                    {
+                        throw new AggregateException(e, exception);
+                    }
+                }
+
+                Assert.Equal(adversarial, list);
+                mockList.VerifyNoOtherCalls();
+            }
+        }
+
+
+        [Theory]
+        [ClassData(typeof(RandomSeedGenerator))]
+        public void Test_Sort(int seed)
+        {
+            const int maxElements = 32;
+            var random = new TRandom(seed: seed);
+            var numElements = random.Next(maxElements);
+            var mockList = new Mock<ArrayList<int>>(args: new object[] {numElements}) {CallBase = true};
+            var list = mockList.Object;
+            mockList.Invocations.Clear();
+
+            var adversarial = new List<int>(numElements);
+
+            for (var i = 0; i < numElements; i++)
+            {
+                list.Add(i);
+                adversarial.Add(i);
+            }
+
+            void RandomFill()
+            {
+                for (var i = 0; i < list.Count; i++)
+                {
+                    var n = random.Next();
+                    list[i] = n;
+                    adversarial[i] = n;
+                }
+            }
+
+            var times = random.Next(maxElements);
+            for (var _ = 0; _ < times; _++)
+            {
+                RandomFill();
+                Exception error = null;
+                var index = random.Next(-2, maxElements + 2);
+                var count = random.Next(-2, maxElements + 2);
+                var noArgs = random.Next() < 0.2;
+                var comparer = random.NextBoolean()
+                    ? (IComparer<int>) Comparer<int>.Default
+                    : ReverseComparer<int>.Default;
+
+                try
+                {
+                    if (noArgs)
+                    {
+                        adversarial.Sort();
+                    }
+                    else
+                    {
+                        adversarial.Sort(index, count, comparer);
+                    }
+                }
+                catch (Exception e)
+                {
+                    error = e;
+                }
+
+                try
+                {
+                    if (noArgs)
+                    {
+                        list.Sort();
+                    }
+                    else
+                    {
+                        list.Sort(index, count, comparer);
+                    }
+
+                    Assert.Null(error);
+                }
+                catch (Exception e) when (!(e is XunitException))
+                {
+                    try
+                    {
+                        Assert.NotNull(error);
+                        Assert.True(e.GetType().IsInstanceOfType(error) || error.GetType().IsInstanceOfType(e));
+                    }
+                    catch (XunitException exception)
+                    {
+                        throw new AggregateException(e, exception);
+                    }
+                }
+
+                Assert.Equal(adversarial, list);
+                mockList.VerifyNoOtherCalls();
+            }
+        }
+
         internal class RandomSeedGenerator : IEnumerable<object[]>
         {
             internal virtual RandomThreadSafe Random { get; } = new RandomThreadSafe();
