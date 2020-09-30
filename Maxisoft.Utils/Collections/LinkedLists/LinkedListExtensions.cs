@@ -219,7 +219,7 @@ namespace Maxisoft.Utils.Collections.LinkedLists
             {
                 if (comparer.Equals(value, el.Value))
                 {
-                    return c;
+                    return list.Count - c - 1;
                 }
 
                 c += 1;
