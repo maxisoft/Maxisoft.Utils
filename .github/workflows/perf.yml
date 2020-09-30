@@ -37,7 +37,7 @@ jobs:
 
     - name: Run the benchmarks
       if: success() && github.ref == 'refs/heads/perf'
-      run: dotnet run -c Release --project Maxisoft.Utils.Benchmarks -- --filter *
+      run: dotnet run -c Release --project Maxisoft.Utils.Benchmarks -- --job default --filter *
 
     - name: Run the benchmarks
       if: success() && github.ref != 'refs/heads/perf'

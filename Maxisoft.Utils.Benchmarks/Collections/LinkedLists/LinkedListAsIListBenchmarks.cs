@@ -1,12 +1,13 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Maxisoft.Utils.Collections.LinkedLists;
 using Troschuetz.Random;
 
 namespace Maxisoft.Utils.Benchmarks.Collections.LinkedLists
 {
-    [SimpleJob(RuntimeMoniker.NetCoreApp31, baseline: true)]
     [RPlotExporter]
+    [JsonExporter]
     public class LinkedListAsIListBenchmarks
     {
         private readonly LinkedListAsIList<int> _linkedListAsIList = new LinkedListAsIList<int>();
@@ -14,7 +15,7 @@ namespace Maxisoft.Utils.Benchmarks.Collections.LinkedLists
 
         [Params(1000, 10000)] public int N;
 
-        [GlobalSetup]
+        [IterationSetup]
         public void Setup()
         {
             _linkedListAsIList.Clear();
@@ -33,27 +34,42 @@ namespace Maxisoft.Utils.Benchmarks.Collections.LinkedLists
         [Benchmark]
         public void IndexOfFromStart()
         {
+            // note this is clearly not the good way to iterate over a linkedlist
             for (var i = 0; i < N; i++)
             {
-                LinkedListExtensions.IndexOfFromStart(_linkedListAsIList, i);
+                var index = LinkedListExtensions.IndexOfFromStart(_linkedListAsIList, i);
+                if (index != i)
+                {
+                    throw new Exception();
+                }
             }
         }
 
         [Benchmark]
         public void IndexOfFromEnd()
         {
+            // note this is clearly not the good way to iterate over a linkedlist
             for (var i = 0; i < N; i++)
             {
-                LinkedListExtensions.IndexOfFromEnd(_linkedListAsIList, i);
+                var index = LinkedListExtensions.IndexOfFromEnd(_linkedListAsIList, i);
+                if (index != i)
+                {
+                    throw new Exception();
+                }
             }
         }
 
         [Benchmark]
         public void IndexOfFromBoth()
         {
+            // note this is clearly not the good way to iterate over a linkedlist
             for (var i = 0; i < N; i++)
             {
-                LinkedListExtensions.IndexOfFromBoth(_linkedListAsIList, i);
+                var index = LinkedListExtensions.IndexOfFromBoth(_linkedListAsIList, i);
+                if (index != i)
+                {
+                    throw new Exception();
+                }
             }
         }
     }
