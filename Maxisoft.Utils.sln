@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maxisoft.Utils", "Maxisoft.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maxisoft.Utils.Tests", "Maxisoft.Utils.Tests\Maxisoft.Utils.Tests.csproj", "{BD41F847-A2AE-4C48-A500-E68E59911B3F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maxisoft.Utils.Benchmark", "Maxisoft.Utils.Benchmark\Maxisoft.Utils.Benchmark.csproj", "{30D1DD89-D81F-45F7-95D0-74EC26D13473}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{BD41F847-A2AE-4C48-A500-E68E59911B3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD41F847-A2AE-4C48-A500-E68E59911B3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD41F847-A2AE-4C48-A500-E68E59911B3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30D1DD89-D81F-45F7-95D0-74EC26D13473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30D1DD89-D81F-45F7-95D0-74EC26D13473}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30D1DD89-D81F-45F7-95D0-74EC26D13473}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30D1DD89-D81F-45F7-95D0-74EC26D13473}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
