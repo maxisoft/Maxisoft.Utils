@@ -1,0 +1,52 @@
+name: perf
+
+on:
+  push:
+    branches: [ main, dev, CI, perf ]
+  pull_request:
+    branches: [ main, dev, CI, perf ]
+
+jobs:
+  benchmark:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+      
+    - uses: microsoft/setup-msbuild@v1.0.0
+      with:
+        vs-version: 16.5
+
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x' # SDK Version to use; x will use the latest version of the 3.1 channel
+    
+
+    - name: Restore using netcore
+      run: dotnet restore
+      timeout-minutes: 5
+    
+    - name: Build Release
+      run: MsBuild Maxisoft.Utils.sln /t:Build /p:Configuration=Release
+      timeout-minutes: 5
+
+    - name: Run the benchmarks
+      run: dotnet run -c Release --project Maxisoft.Utils.Benchmark -- --filter *
+     
+
+    - uses: actions/upload-artifact@v2
+      name: Artifact with Release Build
+      with:
+        name: Release Build
+        path: Maxisoft.Utils/bin/Release/*/Maxisoft.Utils.*
+
+    - uses: actions/upload-artifact@v2
+      name: Artifact with Benchmark results
+      with:
+        name: Benchmark
+        path: BenchmarkDotNet.Artifacts/*
