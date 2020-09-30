@@ -305,7 +305,7 @@ namespace Maxisoft.Utils.Collections.Lists
 
             if (clear)
             {
-                Array.Clear(Data(), Count, Count + count);
+                Array.Clear(Data(), Count, count);
             }
         }
 
@@ -331,7 +331,7 @@ namespace Maxisoft.Utils.Collections.Lists
                 var span = AsSpan().Slice(current);
                 foreach (var element in span)
                 {
-                    if (match(element))
+                    if (!match(element))
                     {
                         break;
                     }
@@ -373,7 +373,7 @@ namespace Maxisoft.Utils.Collections.Lists
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Sort(int index, int count, IComparer<T>? comparer) {
+        public void Sort(int index, int count, IComparer<T>? comparer = null) {
             if (index + count > Count)
             {
                 throw new ArgumentOutOfRangeException();
