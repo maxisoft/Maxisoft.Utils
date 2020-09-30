@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Maxisoft.Utils.Collections.LinkedLists;
 using Troschuetz.Random;
@@ -10,13 +9,11 @@ namespace Maxisoft.Utils.Benchmark.Collections.LinkedLists
     [RPlotExporter]
     public class LinkedListAsIListBenchmarks
     {
-
         private readonly LinkedListAsIList<int> _linkedListAsIList = new LinkedListAsIList<int>();
         private readonly TRandom _random = new TRandom();
-        
-        [Params(1000, 10000)]
-        public int N;
-        
+
+        [Params(1000, 10000)] public int N;
+
         [GlobalSetup]
         public void Setup()
         {
@@ -25,6 +22,12 @@ namespace Maxisoft.Utils.Benchmark.Collections.LinkedLists
             {
                 _linkedListAsIList.AddLast(i);
             }
+        }
+
+        [IterationCleanup]
+        public void Cleanup()
+        {
+            _linkedListAsIList.Clear();
         }
 
         [Benchmark]
@@ -44,7 +47,7 @@ namespace Maxisoft.Utils.Benchmark.Collections.LinkedLists
                 LinkedListExtensions.IndexOfFromEnd(_linkedListAsIList, i);
             }
         }
-        
+
         [Benchmark]
         public void IndexOfFromBoth()
         {
@@ -54,5 +57,4 @@ namespace Maxisoft.Utils.Benchmark.Collections.LinkedLists
             }
         }
     }
-    
 }
