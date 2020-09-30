@@ -244,6 +244,9 @@ namespace Maxisoft.Utils.Tests.Collections.LinkedLists
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
+        [InlineData(7)]
+        [InlineData(10)]
+        [InlineData(13)]
         [InlineData(64)]
         public void TestIndexOf(int size)
         {

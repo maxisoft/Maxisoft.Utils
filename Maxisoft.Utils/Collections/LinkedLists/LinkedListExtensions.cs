@@ -135,7 +135,51 @@ namespace Maxisoft.Utils.Collections.LinkedLists
             return node;
         }
 
+        public static int IndexOf<T>(this LinkedList<T> list, in T value, bool fromStart)
+        {
+            return fromStart ? IndexOfFromStart(list, in value) : IndexOfFromEnd(list, in value);
+        }
+        
         public static int IndexOf<T>(this LinkedList<T> list, in T value)
+        {
+            return IndexOfFromBoth(list, value);
+        }
+        
+        public static int IndexOfFromBoth<T>(LinkedList<T> list, in T value)
+        {
+            var ahead = list.First;
+            var backward = list.Last;
+            var c = 0;
+            var comparer = EqualityComparer<T>.Default;
+            while (!ReferenceEquals(ahead, null) && !ReferenceEquals(ahead, backward))
+            {
+                if (comparer.Equals(value, ahead.Value))
+                {
+                    return c;
+                }
+                if (comparer.Equals(value, backward!.Value))
+                {
+                    return list.Count - c - 1;
+                }
+
+                ahead = ahead.Next;
+                if (ReferenceEquals(ahead, backward))
+                {
+                    break;
+                }
+
+                backward = backward.Previous;
+                c += 1;
+            }
+
+            if (ahead is {} && comparer.Equals(value, ahead.Value))
+            {
+                return c;
+            }
+            return -1;
+        }
+        
+        public static int IndexOfFromStart<T>(LinkedList<T> list, in T value)
         {
             var el = list.First;
             var c = 0;
@@ -149,6 +193,24 @@ namespace Maxisoft.Utils.Collections.LinkedLists
 
                 c += 1;
                 el = el.Next;
+            }
+            return -1;
+        }
+        
+        public static int IndexOfFromEnd<T>(LinkedList<T> list, in T value)
+        {
+            var el = list.Last;
+            var c = 0;
+            var comparer = EqualityComparer<T>.Default;
+            while (el != null)
+            {
+                if (comparer.Equals(value, el.Value))
+                {
+                    return c;
+                }
+
+                c += 1;
+                el = el.Previous;
             }
             return -1;
         }

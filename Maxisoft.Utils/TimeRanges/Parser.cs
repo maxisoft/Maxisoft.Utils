@@ -2,8 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
-[assembly: InternalsVisibleTo("Maxisoft.Utils.Tests")]
-
 namespace Maxisoft.Utils.TimeRanges
 {
     public static class Parser
