@@ -36,7 +36,12 @@ jobs:
       timeout-minutes: 5
 
     - name: Run the benchmarks
+      if: success() && github.ref == 'refs/heads/perf'
       run: dotnet run -c Release --project Maxisoft.Utils.Benchmark -- --filter *
+
+    - name: Run the benchmarks
+      if: success() && github.ref != 'refs/heads/perf'
+      run: dotnet run -c Release --project Maxisoft.Utils.Benchmark -- --job short --filter *
      
 
     - uses: actions/upload-artifact@v2
