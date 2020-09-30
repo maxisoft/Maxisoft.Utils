@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maxisoft.Utils", "Maxisoft.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maxisoft.Utils.Tests", "Maxisoft.Utils.Tests\Maxisoft.Utils.Tests.csproj", "{BD41F847-A2AE-4C48-A500-E68E59911B3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maxisoft.Utils.Benchmark", "Maxisoft.Utils.Benchmark\Maxisoft.Utils.Benchmark.csproj", "{30D1DD89-D81F-45F7-95D0-74EC26D13473}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maxisoft.Utils.Benchmarks", "Maxisoft.Utils.Benchmarks\Maxisoft.Utils.Benchmarks.csproj", "{30D1DD89-D81F-45F7-95D0-74EC26D13473}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

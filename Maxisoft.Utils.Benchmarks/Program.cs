@@ -1,7 +1,7 @@
 ﻿using System;
 using BenchmarkDotNet.Running;
 
-namespace Maxisoft.Utils.Benchmark
+namespace Maxisoft.Utils.Benchmarks
 {
     class Program
     {

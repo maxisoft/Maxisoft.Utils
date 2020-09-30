@@ -3,7 +3,7 @@ using BenchmarkDotNet.Jobs;
 using Maxisoft.Utils.Collections.LinkedLists;
 using Troschuetz.Random;
 
-namespace Maxisoft.Utils.Benchmark.Collections.LinkedLists
+namespace Maxisoft.Utils.Benchmarks.Collections.LinkedLists
 {
     [SimpleJob(RuntimeMoniker.NetCoreApp31, baseline: true)]
     [RPlotExporter]
