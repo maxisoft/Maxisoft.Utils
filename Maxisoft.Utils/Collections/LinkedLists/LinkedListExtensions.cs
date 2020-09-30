@@ -5,19 +5,22 @@ namespace Maxisoft.Utils.Collections.LinkedLists
 {
     public static class LinkedListExtensions
     {
-        public static LinkedList<int> Range(int size) => Range(0, size);
-        
+        public static LinkedList<int> Range(int size)
+        {
+            return Range(0, size);
+        }
+
         public static LinkedList<int> Range(int start, int size, int step = 1)
         {
             var l = new LinkedList<int>();
-            for (var i = start; i < start + size; i+= step)
+            for (var i = start; i < start + size; i += step)
             {
                 l.AddLast(i);
             }
 
             return l;
         }
-        
+
         public static void RemoveAll<T>(this LinkedList<T> linkedList,
             Func<T, bool> predicate)
         {
@@ -70,10 +73,17 @@ namespace Maxisoft.Utils.Collections.LinkedLists
 
         public static LinkedListNode<T> At<T>(this LinkedList<T> list, int index)
         {
-            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), index, "negative index");
+            if (index < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, "negative index");
+            }
+
             if (index >= list.Count)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index), index,
                     $"list contains only {list.Count} elements");
+            }
+
             return index > (list.Count - 1) / 2 ? AtRight(list, index) : AtLeft(list, index);
         }
 
@@ -139,12 +149,12 @@ namespace Maxisoft.Utils.Collections.LinkedLists
         {
             return fromStart ? IndexOfFromStart(list, in value) : IndexOfFromEnd(list, in value);
         }
-        
+
         public static int IndexOf<T>(this LinkedList<T> list, in T value)
         {
             return IndexOfFromBoth(list, value);
         }
-        
+
         public static int IndexOfFromBoth<T>(LinkedList<T> list, in T value)
         {
             var ahead = list.First;
@@ -157,6 +167,7 @@ namespace Maxisoft.Utils.Collections.LinkedLists
                 {
                     return c;
                 }
+
                 if (comparer.Equals(value, backward!.Value))
                 {
                     return list.Count - c - 1;
@@ -176,9 +187,10 @@ namespace Maxisoft.Utils.Collections.LinkedLists
             {
                 return c;
             }
+
             return -1;
         }
-        
+
         public static int IndexOfFromStart<T>(LinkedList<T> list, in T value)
         {
             var el = list.First;
@@ -194,9 +206,10 @@ namespace Maxisoft.Utils.Collections.LinkedLists
                 c += 1;
                 el = el.Next;
             }
+
             return -1;
         }
-        
+
         public static int IndexOfFromEnd<T>(LinkedList<T> list, in T value)
         {
             var el = list.Last;
@@ -212,6 +225,7 @@ namespace Maxisoft.Utils.Collections.LinkedLists
                 c += 1;
                 el = el.Previous;
             }
+
             return -1;
         }
     }
