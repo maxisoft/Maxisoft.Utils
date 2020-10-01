@@ -188,12 +188,7 @@ namespace Maxisoft.Utils.Logic
 
         public bool Equals(bool? other)
         {
-            if (other.HasValue)
-            {
-                return IsTrue == other.Value;
-            }
-
-            return IsIndeterminate;
+            return Equals((TriBool) other);
         }
 
         public override bool Equals(object? obj)
@@ -254,14 +249,13 @@ namespace Maxisoft.Utils.Logic
 
         public int CompareTo(object? obj)
         {
-            if (ReferenceEquals(null, obj))
+            switch (obj)
             {
-                return 1;
-            }
-
-            if (obj is bool b)
-            {
-                obj = new TriBool(b);
+                case null:
+                    return IsIndeterminate ? 0 : 1;
+                case bool b:
+                    obj = new TriBool(b);
+                    break;
             }
 
             return obj is TriBool other
@@ -485,20 +479,14 @@ namespace Maxisoft.Utils.Logic
             {
                 return reader.GetBoolean();
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
                 var s = reader.GetString();
                 if (s is null)
                 {
                     return TriBool.Indeterminate;
                 }
-
-                if (TriBool.TryParse(s, out var res))
-                {
-                    return res;
-                }
-
-                throw;
+                throw new JsonException(null, e);
             }
         }
 

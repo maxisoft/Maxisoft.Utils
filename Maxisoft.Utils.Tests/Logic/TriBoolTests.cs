@@ -1,8 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Soap;
 using System.Text.Json;
 using Maxisoft.Utils.Logic;
+using Moq;
 using Xunit;
 
 namespace Maxisoft.Utils.Tests.Logic
@@ -308,6 +312,196 @@ namespace Maxisoft.Utils.Tests.Logic
             var actual = JsonSerializer.Deserialize<TriBool>(data);
 
             Assert.Equal(expected, actual);
+            
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        [InlineData(null, false)]
+        public void Test_HasValue(bool? value, bool expected)
+        {
+            Assert.Equal(expected, new TriBool(value).HasValue);
+        }
+        
+        [Theory]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        [InlineData(null, true)]
+        public void Test_Value(bool? value, bool throws)
+        {
+            var tri = new TriBool(value);
+            if (throws)
+            {
+                Assert.Throws<InvalidOperationException>(() => tri.Value);
+            }
+            else
+            {
+                var actual = tri.Value;
+                Debug.Assert(value != null, nameof(value) + " != null");
+                var expected = value.Value;
+                Assert.Equal(expected, actual);
+            }
+            
+        }
+
+
+        [Theory]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(null, false)]
+        [InlineData(null, true)]
+        public void Test_Coalesce(bool? value, bool arg)
+        {
+            var expected = value ?? arg;
+            var tri = new TriBool(value);
+            Assert.Equal(expected, tri.Coalesce(arg));
+        }
+
+        [Theory]
+        [InlineData(true, true, true)]
+        [InlineData(true, false, false)]
+        [InlineData(false, true, false)]
+        [InlineData(false, false, true)]
+        [InlineData(null, true, false)]
+        [InlineData(null, false, false)]
+        public void Test_Equal(bool? value, bool other, bool expected)
+        {
+            TriBool tri = value;
+            Assert.Equal(expected, tri.Equals(other));
+        }
+        
+        [Theory]
+        [InlineData(true, true, true)]
+        [InlineData(true, false, false)]
+        [InlineData(true, null, false)]
+        [InlineData(false, true, false)]
+        [InlineData(false, false, true)]
+        [InlineData(false, null, false)]
+        [InlineData(null, true, false)]
+        [InlineData(null, false, false)]
+        [InlineData(null, null, true)]
+        public void Test_Equal_Nullable(bool? value, bool? other, bool expected)
+        {
+            TriBool tri = value;
+            Assert.Equal(expected, tri.Equals(other));
+        }
+
+        [Theory]
+        [InlineData(true, new object[0], false)]
+        [InlineData(false, new object[0], false)]
+        [InlineData(null, new object[0], false)]
+        [InlineData(true, true, true)]
+        [InlineData(false, true, false)]
+        [InlineData(null, true, false)]
+        [InlineData(true, false, false)]
+        [InlineData(false, false, true)]
+        [InlineData(null, false, false)]
+        [InlineData(true, null, false)]
+        [InlineData(false, null, false)]
+        [InlineData(null, null, true)]
+        public void Test_Equal_Object(bool? value, dynamic obj, bool expected)
+        {
+            TriBool tri = value;
+            Assert.Equal(expected, tri.Equals((object) obj));
+        }
+
+
+        [Theory]
+        [InlineData(true, 1)]
+        [InlineData(false, 0)]
+        [InlineData(null, 2)]
+        public void Test_GetHashCode(bool? value, int hash)
+        {
+            TriBool tri = value;
+            Assert.Equal(hash, tri.GetHashCode());
+        }
+
+        [Theory]
+        [InlineData(true, new object[0], null)]
+        [InlineData(false, new object[0], null)]
+        [InlineData(null, new object[0], null)]
+        [InlineData(true, true, 0)]
+        [InlineData(false, true, -1)]
+        [InlineData(null, true, 1)]
+        [InlineData(true, false, 1)]
+        [InlineData(false, false, 0)]
+        [InlineData(null, false, 1)]
+        [InlineData(true, null, 1)]
+        [InlineData(false, null, 1)]
+        [InlineData(null, null, 0)]
+        public void Test_CompareTo(bool? value, dynamic obj, int? expected)
+        {
+            TriBool tri = value;
+            if (expected.HasValue)
+            {
+                Assert.Equal(expected, tri.CompareTo((object) obj));
+            }
+            else
+            {
+                Assert.Throws<ArgumentException>(() => tri.CompareTo((object) obj));
+            }
+        }
+
+        [Theory]
+        [InlineData(true, "true")]
+        [InlineData(false, "false")]
+        [InlineData(null, "null")]
+        public void Test_ToString(bool? value, string expected)
+        {
+            TriBool tri = value;
+            Assert.Equal(expected, tri.ToString());
+            Assert.Equal(expected, tri.ToString(CultureInfo.InvariantCulture));
+            Assert.Equal(expected, tri.ToString(CultureInfo.CurrentCulture));
+        }
+
+        [Theory]
+        [InlineData(true, 1)]
+        [InlineData(false, 0)]
+        [InlineData(null, null)]
+        public void Test_IConvertible(bool? value, int? intValue)
+        {
+            TriBool tri = value;
+            Assert.Equal(TypeCode.Boolean, tri.GetTypeCode());
+            if (intValue.HasValue)
+            {
+                Debug.Assert(value != null, nameof(value) + " != null");
+                Assert.Equal(value.Value, tri.ToBoolean(Mock.Of<IFormatProvider>()));
+
+                Assert.Equal(intValue, tri.ToChar(Mock.Of<IFormatProvider>()));
+                Assert.Equal(intValue, tri.ToInt16(Mock.Of<IFormatProvider>()));
+                Assert.Equal(intValue, tri.ToInt32(Mock.Of<IFormatProvider>()));
+                Assert.Equal((long) intValue, tri.ToInt64(Mock.Of<IFormatProvider>()));
+                Assert.Equal(intValue, tri.ToSByte(Mock.Of<IFormatProvider>()));
+                Assert.Equal(intValue, tri.ToByte(Mock.Of<IFormatProvider>()));
+                Assert.Equal(intValue, tri.ToUInt16(Mock.Of<IFormatProvider>()));
+                Assert.Equal((uint) intValue, tri.ToUInt32(Mock.Of<IFormatProvider>()));
+                Assert.Equal((ulong) intValue, tri.ToUInt64(Mock.Of<IFormatProvider>()));
+                Assert.Equal( (int) intValue, tri.ToDecimal(Mock.Of<IFormatProvider>()));
+                Assert.Equal((float) intValue, tri.ToSingle(Mock.Of<IFormatProvider>()));
+                Assert.Equal((float) intValue, tri.ToDouble(Mock.Of<IFormatProvider>()));
+                
+                Assert.Equal(intValue, tri.ToType(typeof(int), Mock.Of<IFormatProvider>()));
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => tri.ToBoolean(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToChar(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToInt16(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToInt32(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToInt64(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToSByte(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToByte(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToUInt16(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToUInt32(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToUInt64(Mock.Of<IFormatProvider>()));
+                Assert.Throws<InvalidOperationException>(() => tri.ToDecimal(Mock.Of<IFormatProvider>()));
+                Assert.Equal(float.NaN, tri.ToSingle(Mock.Of<IFormatProvider>()));
+                Assert.Equal(double.NaN, tri.ToDouble(Mock.Of<IFormatProvider>()));
+            }
+            
         }
     }
 }
