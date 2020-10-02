@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
 using Maxisoft.Utils.Collections.Lists.Specialized;
 using Moq;
 using Troschuetz.Random;
@@ -15,37 +14,33 @@ namespace Maxisoft.Utils.Tests.Collections.Lists.Specialized
         [Fact]
         public void Test_Basics()
         {
-            var listMock = new Mock<PooledList<int>>(){CallBase = true};
+            var listMock = new Mock<PooledList<int>> {CallBase = true};
             var list = listMock.Object;
 
             const int numElements = 32;
             var numberGenerator = new TRandom(numElements);
 
             var adversarial = new List<int>();
-            
+
             for (var i = 0; i < numElements; i++)
             {
                 var n = numberGenerator.Next();
                 adversarial.Add(n);
                 list.Add(n);
             }
-            
+
             Assert.Equal(adversarial, list);
-            
-            listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), It.IsAny<int>()), Times.AtLeastOnce);
+
             listMock.Verify(mock => mock.ComputeGrowSize(It.IsAny<int>(), It.IsAny<int>()), Times.AtLeastOnce);
-            listMock.Verify(mock => mock.Alloc(It.IsAny<int>()), Times.AtLeastOnce);
-            listMock.Verify(mock => mock.Free(It.IsAny<int[]>()), Times.AtLeastOnce);
             listMock.VerifyNoOtherCalls();
-            
         }
 
         [Fact]
         public void Test_With_CustomArrayPool()
         {
-            var poolMock = new Mock<CustomArrayPool<int>>(){CallBase = true};
+            var poolMock = new Mock<CustomArrayPool<int>> {CallBase = true};
             var pool = poolMock.Object;
-            var listMock = new Mock<PooledList<int>>(args: new object[]{0, pool}){CallBase = true};
+            var listMock = new Mock<PooledList<int>>(new object[] {0, pool}) {CallBase = true};
             var list = listMock.Object;
 
 
@@ -59,7 +54,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists.Specialized
             const int numElements = 50;
             var data = list.Data();
             var capacity = list.Capacity;
-            var numberGenerator = new TRandom(seed: numElements);
+            var numberGenerator = new TRandom(numElements);
             for (var i = 0; i < numElements; i++)
             {
                 list.Add(numberGenerator.Next());
@@ -84,11 +79,11 @@ namespace Maxisoft.Utils.Tests.Collections.Lists.Specialized
                 data = newData;
                 capacity = newCapacity;
             }
-            
+
             poolMock.Invocations.Clear();
             listMock.Invocations.Clear();
 
-            
+
             // test shrink to fit
             {
                 var initialCapacity = list.Capacity;
@@ -102,7 +97,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists.Specialized
                     poolMock.Verify(mock => mock.Return(initialData, It.IsAny<bool>()));
                 }
             }
-            
+
             poolMock.Invocations.Clear();
             listMock.Invocations.Clear();
 
@@ -111,12 +106,12 @@ namespace Maxisoft.Utils.Tests.Collections.Lists.Specialized
                 var initialCapacity = list.Capacity;
                 var initialCount = list.Count;
                 list.Resize(list.Count / 2);
-                
+
                 Assert.Equal(initialCount / 2, list.Count);
                 Assert.True(list.Capacity <= initialCapacity);
                 Assert.True(list.Capacity >= initialCount / 2);
             }
-            
+
             poolMock.Invocations.Clear();
             listMock.Invocations.Clear();
 

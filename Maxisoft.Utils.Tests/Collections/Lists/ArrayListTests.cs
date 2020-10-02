@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
+using Maxisoft.Utils.Collections.Allocators;
 using Maxisoft.Utils.Collections.Lists;
 using Moq;
 using Troschuetz.Random;
 using Xunit;
 using Xunit.Sdk;
-using Range = Moq.Range;
 
 namespace Maxisoft.Utils.Tests.Collections.Lists
 {
@@ -14,21 +14,32 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         [Fact]
         public void Test_Default_Constructor_Doesnt_Allocate()
         {
-            var listMock = new Mock<ArrayList<int>> {CallBase = true};
-            var list = listMock.Object;
-            listMock.VerifyNoOtherCalls(); // as Alloc / Realloc methods are virtual the mock should catch them 
-            Assert.Same(ArrayList<int>.EmptyArray, list.Data());
-            Assert.Equal(0, list.Capacity);
-            Assert.Empty(list);
+            {
+                var listMock = new Mock<ArrayList<int>> {CallBase = true};
+                var list = listMock.Object;
+                listMock.VerifyNoOtherCalls();
+                Assert.Same(ArrayList<int>.EmptyArray, list.Data());
+                Assert.Equal(0, list.Capacity);
+                Assert.Empty(list);
+            }
+
+
+            {
+                var mockAllocator = MockAllocator<int>.Create();
+                var list = new TestableArrayList<int>(mockAllocator.Object);
+                Assert.Same(ArrayList<int>.EmptyArray, list.Data());
+                mockAllocator.VerifyNoOtherCalls();
+            }
         }
 
         [Fact]
         public void Test_Constructor_With_Array()
         {
             var arr = Enumerable.Range(0, 5).ToArray();
-            var listMock = new Mock<ArrayList<int>>(arr) {CallBase = true};
+            var mockAllocator = MockAllocator<int>.Create();
+            var listMock = new Mock<TestableArrayList<int>>(arr, arr.Length, mockAllocator.Object) {CallBase = true};
             var list = listMock.Object;
-            listMock.VerifyNoOtherCalls(); // => no allocation
+            mockAllocator.VerifyNoOtherCalls(); // => no allocation
             Assert.Same(arr, list.Data());
             Assert.Equal(arr.Length, list.Count);
             Assert.Equal(arr.Length, list.Capacity);
@@ -66,18 +77,18 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 }
             }
 
-            listMock.VerifyNoOtherCalls(); // => no allocation
+            mockAllocator.VerifyNoOtherCalls(); // => no allocation
 
             // as soon as one add more elements than the list capacity could handle the array is detached from the list
             {
                 list.Add(6);
                 Assert.NotSame(arr, list.Data());
                 Assert.Equal(new[] {1, 2, 3, 4, 5, 6}, list);
-                listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), It.IsAny<int>()),
+                mockAllocator.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, ref It.Ref<int>.IsAny),
                     Times.Once);
                 listMock.Verify(mock => mock.ComputeGrowSize(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
-                listMock.Verify(mock => mock.Free(It.IsAny<int[]>()), Times.Once);
-                listMock.VerifyNoOtherCalls();
+                mockAllocator.Verify(mock => mock.Free(ref It.Ref<int[]>.IsAny), Times.AtMostOnce);
+                mockAllocator.VerifyNoOtherCalls();
             }
 
             // test constructor with size
@@ -105,9 +116,6 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int capacity = 10;
             var listMock = new Mock<ArrayList<int>>(capacity) {CallBase = true};
             var list = listMock.Object;
-
-            listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), capacity), Times.Once);
-            listMock.Verify(mock => mock.Alloc(capacity), Times.Once);
             listMock.VerifyNoOtherCalls();
             Assert.Equal(capacity, list.Capacity);
             Assert.Empty(list);
@@ -140,10 +148,12 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         [Fact]
         public void Test_Basics()
         {
-            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var allocatorMock = MockAllocator<int>.Create();
+            var listMock = new Mock<TestableArrayList<int>>(allocatorMock.Object) {CallBase = true};
             var list = listMock.Object;
 
-            listMock.VerifyNoOtherCalls(); // => no allocation
+            allocatorMock.VerifyNoOtherCalls();
+            listMock.VerifyNoOtherCalls();
 
             // ReSharper disable once xUnit2013
             Assert.Equal(0, list.Count);
@@ -183,16 +193,18 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         [Fact]
         public void Test_EnsureCapacity()
         {
-            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var allocatorMock = MockAllocator<int>.Create();
+            var listMock = new Mock<TestableArrayList<int>>(allocatorMock.Object) {CallBase = true};
             var list = listMock.Object;
             const int numElement = 5;
             listMock.VerifyNoOtherCalls(); // => no allocation
 
             list.EnsureCapacity(numElement);
-            listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), numElement), Times.Once);
-            listMock.Verify(mock => mock.Alloc(numElement), Times.Once);
+            allocatorMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, ref It.Ref<int>.IsAny), Times.Once);
+            allocatorMock.Verify(mock => mock.Alloc(ref It.Ref<int>.IsAny), Times.AtMostOnce);
             listMock.VerifyNoOtherCalls();
             listMock.Invocations.Clear();
+            allocatorMock.Invocations.Clear();
 
             var dataRef = list.Data();
 
@@ -226,9 +238,9 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             // ensure bigger capacity
             {
                 list.EnsureCapacity(numElement * 2);
-                listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), numElement * 2),
+                allocatorMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, ref It.Ref<int>.IsAny),
                     Times.Once);
-                listMock.Verify(mock => mock.Free(It.IsAny<int[]>()), Times.Once);
+                allocatorMock.Verify(mock => mock.Free(ref It.Ref<int[]>.IsAny), Times.AtMostOnce);
                 listMock.VerifyNoOtherCalls();
 
                 Assert.Equal(numElement * 2, list.Capacity);
@@ -242,7 +254,8 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         [Fact]
         public void Test_ShrinkToFit()
         {
-            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var allocatorMock = MockAllocator<int>.Create();
+            var listMock = new Mock<TestableArrayList<int>>(allocatorMock.Object) {CallBase = true};
             var list = listMock.Object;
             const int numElement = 5;
 
@@ -254,11 +267,13 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
 
             Assert.True(list.Capacity >= list.Count);
             listMock.Invocations.Clear();
+            allocatorMock.Invocations.Clear();
 
             list.ShrinkToFit();
             Assert.True(list.Capacity == list.Count);
             Assert.True(list.Capacity > 0);
             listMock.Invocations.Clear();
+            allocatorMock.Invocations.Clear();
 
             // call a 2nd time then
             // check data is not changed and there's no new array alloced
@@ -268,6 +283,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.ShrinkToFit();
                 Assert.True(list.Capacity == list.Count);
                 listMock.VerifyNoOtherCalls();
+                allocatorMock.VerifyNoOtherCalls();
                 Assert.Same(data, list.Data());
                 Assert.Equal(Enumerable.Range(0, numElement), list);
             }
@@ -275,19 +291,22 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             // grow (x2) the list's capacity, shrink and check that data's still the same
             {
                 list.Capacity *= 2;
-                listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), numElement * 2),
+                allocatorMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, ref It.Ref<int>.IsAny),
                     Times.Once);
-                listMock.Verify(mock => mock.Free(It.IsAny<int[]>()), Times.Once);
+                allocatorMock.Verify(mock => mock.Free(ref It.Ref<int[]>.IsAny), Times.AtMostOnce);
                 listMock.VerifyNoOtherCalls();
+                allocatorMock.VerifyNoOtherCalls();
+                allocatorMock.Invocations.Clear();
                 listMock.Invocations.Clear();
 
                 Assert.True(list.Capacity >= list.Count);
 
                 list.ShrinkToFit();
                 Assert.True(list.Capacity == list.Count);
-                listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), numElement), Times.Once);
-                listMock.Verify(mock => mock.Free(It.IsAny<int[]>()), Times.Once);
+                allocatorMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, ref It.Ref<int>.IsAny), Times.Once);
+                allocatorMock.Verify(mock => mock.Free(ref It.Ref<int[]>.IsAny), Times.AtMostOnce);
                 listMock.VerifyNoOtherCalls();
+                allocatorMock.VerifyNoOtherCalls();
 
                 Assert.Equal(Enumerable.Range(0, numElement), list);
             }
@@ -295,19 +314,23 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             // test edge case with 0 size, 1 capacity to 0 capacity
             {
                 list.Clear();
+                allocatorMock.Invocations.Clear();
                 listMock.Invocations.Clear();
                 Assert.Empty(list);
                 list.ShrinkToFit();
                 Assert.Equal(0, list.Capacity);
                 listMock.VerifyNoOtherCalls();
                 list.Capacity = 1;
-                listMock.Verify(mock => mock.Alloc(1), Times.Once);
-                listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), 1), Times.Once);
+                allocatorMock.Verify(mock => mock.Alloc(ref It.Ref<int>.IsAny), Times.AtMostOnce);
+                allocatorMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, ref It.Ref<int>.IsAny), Times.Once);
+                allocatorMock.VerifyNoOtherCalls();
                 listMock.VerifyNoOtherCalls();
                 list.ShrinkToFit();
                 Assert.Equal(0, list.Capacity);
-                listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), 0), Times.Once);
-                listMock.Verify(mock => mock.Free(It.IsAny<int[]>()), Times.Once);
+                allocatorMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, ref It.Ref<int>.IsAny),
+                    Times.Exactly(2));
+                allocatorMock.Verify(mock => mock.Free(ref It.Ref<int[]>.IsAny), Times.AtMost(2));
+                allocatorMock.VerifyNoOtherCalls();
                 listMock.VerifyNoOtherCalls(); // note that a zero size array is not alloced with Alloc
             }
         }
@@ -315,7 +338,8 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         [Fact]
         public void Test_Clear()
         {
-            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var allocatorMock = MockAllocator<int>.Create();
+            var listMock = new Mock<TestableArrayList<int>>(allocatorMock.Object) {CallBase = true};
             var list = listMock.Object;
             const int numElement = 5;
 
@@ -328,6 +352,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             Assert.Equal(numElement, list.Count);
             var data = list.Data();
             listMock.Invocations.Clear();
+            allocatorMock.Invocations.Clear();
 
             // clear and check
             {
@@ -335,10 +360,11 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 Assert.Empty(list);
                 Assert.Equal(0, list.Capacity);
                 Assert.NotSame(data, list.Data());
-                listMock.Verify(mock => mock.Free(It.IsAny<int[]>()));
+                allocatorMock.Verify(mock => mock.Free(ref It.Ref<int[]>.IsAny));
+                allocatorMock.VerifyNoOtherCalls(); // note that a zero size array is not alloced with Alloc
                 listMock.VerifyNoOtherCalls(); // note that a zero size array is not alloced with Alloc
             }
-
+            allocatorMock.Invocations.Clear();
             listMock.Invocations.Clear();
 
             // do a 2nd time clear as a edge case check
@@ -346,8 +372,8 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list.Clear();
                 Assert.Empty(list);
                 Assert.Equal(0, list.Capacity);
-                listMock.Verify(mock => mock.Free(It.IsAny<int[]>()));
-                listMock.VerifyNoOtherCalls();
+                allocatorMock.Verify(mock => mock.Free(ref It.Ref<int[]>.IsAny));
+                allocatorMock.VerifyNoOtherCalls();
             }
 
             // ensure the list is still usable after 2 clears
@@ -375,7 +401,8 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         [InlineData(-2, false, typeof(ArgumentException))]
         public void Test_Resize(int newSize, bool clear, Type exception)
         {
-            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var allocatorMock = MockAllocator<int>.Create();
+            var listMock = new Mock<TestableArrayList<int>>(allocatorMock.Object) {CallBase = true};
             var list = listMock.Object;
             const int numElement = 5;
 
@@ -388,6 +415,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             Assert.Equal(numElement, list.Count);
             var data = list.Data();
             listMock.Invocations.Clear();
+            allocatorMock.Invocations.Clear();
 
             try
             {
@@ -399,21 +427,23 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 Assert.IsAssignableFrom(exception, e);
                 Assert.Equal(Enumerable.Range(0, numElement), list); // no changes
                 listMock.VerifyNoOtherCalls();
+                allocatorMock.VerifyNoOtherCalls();
                 return;
             }
 
             if (newSize > numElement)
             {
                 Assert.True(list.Capacity >= newSize);
-                listMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, numElement,
-                    It.IsInRange(newSize, int.MaxValue, Range.Inclusive)));
-                listMock.Verify(mock => mock.Free(It.IsAny<int[]>()), Times.Once);
+                allocatorMock.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, ref It.Ref<int>.IsAny));
+                allocatorMock.Verify(mock => mock.Free(ref It.Ref<int[]>.IsAny), Times.AtMostOnce);
+                allocatorMock.VerifyNoOtherCalls();
                 listMock.VerifyNoOtherCalls();
             }
             else
             {
                 Assert.Same(data, list.Data()); // same data array ref
                 listMock.VerifyNoOtherCalls(); // no realloc
+                allocatorMock.VerifyNoOtherCalls();
             }
 
             Assert.Equal(newSize, list.Count);
@@ -465,16 +495,18 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
         [Fact]
         public void Test_Realloc_EdgeCase()
         {
-            var listMock = new Mock<ArrayList<int>> {CallBase = true};
+            var allocatorMock = MockAllocator<int>.Create();
+            var listMock = new Mock<TestableArrayList<int>>(allocatorMock.Object) {CallBase = true};
             var list = listMock.Object;
 
             Assert.Equal(0, list.Capacity);
             var data = list.Data();
-
-            list.ReAlloc(ref data, 0, 0);
+            var capacity = 0;
+            allocatorMock.Object.ReAlloc(ref data, ref capacity);
             Assert.Equal(0, list.Capacity);
             Assert.Same(data, list.Data());
-            listMock.Verify(mock => mock.ReAlloc(ref data, 0, 0), Times.Once);
+            allocatorMock.Verify(mock => mock.ReAlloc(ref data, ref It.Ref<int>.IsAny), Times.Once);
+            allocatorMock.VerifyNoOtherCalls();
             listMock.VerifyNoOtherCalls();
         }
 
@@ -544,5 +576,89 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 }
             }
         }
+
+        #region Test Classes
+
+        public class MockAllocator<T> : IAllocator<T>
+        {
+            internal readonly IAllocator<T> AllocatorImplementation;
+
+            public MockAllocator(IAllocator<T> allocatorImplementation)
+            {
+                AllocatorImplementation = allocatorImplementation;
+            }
+
+            public virtual T[] Alloc(ref int capacity)
+            {
+                return AllocatorImplementation.Alloc(ref capacity);
+            }
+
+            public virtual void Free(ref T[] array)
+            {
+                AllocatorImplementation.Free(ref array);
+            }
+
+            public virtual void ReAlloc(ref T[] array, ref int capacity)
+            {
+                AllocatorImplementation.ReAlloc(ref array, ref capacity);
+            }
+
+            public static Mock<MockAllocator<T>> Create()
+            {
+                return new Mock<MockAllocator<T>>(new DefaultAllocator<T>()) {CallBase = true};
+            }
+        }
+
+        public class MockAllocator : IAllocator<int>
+        {
+            internal readonly IAllocator<int> AllocatorImplementation;
+
+            public MockAllocator(IAllocator<int> allocatorImplementation)
+            {
+                AllocatorImplementation = allocatorImplementation;
+            }
+
+            public virtual int[] Alloc(ref int capacity)
+            {
+                return AllocatorImplementation.Alloc(ref capacity);
+            }
+
+            public virtual void Free(ref int[] array)
+            {
+                AllocatorImplementation.Free(ref array);
+            }
+
+            public virtual void ReAlloc(ref int[] array, ref int capacity)
+            {
+                AllocatorImplementation.ReAlloc(ref array, ref capacity);
+            }
+
+            public static Mock<MockAllocator<int>> Create()
+            {
+                return new Mock<MockAllocator<int>>(new DefaultAllocator<int>()) {CallBase = true};
+            }
+        }
+
+        public class TestableArrayList<T> : ArrayList<T, IAllocator<T>>
+        {
+            public TestableArrayList() : this(MockAllocator<T>.Create().Object)
+            {
+            }
+
+            public TestableArrayList(IAllocator<T> allocator) : this(0, allocator)
+            {
+            }
+
+            public TestableArrayList(int capacity, IAllocator<T> allocator) : base(capacity, in allocator)
+            {
+            }
+
+            public TestableArrayList(T[] initialArray, int size, IAllocator<T> allocator) : base(initialArray, size,
+                in allocator)
+            {
+            }
+        }
+
+        #endregion
     }
 }
