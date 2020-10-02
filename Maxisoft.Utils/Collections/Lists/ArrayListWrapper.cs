@@ -1,32 +1,19 @@
 ﻿using System;
+using Maxisoft.Utils.Collections.Allocators;
 
 namespace Maxisoft.Utils.Collections.Lists
 {
-    public class ArrayListWrapper<T> : ArrayList<T>
+    public class ArrayListWrapper<T> : ArrayList<T, ArrayListWrapper<T>.NoAlloc>
     {
-        public ArrayListWrapper()
+        public ArrayListWrapper() : base(0, new NoAlloc())
         {
         }
 
-        public ArrayListWrapper(T[] array) : base(array, array.Length)
+        public ArrayListWrapper(T[] array) : this(array, array.Length)
         {
         }
 
-        public ArrayListWrapper(T[] array, int size) : base(array, size)
-        {
-        }
-
-        protected internal override T[] Alloc(int size)
-        {
-            if (size != Capacity)
-            {
-                throw new InvalidOperationException("Cannot allocate new array");
-            }
-
-            return Data();
-        }
-
-        protected internal override void Free(T[] array)
+        public ArrayListWrapper(T[] array, int size) : base(array, size, new NoAlloc())
         {
         }
 
@@ -35,11 +22,23 @@ namespace Maxisoft.Utils.Collections.Lists
             throw new InvalidOperationException("Cannot grow");
         }
 
-        protected internal override void ReAlloc(ref T[] array, int actualSize, int capacity)
+        public readonly struct NoAlloc : IAllocator<T>
         {
-            if (capacity != Capacity)
+            public T[] Alloc(ref int capacity)
             {
-                throw new InvalidOperationException("Cannot reallocate new array");
+                throw new InvalidOperationException("Cannot allocate new array");
+            }
+
+            public void Free(ref T[] array)
+            {
+            }
+
+            public void ReAlloc(ref T[] array, ref int capacity)
+            {
+                if (array.Length != capacity)
+                {
+                    throw new InvalidOperationException("Cannot allocate new array");
+                }
             }
         }
     }

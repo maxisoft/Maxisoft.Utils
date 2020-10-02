@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.Linq;
+using Maxisoft.Utils.Collections.Allocators;
 using Maxisoft.Utils.Collections.Lists;
 using Maxisoft.Utils.Objects;
 using Maxisoft.Utils.Random;
@@ -23,7 +23,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -93,7 +93,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 1024;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -124,7 +124,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -204,7 +204,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -281,7 +281,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -369,7 +369,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -457,7 +457,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -548,7 +548,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -638,7 +638,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -726,7 +726,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -814,7 +814,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -905,7 +905,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -995,7 +995,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1084,7 +1084,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1182,7 +1182,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1268,7 +1268,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1362,7 +1362,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1458,7 +1458,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1520,7 +1520,8 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                             list.InsertRange(index, (IEnumerable<int>) randomCollection.Select(i => i));
                             break;
                         case 1:
-                            list.InsertRange(index, (IEnumerable<int>) new ReadOnlyCollectionWrapper<int>(randomCollection));
+                            list.InsertRange(index,
+                                (IEnumerable<int>) new ReadOnlyCollectionWrapper<int>(randomCollection));
                             break;
                         case 2:
                             list.InsertRange(index, (IEnumerable<int>) randomCollection);
@@ -1569,7 +1570,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1635,7 +1636,9 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
 
 
                 Assert.Equal(adversarial, list);
+                mockList.Verify(mock => mock.GetRange<ArrayList<int>, DefaultAllocator<int>>(index, count));
                 mockList.VerifyNoOtherCalls();
+                mockList.Invocations.Clear();
             }
         }
 
@@ -1646,7 +1649,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1728,7 +1731,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1818,7 +1821,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1904,7 +1907,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             const int maxElements = 32;
             var random = new TRandom(seed);
             var numElements = random.Next(maxElements);
-            var mockList = new Mock<ArrayList<int>>(new object[] {numElements}) {CallBase = true};
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
             var list = mockList.Object;
             mockList.Invocations.Clear();
 
@@ -1986,7 +1989,7 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
 
         internal class ReadOnlyCollectionWrapper<T> : IReadOnlyCollection<T>
         {
-            private IReadOnlyCollection<T> _collection;
+            private readonly IReadOnlyCollection<T> _collection;
 
             public ReadOnlyCollectionWrapper(IReadOnlyCollection<T> collection)
             {

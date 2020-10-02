@@ -9,11 +9,10 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
 {
     public class ArrayListWrapperTests
     {
-        
         [Fact]
         public void Test_Default_Constructor()
         {
-            var mockList = new Mock<ArrayListWrapper<int>>() {CallBase = true};
+            var mockList = new Mock<ArrayListWrapper<int>> {CallBase = true};
             var list = mockList.Object;
             Assert.Empty(list);
             Assert.Equal(0, list.Capacity);
@@ -21,11 +20,11 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
 
             // can't add anything into the list
             Assert.Throws<InvalidOperationException>(() => list.Add(0));
-            
+
             Assert.Equal(Enumerable.Empty<int>(), list);
             Assert.Same(ArrayListWrapper<int>.EmptyArray, list.Data());
         }
-        
+
         [Fact]
         public void Test_Basics()
         {
@@ -34,9 +33,9 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
             var numberGenerator = new TRandom(numElements);
             var mockList = new Mock<ArrayListWrapper<int>>(underlying, numElements) {CallBase = true};
             var list = mockList.Object;
-            
+
             mockList.VerifyNoOtherCalls();
-            
+
             for (var i = 0; i < numElements; i++)
             {
                 var n = numberGenerator.Next();
@@ -44,8 +43,9 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 Assert.Equal(n, list[i]);
                 Assert.Equal(n, underlying[i]);
             }
+
             mockList.VerifyNoOtherCalls();
-            
+
             for (var i = 0; i < numElements; i++)
             {
                 var n = numberGenerator.Next();
@@ -53,28 +53,29 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 Assert.Equal(n, underlying[i]);
                 Assert.Equal(n, list[i]);
             }
+
             mockList.VerifyNoOtherCalls();
-            
-            
-            
+
+
             // now test allocation methods
             {
-                list.Free(underlying);
-                mockList.Verify(mock => mock.Free(underlying));
+                list.Allocator.Free(ref underlying);
                 mockList.VerifyNoOtherCalls();
                 mockList.Invocations.Clear();
-                
-                Assert.Throws<InvalidOperationException>(() => list.Alloc(1));
-                Assert.Same(list.Data(), list.Alloc(numElements));
-                mockList.Verify(mock => mock.Alloc(It.IsAny<int>()), Times.Exactly(2));
+
+                var capacity = 1;
+                Assert.Throws<InvalidOperationException>(() => list.Allocator.Alloc(ref capacity));
+                capacity = numElements;
+                Assert.Throws<InvalidOperationException>(() => list.Allocator.Alloc(ref capacity));
                 mockList.VerifyNoOtherCalls();
                 mockList.Invocations.Clear();
-                
+
                 var copy = underlying;
-                list.ReAlloc(ref copy, numElements, numElements);
+                capacity = numElements;
+                list.Allocator.ReAlloc(ref copy, ref capacity);
                 Assert.Same(underlying, copy);
-                Assert.Throws<InvalidOperationException>(() => list.ReAlloc(ref copy, numElements, numElements * 2));
-                mockList.Verify(mock => mock.ReAlloc(ref It.Ref<int[]>.IsAny, It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(2));
+                capacity = numElements * 2;
+                Assert.Throws<InvalidOperationException>(() => list.Allocator.ReAlloc(ref copy, ref capacity));
                 mockList.VerifyNoOtherCalls();
             }
         }

@@ -3,45 +3,42 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Maxisoft.Utils.Collections.Allocators;
 
 namespace Maxisoft.Utils.Collections.Lists
 {
-    public partial class ArrayList<T> : IList<T>, IReadOnlyList<T>
+    public abstract partial class ArrayList<T, TAllocator> : IList<T>, IReadOnlyList<T> where TAllocator : IAllocator<T>
     {
         public static readonly T[] EmptyArray = Array.Empty<T>();
 
+        internal readonly TAllocator Allocator;
+
+
         private T[] _array;
 
-        public ArrayList(int capacity)
+        protected internal ArrayList(int capacity, in TAllocator allocator)
         {
             if (capacity < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity), capacity, "negative");
             }
 
+            Allocator = allocator;
             _array = EmptyArray;
             EnsureCapacity(capacity);
             Count = 0;
         }
 
-        public ArrayList() : this(0)
-        {
-        }
-
-        public ArrayList(T[] initialArray, int size)
+        protected internal ArrayList(T[] initialArray, int size, in TAllocator allocator)
         {
             if ((uint) size > (uint) initialArray.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(size), size, "out of bounds");
             }
 
-
+            Allocator = allocator;
             _array = initialArray;
             Count = size;
-        }
-
-        public ArrayList(T[] initialArray) : this(initialArray, initialArray.Length)
-        {
         }
 
         public int Capacity
@@ -80,7 +77,7 @@ namespace Maxisoft.Utils.Collections.Lists
 
         public void Clear()
         {
-            Free(_array);
+            Allocator.Free(ref _array);
             _array = EmptyArray;
             Count = 0;
         }
@@ -156,15 +153,6 @@ namespace Maxisoft.Utils.Collections.Lists
             }
         }
 
-        protected internal virtual T[] Alloc(int size)
-        {
-            return new T[size];
-        }
-
-        protected internal virtual void Free(T[] array)
-        {
-        }
-
         protected internal virtual int ComputeGrowSize(int size, int capacity)
         {
             Debug.Assert(size <= capacity);
@@ -175,37 +163,11 @@ namespace Maxisoft.Utils.Collections.Lists
             return res;
         }
 
-        protected internal virtual void ReAlloc(ref T[] array, int actualSize, int capacity)
-        {
-            if (capacity == 0)
-            {
-                if (ReferenceEquals(array, EmptyArray))
-                {
-                    return;
-                }
-
-                Free(array);
-                array = EmptyArray;
-                return;
-            }
-
-            if (ReferenceEquals(array, EmptyArray))
-            {
-                array = Alloc(capacity);
-            }
-            else
-            {
-                var old = array;
-                Array.Resize(ref array, capacity);
-                Free(old);
-            }
-        }
-
         public void EnsureCapacity(int minimalCapacity)
         {
             if (minimalCapacity > Capacity)
             {
-                ReAlloc(ref _array, Count, minimalCapacity);
+                Allocator.ReAlloc(ref _array, ref minimalCapacity);
             }
         }
 
@@ -213,7 +175,9 @@ namespace Maxisoft.Utils.Collections.Lists
         {
             if (Count != Capacity)
             {
-                ReAlloc(ref _array, Count, Count);
+                var capacity = Count;
+                Allocator.ReAlloc(ref _array, ref capacity);
+                Count = capacity;
             }
         }
 
@@ -265,12 +229,12 @@ namespace Maxisoft.Utils.Collections.Lists
         }
 
 
-        public static implicit operator Span<T>(ArrayList<T> list)
+        public static implicit operator Span<T>(ArrayList<T, TAllocator> list)
         {
             return list.AsSpan();
         }
 
-        public static implicit operator ReadOnlySpan<T>(ArrayList<T> list)
+        public static implicit operator ReadOnlySpan<T>(ArrayList<T, TAllocator> list)
         {
             return list.AsSpan();
         }
@@ -283,7 +247,8 @@ namespace Maxisoft.Utils.Collections.Lists
                 return false;
             }
 
-            ReAlloc(ref _array, Count, ComputeGrowSize(Count, Capacity));
+            var computeGrowSize = ComputeGrowSize(Count, Capacity);
+            Allocator.ReAlloc(ref _array, ref computeGrowSize);
             return true;
         }
 
@@ -296,6 +261,38 @@ namespace Maxisoft.Utils.Collections.Lists
             {
                 throw new ArgumentOutOfRangeException(paramName, index, message);
             }
+        }
+    }
+
+
+    public class ArrayList<T> : ArrayList<T, DefaultAllocator<T>>
+    {
+        protected internal static readonly DefaultAllocator<T> DefaultAllocator = new DefaultAllocator<T>();
+
+        public ArrayList() : this(0)
+        {
+        }
+
+
+        public ArrayList(int capacity) : this(capacity, DefaultAllocator)
+        {
+        }
+
+        public ArrayList(T[] initialArray, int size) : this(initialArray, size, DefaultAllocator)
+        {
+        }
+
+        public ArrayList(T[] initialArray) : this(initialArray, initialArray.Length)
+        {
+        }
+
+        internal ArrayList(int capacity, in DefaultAllocator<T> allocator) : base(capacity, in allocator)
+        {
+        }
+
+        internal ArrayList(T[] initialArray, int size, in DefaultAllocator<T> allocator) : base(initialArray, size,
+            in allocator)
+        {
         }
     }
 }

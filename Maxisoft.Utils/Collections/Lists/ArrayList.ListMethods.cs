@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
+using Maxisoft.Utils.Collections.Allocators;
 
 namespace Maxisoft.Utils.Collections.Lists
 {
-    public partial class ArrayList<T>
+    public partial class ArrayList<T, TAllocator>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int BinarySearch(int index, int count, in T item, IComparer<T>? comparer = null)
@@ -16,13 +15,16 @@ namespace Maxisoft.Utils.Collections.Lists
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int BinarySearch(in T item, IComparer<T>? comparer = null) => BinarySearch(0, Count, in item, comparer);
+        public int BinarySearch(in T item, IComparer<T>? comparer = null)
+        {
+            return BinarySearch(0, Count, in item, comparer);
+        }
 
-        public TList ConvertAll<TOutput, TList>(Converter<T, TOutput> converter) where TList : ArrayList<TOutput>, new()
+        public virtual TList ConvertAll<TOutput, TList, TAlloc>(Converter<T, TOutput> converter)
+            where TList : ArrayList<TOutput, TAlloc>, new() where TAlloc : IAllocator<TOutput>
         {
             var res = new TList();
             res.EnsureCapacity(Count);
-            var c = 0;
             foreach (var elem in AsSpan())
             {
                 res.Add(converter(elem));
@@ -32,15 +34,20 @@ namespace Maxisoft.Utils.Collections.Lists
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ArrayList<TOutput> ConvertAll<TOutput>(Converter<T, TOutput> converter) =>
-            ConvertAll<TOutput, ArrayList<TOutput>>(converter);
+        public ArrayList<TOutput> ConvertAll<TOutput>(Converter<T, TOutput> converter)
+        {
+            return ConvertAll<TOutput, ArrayList<TOutput>, DefaultAllocator<TOutput>>(converter);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CopyTo(int index, T[] array, int arrayIndex, int count)
         {
-            if (Count - index < count) {
-                throw new ArgumentOutOfRangeException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
+            if (Count - index < count)
+            {
+                throw new ArgumentOutOfRangeException(
+                    "Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
             }
+
             Span<T> target = array;
 
             AsSpan().Slice(index, count).CopyTo(target.Slice(arrayIndex, count));
@@ -153,6 +160,7 @@ namespace Maxisoft.Utils.Collections.Lists
             {
                 throw new ArgumentOutOfRangeException();
             }
+
             return Array.IndexOf(_array, item, index, count);
         }
 
@@ -259,13 +267,20 @@ namespace Maxisoft.Utils.Collections.Lists
             return AsSpan().Slice(index, count);
         }
 
-        public TList GetRange<TList>(int index, int count) where TList : ArrayList<T>, new()
+        public virtual TList GetRange<TList, TAlloc>(int index, int count) where TList : ArrayList<T, TAlloc>, new()
+            where TAlloc : IAllocator<T>
         {
             var span = GetSlice(index, count);
             var res = new TList();
             res.Resize(count);
             span.CopyTo(res.Data());
             return res;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TList GetRange<TList>(int index, int count) where TList : ArrayList<T>, new()
+        {
+            return GetRange<TList, DefaultAllocator<T>>(index, count);
         }
 
 
@@ -312,7 +327,7 @@ namespace Maxisoft.Utils.Collections.Lists
         public int RemoveAll(in Predicate<T> match, bool clear = true)
         {
             var freeIndex = 0;
-            
+
             foreach (var element in AsSpan())
             {
                 if (match(element))
@@ -323,7 +338,10 @@ namespace Maxisoft.Utils.Collections.Lists
                 freeIndex++;
             }
 
-            if (freeIndex >= Count) return 0;
+            if (freeIndex >= Count)
+            {
+                return 0;
+            }
 
             var current = freeIndex + 1;
             while (current < Count)
@@ -354,30 +372,34 @@ namespace Maxisoft.Utils.Collections.Lists
             Count = freeIndex;
             return res;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Reverse() {
+        public void Reverse()
+        {
             Reverse(0, Count);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Reverse(int index, int count) {
+        public void Reverse(int index, int count)
+        {
             GetSlice(index, count).Reverse();
         }
-        
-        
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Sort(IComparer<T>? comparer = null)
         {
             Sort(0, Count, comparer);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Sort(int index, int count, IComparer<T>? comparer = null) {
+        public void Sort(int index, int count, IComparer<T>? comparer = null)
+        {
             if (index + count > Count)
             {
                 throw new ArgumentOutOfRangeException();
             }
+
             comparer ??= Comparer<T>.Default;
             Array.Sort(_array, index, count, comparer);
         }

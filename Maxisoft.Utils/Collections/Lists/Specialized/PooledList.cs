@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Buffers;
+using Maxisoft.Utils.Collections.Allocators;
 
 namespace Maxisoft.Utils.Collections.Lists.Specialized
 {
-    public class PooledList<T> : ArrayList<T>, IDisposable
+    public class PooledList<T> : ArrayList<T, PooledAllocator<T>>, IDisposable
     {
         public static readonly ArrayPool<T> DefaultPool = ArrayPool<T>.Shared;
 
-        public readonly ArrayPool<T> ArrayPool;
 
-        public PooledList(int capacity, ArrayPool<T> arrayPool) : base(0)
+        public PooledList(int capacity, ArrayPool<T> arrayPool) : base(0, new PooledAllocator<T>(arrayPool))
         {
             if (capacity < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity), capacity, "negative");
             }
 
-            ArrayPool = arrayPool;
             EnsureCapacity(capacity);
         }
 
@@ -34,50 +33,11 @@ namespace Maxisoft.Utils.Collections.Lists.Specialized
             GC.SuppressFinalize(this);
         }
 
-        protected internal override T[] Alloc(int size)
-        {
-            return ArrayPool.Rent(size);
-        }
-
-        protected internal override void Free(T[] array)
-        {
-            if (!ReferenceEquals(array, EmptyArray))
-            {
-                ArrayPool.Return(array);
-            }
-        }
-
-        protected internal override void ReAlloc(ref T[] array, int actualSize, int capacity)
-        {
-            if (capacity == array.Length)
-            {
-                return;
-            }
-
-            var old = array;
-            try
-            {
-                if (capacity == 0)
-                {
-                    array = EmptyArray;
-                }
-                else
-                {
-                    array = Alloc(capacity);
-                    Array.Copy(old, array, Math.Min(actualSize, capacity));
-                }
-            }
-            finally
-            {
-                Free(old);
-            }
-        }
-
         private void ReleaseUnmanagedResources()
         {
             Clear();
         }
-        
+
         protected internal virtual void Dispose(bool disposing)
         {
             ReleaseUnmanagedResources();
