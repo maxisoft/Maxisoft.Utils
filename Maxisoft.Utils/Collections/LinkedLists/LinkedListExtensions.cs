@@ -152,10 +152,10 @@ namespace Maxisoft.Utils.Collections.LinkedLists
 
         public static int IndexOf<T>(this LinkedList<T> list, in T value)
         {
-            return IndexOfFromBoth(list, value);
+            return IndexOfFromStart(list, value);
         }
 
-        public static int IndexOfFromBoth<T>(LinkedList<T> list, in T value)
+        public static int IndexOfFromBoth<T>(this LinkedList<T> list, in T value)
         {
             var ahead = list.First;
             var backward = list.Last;
