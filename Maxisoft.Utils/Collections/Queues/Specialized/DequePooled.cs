@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Buffers;
 using System.Runtime.InteropServices;
+using Maxisoft.Utils.Collections.Allocators;
 
 namespace Maxisoft.Utils.Collections.Queues.Specialized
 {
     /// <summary>
-    ///     A <see cref="Deque{T}" /> using <see cref="ArrayPool" />'s arrays as base storage
+    ///     A <see cref="Deque{T}" /> using <see cref="ArrayPool{T}" />'s arrays as base storage
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <seealso cref="Deque{T}" />
@@ -18,22 +19,19 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
         {
         }
 
-        public DequePooled(ArrayPool<T> pool)
+        public DequePooled(ArrayPool<T> pool) : base(new PooledAllocator<T>(pool))
         {
-            ArrayPool = pool;
             TrimOnDeletion = true;
         }
 
         public DequePooled(ArrayPool<T> pool, long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize,
-            usage)
+            usage.ToRatio(), new PooledAllocator<T>(pool))
         {
-            ArrayPool = pool;
             TrimOnDeletion = true;
         }
 
-        private DequePooled(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize, usage)
+        public DequePooled(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize, usage.ToRatio(), new PooledAllocator<T>(DefaultPool.Value))
         {
-            ArrayPool = DefaultPool.Value;
             TrimOnDeletion = true;
         }
 
@@ -57,17 +55,6 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
             return MaxArrayByteLength / Math.Max(@sizeof, IntPtr.Size);
         }
 
-        protected override T[] Alloc(long size)
-        {
-            var intSize = checked((int) size);
-            return ArrayPool.Rent(intSize);
-        }
-
-        protected override void Free(T[] data)
-        {
-            ArrayPool.Return(data);
-        }
-
         public override long OptimalChunkSize()
         {
             return ComputeOptimalChunkSize();
@@ -81,9 +68,6 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
         protected virtual void Dispose(bool disposing)
         {
             ReleaseUnmanagedResources();
-            if (disposing)
-            {
-            }
         }
 
         ~DequePooled()
@@ -97,17 +81,15 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
         public const int MaxArraysPerBucket = 16;
 
         /// <summary>
-        ///     The default <see cref="ArrayPool" />
+        ///     The default <see cref="ArrayPool{T}" />
         /// </summary>
         /// <remarks>
-        ///     Use <see cref="Lazy{T}" /> in order to <b>prevent</b> the <see cref="ArrayPool" /> to be created as soon as
+        ///     Use <see cref="Lazy{T}" /> in order to <b>prevent</b> the <see cref="ArrayPool{T}" /> to be created as soon as
         ///     this assembly is loaded
         /// </remarks>
         public static readonly Lazy<ArrayPool<T>> DefaultPool =
             new Lazy<ArrayPool<T>>(() => ArrayPool<T>.Create(ComputeOptimalChunkSize(), MaxArraysPerBucket));
-
-
-        public readonly ArrayPool<T> ArrayPool;
+        
         // ReSharper restore MemberCanBePrivate.Global
     }
 }

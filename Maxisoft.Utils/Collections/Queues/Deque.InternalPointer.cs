@@ -11,11 +11,13 @@ namespace Maxisoft.Utils.Collections.Queues
         {
             internal readonly long Index;
             private readonly LinkedListNode<T[]>? _node;
+            internal readonly long ChunkSize;
 
-            public InternalPointer(LinkedListNode<T[]>? node, long index)
+            public InternalPointer(LinkedListNode<T[]>? node, long index, long chunkSize)
             {
                 _node = node;
                 Index = index;
+                ChunkSize = chunkSize;
             }
 
 
@@ -26,10 +28,10 @@ namespace Maxisoft.Utils.Collections.Queues
             public ref T Value => ref Node.Value[Index];
 
             public long DistanceToBeginning => Index;
-            public long DistanceToEnd => Node.Value.LongLength - Index;
+            public long DistanceToEnd => ChunkSize - Index;
 
             public bool HasNode => !ReferenceEquals(_node, null);
-            public bool Valid => HasNode && Index >= 0 && Index < Node.Value.LongLength;
+            public bool Valid => HasNode && Index >= 0 && Index < ChunkSize;
 
             private void ThrowForNullNode()
             {
@@ -65,17 +67,17 @@ namespace Maxisoft.Utils.Collections.Queues
                             throw new IndexOutOfRangeException($"Cannot move pointer to +{originalInc}");
                         }
 
-                        res = new InternalPointer(res.Node.Next, 0);
+                        res = new InternalPointer(res.Node.Next, 0, p.ChunkSize);
                     }
                     else if (res.DistanceToEnd >= inc)
                     {
-                        res = new InternalPointer(res.Node, res.Index + inc);
+                        res = new InternalPointer(res.Node, res.Index + inc, p.ChunkSize);
                         inc = 0;
                     }
                     else
                     {
                         var distanceToEnd = res.DistanceToEnd;
-                        res = new InternalPointer(res.Node, res.Index + distanceToEnd);
+                        res = new InternalPointer(res.Node, res.Index + distanceToEnd, p.ChunkSize);
                         inc -= distanceToEnd;
                     }
                 }
@@ -107,17 +109,17 @@ namespace Maxisoft.Utils.Collections.Queues
                             throw new IndexOutOfRangeException($"Cannot move pointer to -{originalDecr}");
                         }
 
-                        res = new InternalPointer(res.Node.Previous, res.Node.Previous.Value.Length);
+                        res = new InternalPointer(res.Node.Previous, p.ChunkSize, p.ChunkSize);
                     }
                     else if (res.DistanceToBeginning >= decr)
                     {
-                        res = new InternalPointer(res.Node, res.Index - decr);
+                        res = new InternalPointer(res.Node, res.Index - decr, p.ChunkSize);
                         decr = 0;
                     }
                     else
                     {
                         var distanceToBeginning = res.DistanceToBeginning;
-                        res = new InternalPointer(res.Node, res.Index - distanceToBeginning);
+                        res = new InternalPointer(res.Node, res.Index - distanceToBeginning, p.ChunkSize);
                         decr -= distanceToBeginning;
                     }
                 }
