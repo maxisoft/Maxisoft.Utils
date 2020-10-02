@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using Maxisoft.Utils.Collections.Allocators;
 using Maxisoft.Utils.Collections.UpdateGuards;
 
 #nullable enable
@@ -19,22 +20,35 @@ namespace Maxisoft.Utils.Collections.Queues
     {
         private readonly LinkedList<T[]> _map = new LinkedList<T[]>();
         private readonly UpdateGuardedContainer _version = new UpdateGuardedContainer();
+        private static readonly DefaultAllocator<T> DefaultAllocator = new DefaultAllocator<T>(); 
+        protected internal readonly IAllocator<T> Allocator = DefaultAllocator;
         protected internal readonly long ChunkSize;
         private InternalPointer _begin;
         private InternalPointer _end;
         public float InitialChunkRatio { get; protected internal set; } = 0.5f;
 
-        public Deque()
+        internal protected Deque(IAllocator<T> allocator)
         {
             // ReSharper disable once VirtualMemberCallInConstructor
             ChunkSize = OptimalChunkSize();
+            Allocator = allocator;
+        }
+
+        public Deque() : this(DefaultAllocator)
+        {
+            
         }
 
         public Deque(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : this(chunkSize, usage.ToRatio())
         {
         }
 
-        public Deque(long chunkSize, float initialChunkRatio)
+        public Deque(long chunkSize, float initialChunkRatio) : this(chunkSize, initialChunkRatio, DefaultAllocator)
+        {
+            
+        }
+        
+        protected internal Deque(long chunkSize, float initialChunkRatio, IAllocator<T> allocator)
         {
             if (chunkSize <= 0)
             {
@@ -50,7 +64,7 @@ namespace Maxisoft.Utils.Collections.Queues
             {
                 throw new ArgumentException("more than 100% ratio", nameof(initialChunkRatio));
             }
-
+            Allocator = allocator;
             InitialChunkRatio = initialChunkRatio;
             ChunkSize = chunkSize;
         }
@@ -425,7 +439,7 @@ namespace Maxisoft.Utils.Collections.Queues
             }
 
             _map.AddFirst(Alloc(ChunkSize));
-            _begin = new InternalPointer(_map.First, startIndex);
+            _begin = new InternalPointer(_map.First, startIndex, ChunkSize);
             _end = _begin;
         }
 
@@ -488,7 +502,7 @@ namespace Maxisoft.Utils.Collections.Queues
                     _map.AddFirst(Alloc(ChunkSize));
                 }
 
-                _begin = new InternalPointer(_begin.Node.Previous!, ChunkSize - 1);
+                _begin = new InternalPointer(_begin.Node.Previous!, ChunkSize - 1, ChunkSize);
             }
             else
             {
@@ -519,7 +533,7 @@ namespace Maxisoft.Utils.Collections.Queues
                     }
                 }
 
-                _end = new InternalPointer(_end.Node.Next!, 0);
+                _end = new InternalPointer(_end.Node.Next!, 0, ChunkSize);
             }
 
             _end.Value = item;
@@ -527,14 +541,18 @@ namespace Maxisoft.Utils.Collections.Queues
             LongLength += 1;
         }
 
-        protected virtual T[] Alloc(long size)
+        protected T[] Alloc(long size)
         {
             Debug.Assert(size == ChunkSize);
-            return new T[size];
+            var intSize = checked((int) size);
+            var res = Allocator.Alloc(ref intSize);
+            Debug.Assert(res.LongLength >= size);
+            return res;
         }
 
-        protected virtual void Free(T[] data)
+        protected void Free(T[] data)
         {
+            Allocator.Free(ref data);
         }
 
         private bool RemoveAtDispatch(long index, in InternalPointer pointer)
@@ -566,10 +584,10 @@ namespace Maxisoft.Utils.Collections.Queues
             {
                 ug.Check();
                 Array.Copy(node.Value, 1 + initialShift, node.Value, initialShift,
-                    node.Value.LongLength - initialShift - 1);
+                    ChunkSize - initialShift - 1);
                 if (!(node.Next is null))
                 {
-                    node.Value[node.Value.Length - 1] = node.Next.Value[0];
+                    node.Value[ChunkSize - 1] = node.Next.Value[0];
                 }
 
                 node = node.Next;
@@ -595,11 +613,11 @@ namespace Maxisoft.Utils.Collections.Queues
                 Array.Copy(node.Value, 0, node.Value, 1, length);
                 if (!(node.Previous is null))
                 {
-                    node.Value[0] = node.Previous.Value[node.Previous.Value.Length - 1];
+                    node.Value[0] = node.Previous.Value[ChunkSize - 1];
                 }
 
                 node = node.Previous;
-                length = node?.Value.Length - 1 ?? default;
+                length = ChunkSize - 1;
             }
 
             LongLength -= 1;
@@ -684,11 +702,11 @@ namespace Maxisoft.Utils.Collections.Queues
                 ug.Check();
                 if (node.Previous is { })
                 {
-                    node.Previous.Value[node.Previous.Value.LongLength - 1] = node.Value[0];
+                    node.Previous.Value[ChunkSize - 1] = node.Value[0];
                 }
 
                 Array.Copy(node.Value, 1 + initialShift, node.Value, 0 + initialShift,
-                    node.Value.LongLength - 1 - initialShift);
+                    ChunkSize - 1 - initialShift);
                 node = node.Next ?? throw new IndexOutOfRangeException();
                 initialShift = 0;
             }
@@ -697,7 +715,7 @@ namespace Maxisoft.Utils.Collections.Queues
 
             if (node.Previous is { })
             {
-                node.Previous.Value[node.Previous.Value.LongLength - 1] = node.Value[0];
+                node.Previous.Value[ChunkSize - 1] = node.Value[0];
             }
 
             Array.Copy(node.Value, 1, node.Value, 0, pointer.Index);
@@ -716,25 +734,25 @@ namespace Maxisoft.Utils.Collections.Queues
                 ug.Check();
                 if (node.Next is { })
                 {
-                    node.Next.Value[0] = node.Value[node.Value.LongLength - 1];
+                    node.Next.Value[0] = node.Value[ChunkSize - 1];
                 }
 
                 Array.Copy(node.Value, 0, node.Value, 1,
                     effectiveLength);
 
                 node = node.Previous ?? throw new IndexOutOfRangeException();
-                effectiveLength = node.Value.Length - 1;
+                effectiveLength = ChunkSize - 1;
             }
 
             Debug.Assert(ReferenceEquals(node, pointer.Node));
 
             if (node.Next is { })
             {
-                node.Next.Value[0] = node.Value[node.Value.LongLength - 1];
+                node.Next.Value[0] = node.Value[ChunkSize - 1];
             }
 
             Array.Copy(node.Value, pointer.Index, node.Value, pointer.Index + 1,
-                node.Value.LongLength - pointer.Index - 1);
+                ChunkSize - pointer.Index - 1);
             pointer.Value = item;
         }
 
