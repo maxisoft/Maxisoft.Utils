@@ -5,7 +5,9 @@ namespace Maxisoft.Utils.Collections.Lists
 {
     public class ArrayListWrapper<T> : ArrayList<T, ArrayListWrapper<T>.NoAlloc>
     {
-        public ArrayListWrapper() : base(0, new NoAlloc())
+        protected internal static NoAlloc DefaultNoAlloc = new NoAlloc();
+
+        public ArrayListWrapper() : base(0, DefaultNoAlloc)
         {
         }
 
@@ -13,7 +15,7 @@ namespace Maxisoft.Utils.Collections.Lists
         {
         }
 
-        public ArrayListWrapper(T[] array, int size) : base(array, size, new NoAlloc())
+        public ArrayListWrapper(T[] array, int size) : base(array, size, DefaultNoAlloc)
         {
         }
 
