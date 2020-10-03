@@ -48,23 +48,19 @@ namespace Maxisoft.Utils.Collections.Lists
         }
 
 
-        public IEnumerator<T> GetEnumerator()
+        public Span<T>.Enumerator GetEnumerator()
         {
-            var c = 0;
-            foreach (var element in _array)
-            {
-                if (c++ >= Count)
-                {
-                    yield break;
-                }
+            return AsSpan().GetEnumerator();
+        }
 
-                yield return element;
-            }
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return ((IEnumerable<T>) new ArraySegment<T>(_array, 0, Count)).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return ((IEnumerable<T>) this).GetEnumerator();
         }
 
         public void Add(T item)
