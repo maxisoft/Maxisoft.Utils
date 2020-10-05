@@ -157,11 +157,6 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            if (LongLength == 0)
-            {
-                return;
-            }
-
             using var ug = _version.CreateGuard();
             long c = 0;
             var p = _begin;
@@ -176,12 +171,13 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public bool Remove(T item)
         {
-            if (IsEmpty)
-            {
-                return false;
-            }
-
             var (index, p) = Find(item);
+            return RemoveAtDispatch(index, in p);
+        }
+        
+        public bool RemoveLast(in T item)
+        {
+            var (index, p) = FindLast(item);
             return RemoveAtDispatch(index, in p);
         }
 
@@ -655,6 +651,23 @@ namespace Maxisoft.Utils.Collections.Queues
 
             return (-1, _end);
         }
+        
+        private (long index, InternalPointer pointer) FindLast(in T item)
+        {
+            var comparer = EqualityComparer<T>.Default;
+            var p = _end - (LongLength > 0 ? 1 : 0);
+            for (var i = LongLength - 1; i >= 0; i--)
+            {
+                if (ReferenceEquals(p.Value, item) || comparer.Equals(item, p.Value))
+                {
+                    return (i, p);
+                }
+
+                p -= 1;
+            }
+
+            return (-1, _begin);
+        }
 
         private (long index, InternalPointer pointer) FindFastPath(in T item)
         {
@@ -685,9 +698,14 @@ namespace Maxisoft.Utils.Collections.Queues
             return (-1, _end);
         }
 
-        public long IndexOfFast(T item)
+        public long IndexOfFast(in T item)
         {
             return FindFastPath(in item).index;
+        }
+        
+        public long LastIndexOf(in T item)
+        {
+            return FindLast(in item).index;
         }
 
         private void InsertLeft(InternalPointer pointer, in T item)

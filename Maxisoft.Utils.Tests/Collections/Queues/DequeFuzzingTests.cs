@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -215,6 +216,35 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
 
             Assert.Equal(arr.Contains(nonExisting), q.Contains(nonExisting));
         }
+        
+        [Theory]
+        [ClassData(typeof(DataGenDifferentSizesAndChunkSizeWithFuzzingIndex))]
+        public void Test_IList_Contains_Fuzzing(long size, long chunkSize, long index)
+        {
+            var q = new Deque<int>(chunkSize);
+            for (var i = 0; i < size; i++)
+            {
+                q.PushBack(i);
+            }
+
+            //construct an array with the expected same elements
+            var arr = size > 0 ? Enumerable.Range(0, (int) size).ToArray() : new int[0];
+
+            Assert.Equal(size, q.LongLength);
+            Assert.Equal(arr, q.ToArray());
+
+            var element = arr[index];
+
+            Assert.Equal(arr.Contains(element), ((IList)q).Contains((object) element));
+
+            int nonExisting;
+            unchecked
+            {
+                nonExisting = _randomThreadSafe.Next() * -1;
+            }
+
+            Assert.Equal(arr.Contains(nonExisting), ((IList)q).Contains((object) nonExisting));
+        }
 
         [Theory]
         [ClassData(typeof(DataGenDifferentSizesAndChunkSizeWithFuzzingIndex))]
@@ -321,6 +351,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                 args => q.TryPeekFront(out _),
                 args => q.TryPeekBack(out _),
                 args => q.Insert((int) args.index, args.value),
+                args => q[args.index] = args.value,
                 args => q.RemoveAt((int) args.index),
                 args => q.PushBack(args.value),
                 args => q.PushFront(args.value),
@@ -330,13 +361,14 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                 args => q.TryPopFront(out _),
                 args => q.TrimExcess(),
                 args => q.IndexOf(args.value),
+                args => q.IndexOfFast(args.value),
                 // balance the number of addition/removal 
                 args => q.PushBack(args.value),
                 args => q.PushFront(args.value)
             };
         }
 
-        private static Action<(long index, T value)>[] BindActionSet<T>(LinkedList<T> l)
+        private static Action<(long index, T value)>[] BindActionSet<T>(LinkedListAsIList<T> l)
         {
             return new Action<(long index, T value)>[]
             {
@@ -383,7 +415,8 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                     {
                     }
                 },
-                args => l.Insert((int) args.index, args.value),
+                args => l.Insert(checked((int) args.index), args.value),
+                args => l[checked((int) args.index)] = args.value,
                 args => l.RemoveAt((int) args.index),
                 args => l.AddLast(args.value),
                 args => l.AddFirst(args.value),
@@ -411,6 +444,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                 },
                 args => { },
                 args => l.IndexOf(args.value),
+                args => l.IndexOfFromBoth(args.value),
                 // balance
                 args => l.AddLast(args.value),
                 args => l.AddFirst(args.value)
@@ -436,7 +470,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
             }
 
             var history = new List<(long index, sbyte value, int action)>();
-            var adversarial = new LinkedList<sbyte>();
+            var adversarial = new LinkedListAsIList<sbyte>();
             var actions = BindActionSet(q);
             var adversarialActions = BindActionSet(adversarial);
 
