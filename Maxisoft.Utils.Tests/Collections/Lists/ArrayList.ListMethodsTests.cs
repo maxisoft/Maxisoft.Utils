@@ -1354,6 +1354,203 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 mockList.Invocations.Clear();
             }
         }
+        
+        [Theory]
+        [ClassData(typeof(RandomSeedGenerator))]
+        public void Test_AddRange_Collection(int seed)
+        {
+            const int maxElements = 32;
+            var random = new TRandom(seed);
+            var numElements = random.Next(maxElements);
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
+            var list = mockList.Object;
+            mockList.Invocations.Clear();
+
+            var adversarial = new List<int>(numElements);
+
+            for (var i = 0; i < numElements; i++)
+            {
+                list.Add(i);
+                adversarial.Add(i);
+            }
+
+            var adversarialBuff = new int[random.Next(maxElements * 2)];
+            var buff = new int[adversarialBuff.Length];
+
+            //fill up the buffers with random data
+            void RandomFill()
+            {
+                for (var i = 0; i < buff.Length; i++)
+                {
+                    var n = random.Next(maxElements);
+                    adversarialBuff[i] = n;
+                    buff[i] = n;
+                }
+            }
+
+            var times = random.Next(maxElements);
+            for (var _ = 0; _ < times; _++)
+            {
+                RandomFill();
+
+                IList<int> randomCollection;
+                if (random.NextDouble() < 0.8)
+                {
+                    var capacity = random.Next(maxElements);
+                    randomCollection = new List<int>(capacity);
+
+                    for (var i = 0; i < capacity; i++)
+                    {
+                        randomCollection.Add(random.Next());
+                    }
+                }
+                else
+                {
+                    randomCollection = null; // => insert into self
+                }
+
+
+                Exception error = null;
+                try
+                {
+                    adversarial.AddRange(randomCollection ?? adversarial);
+                }
+                catch (Exception e)
+                {
+                    error = e;
+                }
+
+                try
+                {
+                    var useTemplate = random.NextBoolean();
+                    if (useTemplate)
+                    {
+                        // ReSharper disable once RedundantTypeArgumentsOfMethod
+                        list.AddRange<IList<int>>(randomCollection ?? list);
+                    }
+                    else
+                    {
+                        list.AddRange((IEnumerable<int>) randomCollection ?? list);
+                    }
+                    
+                    Assert.Null(error);
+                }
+                catch (Exception e) when (!(e is XunitException))
+                {
+                    try
+                    {
+                        Assert.NotNull(error);
+                        Assert.True(e.GetType().IsInstanceOfType(error) || error.GetType().IsInstanceOfType(e));
+                    }
+                    catch (XunitException exception)
+                    {
+                        throw new AggregateException(e, exception);
+                    }
+                }
+
+                if (error is null)
+                {
+                    Assert.Equal(adversarialBuff, buff);
+                }
+
+                Assert.Equal(adversarial, list);
+                mockList.Invocations.Clear();
+            }
+        }
+        
+        
+        [Theory]
+        [ClassData(typeof(RandomSeedGenerator))]
+        public void Test_AddRange_IEnumerable(int seed)
+        {
+            const int maxElements = 32;
+            var random = new TRandom(seed);
+            var numElements = random.Next(maxElements);
+            var mockList = new Mock<ArrayList<int>>(numElements) {CallBase = true};
+            var list = mockList.Object;
+            mockList.Invocations.Clear();
+
+            var adversarial = new List<int>(numElements);
+
+            for (var i = 0; i < numElements; i++)
+            {
+                list.Add(i);
+                adversarial.Add(i);
+            }
+
+            var adversarialBuff = new int[random.Next(maxElements * 2)];
+            var buff = new int[adversarialBuff.Length];
+
+            //fill up the buffers with random data
+            void RandomFill()
+            {
+                for (var i = 0; i < buff.Length; i++)
+                {
+                    var n = random.Next(maxElements);
+                    adversarialBuff[i] = n;
+                    buff[i] = n;
+                }
+            }
+
+            var times = random.Next(maxElements);
+            for (var _ = 0; _ < times; _++)
+            {
+                RandomFill();
+
+                IList<int> randomCollection;
+                if (random.NextDouble() < 0.8)
+                {
+                    var capacity = random.Next(maxElements);
+                    randomCollection = new List<int>(capacity);
+
+                    for (var i = 0; i < capacity; i++)
+                    {
+                        randomCollection.Add(random.Next());
+                    }
+                }
+                else
+                {
+                    randomCollection = null; // => insert into self
+                }
+
+
+                Exception error = null;
+                try
+                {
+                    adversarial.AddRange(randomCollection ?? adversarial);
+                }
+                catch (Exception e)
+                {
+                    error = e;
+                }
+
+                try
+                {
+                    // ReSharper disable once RedundantCast
+                    list.AddRange((IEnumerable<int>) (randomCollection ?? list).Select(i => i));
+                }
+                catch (Exception e) when (!(e is XunitException))
+                {
+                    try
+                    {
+                        Assert.NotNull(error);
+                        Assert.True(e.GetType().IsInstanceOfType(error) || error.GetType().IsInstanceOfType(e));
+                    }
+                    catch (XunitException exception)
+                    {
+                        throw new AggregateException(e, exception);
+                    }
+                }
+
+                if (error is null)
+                {
+                    Assert.Equal(adversarialBuff, buff);
+                }
+
+                Assert.Equal(adversarial, list);
+                mockList.Invocations.Clear();
+            }
+        }
 
         [Theory]
         [ClassData(typeof(RandomSeedGenerator))]

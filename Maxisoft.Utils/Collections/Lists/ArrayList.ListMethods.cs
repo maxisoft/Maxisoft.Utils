@@ -164,14 +164,34 @@ namespace Maxisoft.Utils.Collections.Lists
             return Array.IndexOf(_array, item, index, count);
         }
 
-        public void InsertRange<TCollection>(int index, in TCollection c) where TCollection : ICollection<T>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AddRange<TCollection>(in TCollection collection) where TCollection : ICollection<T>
+        {
+            InsertRange<TCollection>(Count, in collection);
+        }
+        
+        
+        public void AddRange(in IEnumerable<T> collection)
+        {
+            if (collection is ICollection<T> c)
+            {
+                AddRange<ICollection<T>>(in c);
+                return;
+            }
+            foreach (var item in collection)
+            {
+                Add(item);
+            }
+        }
+
+        public void InsertRange<TCollection>(int index, in TCollection collection) where TCollection : ICollection<T>
         {
             if ((uint) index > (uint) Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, "out of bound");
             }
 
-            var count = c.Count;
+            var count = collection.Count;
             if (count == 0)
             {
                 return;
@@ -184,27 +204,27 @@ namespace Maxisoft.Utils.Collections.Lists
             }
 
             // inserting into itself
-            if (ReferenceEquals(this, c))
+            if (ReferenceEquals(this, collection))
             {
                 Array.Copy(Data(), 0, Data(), index, index);
                 Array.Copy(Data(), index + count, Data(), index * 2, Count - index);
             }
             else
             {
-                c.CopyTo(Data(), index);
+                collection.CopyTo(Data(), index);
             }
 
             Count += count;
         }
 
-        public void InsertRange(int index, in IReadOnlyCollection<T> c)
+        public void InsertRange(int index, in IReadOnlyCollection<T> collection)
         {
             if ((uint) index > (uint) Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, "out of bound");
             }
 
-            var count = c.Count;
+            var count = collection.Count;
             if (count == 0)
             {
                 return;
@@ -217,7 +237,7 @@ namespace Maxisoft.Utils.Collections.Lists
             }
 
             // inserting into itself
-            if (ReferenceEquals(this, c))
+            if (ReferenceEquals(this, collection))
             {
                 Array.Copy(Data(), 0, Data(), index, index);
                 Array.Copy(Data(), index + count, Data(), index * 2, Count - index);
@@ -225,7 +245,7 @@ namespace Maxisoft.Utils.Collections.Lists
             else
             {
                 var i = index;
-                foreach (var element in c)
+                foreach (var element in collection)
                 {
                     _array[i++] = element;
                 }
