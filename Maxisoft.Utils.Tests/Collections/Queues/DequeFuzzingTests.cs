@@ -216,7 +216,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
 
             Assert.Equal(arr.Contains(nonExisting), q.Contains(nonExisting));
         }
-        
+
         [Theory]
         [ClassData(typeof(DataGenDifferentSizesAndChunkSizeWithFuzzingIndex))]
         public void Test_IList_Contains_Fuzzing(long size, long chunkSize, long index)
@@ -235,7 +235,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
 
             var element = arr[index];
 
-            Assert.Equal(arr.Contains(element), ((IList)q).Contains((object) element));
+            Assert.Equal(arr.Contains(element), ((IList) q).Contains(element));
 
             int nonExisting;
             unchecked
@@ -243,7 +243,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                 nonExisting = _randomThreadSafe.Next() * -1;
             }
 
-            Assert.Equal(arr.Contains(nonExisting), ((IList)q).Contains((object) nonExisting));
+            Assert.Equal(arr.Contains(nonExisting), ((IList) q).Contains(nonExisting));
         }
 
         [Theory]
@@ -362,6 +362,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                 args => q.TrimExcess(),
                 args => q.IndexOf(args.value),
                 args => q.IndexOfFast(args.value),
+                args => q.LastIndexOf(args.value),
                 // balance the number of addition/removal 
                 args => q.PushBack(args.value),
                 args => q.PushFront(args.value)
@@ -445,6 +446,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                 args => { },
                 args => l.IndexOf(args.value),
                 args => l.IndexOfFromBoth(args.value),
+                args => l.FindLast(args.value),
                 // balance
                 args => l.AddLast(args.value),
                 args => l.AddFirst(args.value)

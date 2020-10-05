@@ -1,7 +1,5 @@
 ﻿using System.Linq;
-using Maxisoft.Utils.Collections;
 using Maxisoft.Utils.Collections.LinkedLists;
-using Maxisoft.Utils.Collections.Queues;
 using Maxisoft.Utils.Collections.Queues.Specialized;
 using Xunit;
 
@@ -19,7 +17,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
 
             void CheckEqualsHeuristicPerformance()
             {
-                Assert.Equal(adversarial.Count,q.Count);
+                Assert.Equal(adversarial.Count, q.Count);
                 if (q.Count < 5)
                 {
                     Assert.Equal(adversarial, q);
@@ -30,7 +28,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                     Assert.Equal(adversarial.Last?.Value, q.Back());
                 }
             }
-            
+
             for (var i = 0; i < q.ChunkSize * 2; i++)
             {
                 q.PushBack(i);
@@ -40,7 +38,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                 adversarial.AddFirst(-i);
                 CheckEqualsHeuristicPerformance();
             }
-            
+
             Assert.Equal(adversarial, q);
 
             while (adversarial.Any())
@@ -53,7 +51,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
                 adversarial.RemoveLast();
                 CheckEqualsHeuristicPerformance();
             }
-            
+
             Assert.Equal(adversarial, q);
         }
     }
