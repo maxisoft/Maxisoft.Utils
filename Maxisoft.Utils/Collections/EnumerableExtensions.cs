@@ -30,6 +30,14 @@ namespace Maxisoft.Utils.Collections
 
         public static ArrayList<T> ToArrayList<T>(this IEnumerable<T> enumerable)
         {
+            switch (enumerable)
+            {
+                case ICollection<T> coll:
+                    return ToArrayList<T>(coll);
+                case IReadOnlyCollection<T> rcoll:
+                    return ToArrayList(rcoll);
+            }
+
             var res = new ArrayList<T>();
             foreach (var element in enumerable)
             {
@@ -39,7 +47,7 @@ namespace Maxisoft.Utils.Collections
             return res;
         }
 
-        public static ArrayList<T> ToArrayList<T>(this ICollection<T> collection)
+        public static ArrayList<T> ToArrayList<T>(ICollection<T> collection)
         {
             var res = new ArrayList<T>(collection.Count);
             foreach (var element in collection)
@@ -50,7 +58,7 @@ namespace Maxisoft.Utils.Collections
             return res;
         }
 
-        public static ArrayList<T> ToArrayList<T>(this IReadOnlyCollection<T> collection)
+        public static ArrayList<T> ToArrayList<T>(IReadOnlyCollection<T> collection)
         {
             var res = new ArrayList<T>(collection.Count);
             foreach (var element in collection)

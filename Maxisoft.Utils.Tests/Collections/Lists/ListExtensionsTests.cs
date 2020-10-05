@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using Maxisoft.Utils.Collections;
 using Maxisoft.Utils.Collections.Lists;
+using Maxisoft.Utils.Collections.Queues;
 using Moq;
 using Troschuetz.Random;
 using Xunit;
@@ -134,6 +138,197 @@ namespace Maxisoft.Utils.Tests.Collections.Lists
                 list[i] = numberGenerator.Next();
                 Assert.Equal(array[i], list[i]);
             }
+        }
+        
+        
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void Test_TryPop(int numElement)
+        {
+            var array = new ArrayList<int>(numElement);
+
+            var numberGenerator = new TRandom(numElement);
+            var shift = numberGenerator.Next();
+
+            for (var i = 0; i < numElement; i++)
+            {
+                array.Add(i + shift);
+            }
+            
+            var originalArray = array.ToImmutableArray();
+
+            if (numElement > 0)
+            {
+                {
+                    Assert.True(array.TryPop(0, out var tmp));
+                    Assert.Equal(0 + shift, tmp);
+                    array.Insert(0, tmp);
+                    Assert.Equal(originalArray, array);
+                }
+                
+
+                for (var i = numElement - 1; i >= 0; i--)
+                {
+                    Assert.True(array.TryPop(i, out var tmp));
+                    Assert.Equal(i + shift, tmp);
+                    array.Insert(i, tmp);
+                    Assert.Equal(originalArray, array);
+                }
+                
+                var q = new Deque<int>();
+                for (var i = 0; i < numElement; i++)
+                {
+                    Assert.True(array.TryPop(out var tmp));
+                    q.PushFront(tmp);
+                    Assert.Equal(array.Count + shift, tmp);
+                }
+               
+                Assert.Empty(array);
+                Assert.False(array.TryPop(out _));
+                
+                array.AddRange(q);
+                Assert.Equal(originalArray, array);
+            }
+            else
+            {
+                Assert.False(array.TryPop(0, out _));
+                Assert.False(array.TryPop(out _));
+            }
+            Assert.Equal(originalArray, array);
+            
+            Assert.False(array.TryPop(-1, out _));
+            Assert.False(array.TryPop(-2, out _));
+            Assert.False(array.TryPop(numElement + 1, out _));
+            Assert.False(array.TryPop(numElement, out _));
+        
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void Test_Pop(int numElement)
+        {
+            var array = new ArrayList<int>(numElement);
+
+            var numberGenerator = new TRandom(numElement);
+            var shift = numberGenerator.Next();
+
+            for (var i = 0; i < numElement; i++)
+            {
+                array.Add(i + shift);
+            }
+            
+            var originalArray = array.ToImmutableArray();
+
+            if (numElement > 0)
+            {
+                {
+                    var tmp = array.Pop(0);
+                    Assert.Equal(0 + shift, tmp);
+                    array.Insert(0, tmp);
+                    Assert.Equal(originalArray, array);
+                }
+
+
+                for (var i = numElement - 1; i >= 0; i--)
+                {
+                    var tmp = array.Pop(i);
+                    Assert.Equal(i + shift, tmp);
+                    array.Insert(i, tmp);
+                    Assert.Equal(originalArray, array);
+                }
+
+                var q = new Deque<int>();
+                for (var i = 0; i < numElement; i++)
+                {
+                    var tmp = array.Pop();
+                    q.PushFront(tmp);
+                    Assert.Equal(array.Count + shift, tmp);
+                }
+
+                Assert.Empty(array);
+                Assert.Throws<ArgumentOutOfRangeException>(() => array.Pop());
+
+                array.AddRange(q);
+                Assert.Equal(originalArray, array);
+            }
+            else
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => array.Pop(0));
+                Assert.Throws<ArgumentOutOfRangeException>(() => array.Pop());
+            }
+
+            Assert.Equal(originalArray, array);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => array.Pop(-1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => array.Pop(-2));
+            Assert.Throws<ArgumentOutOfRangeException>(() => array.Pop(numElement + 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => array.Pop(numElement));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
+        [InlineData(32)]
+        [InlineData(75)]
+        [InlineData(97)]
+        [InlineData(417)]
+        public void Test_AddSorted_List(int numElement)
+        {
+            var array = new List<int>(numElement);
+
+            var numberGenerator = new TRandom(numElement);
+
+            for (var i = 0; i < numElement; i++)
+            {
+                array.Add(numberGenerator.Next(numElement));
+            }
+            
+            array.Sort();
+
+            var item = numberGenerator.Next(numElement);
+            var index = array.AddSorted(item);
+            Assert.Equal(numElement + 1, array.Count);
+            Assert.Equal(item, array[index]);
+            var copy = array.ToImmutableArray();
+            array.Sort();
+            Assert.Equal(copy, array);
+        }
+        
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
+        [InlineData(32)]
+        [InlineData(75)]
+        [InlineData(97)]
+        [InlineData(417)]
+        public void Test_AddSorted_ArrayList(int numElement)
+        {
+            var array = new ArrayList<int>(numElement);
+
+            var numberGenerator = new TRandom(numElement);
+
+            for (var i = 0; i < numElement; i++)
+            {
+                array.Add(numberGenerator.Next(numElement));
+            }
+            
+            array.Sort();
+
+            var item = numberGenerator.Next(numElement);
+            var index = array.AddSorted(item);
+            Assert.Equal(numElement + 1, array.Count);
+            Assert.Equal(item, array[index]);
+            var copy = array.ToImmutableArray();
+            array.Sort();
+            Assert.Equal(copy, array);
         }
     }
 }
