@@ -163,6 +163,18 @@ namespace Maxisoft.Utils.Collections.Lists
 
             return Array.IndexOf(_array, item, index, count);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int LastIndexOf(in T item)
+        {
+            return LastIndexOf(in item, 0, 0);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int LastIndexOf(in T item, int index, int count)
+        {
+            return Array.LastIndexOf(_array, item, index, count);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddRange<TCollection>(in TCollection collection) where TCollection : ICollection<T>
