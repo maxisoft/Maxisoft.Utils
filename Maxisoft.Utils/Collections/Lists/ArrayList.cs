@@ -208,12 +208,14 @@ namespace Maxisoft.Utils.Collections.Lists
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Front()
         {
+            CheckForOutOfBounds(0, nameof(Count));
             return ref _array[0];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Back()
         {
+            CheckForOutOfBounds(Count - 1, nameof(Count));
             return ref _array[Count - 1];
         }
 
