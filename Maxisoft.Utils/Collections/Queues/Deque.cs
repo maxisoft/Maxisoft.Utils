@@ -20,7 +20,7 @@ namespace Maxisoft.Utils.Collections.Queues
     {
         private readonly LinkedList<T[]> _map = new LinkedList<T[]>();
         private readonly UpdateGuardedContainer _version = new UpdateGuardedContainer();
-        private static readonly DefaultAllocator<T> DefaultAllocator = new DefaultAllocator<T>(); 
+        private static readonly DefaultAllocator<T> DefaultAllocator = new DefaultAllocator<T>();
         protected internal readonly IAllocator<T> Allocator = DefaultAllocator;
         protected internal readonly long ChunkSize;
         private InternalPointer _begin;
@@ -36,18 +36,17 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public Deque() : this(DefaultAllocator)
         {
-            
         }
 
-        public Deque(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : this(chunkSize, usage.ToRatio())
+        public Deque(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : this(chunkSize,
+            usage.ToRatio())
         {
         }
 
         public Deque(long chunkSize, float initialChunkRatio) : this(chunkSize, initialChunkRatio, DefaultAllocator)
         {
-            
         }
-        
+
         protected internal Deque(long chunkSize, float initialChunkRatio, IAllocator<T> allocator)
         {
             if (chunkSize <= 0)
@@ -64,6 +63,7 @@ namespace Maxisoft.Utils.Collections.Queues
             {
                 throw new ArgumentException("more than 100% ratio", nameof(initialChunkRatio));
             }
+
             Allocator = allocator;
             InitialChunkRatio = initialChunkRatio;
             ChunkSize = chunkSize;
@@ -174,7 +174,7 @@ namespace Maxisoft.Utils.Collections.Queues
             var (index, p) = Find(item);
             return RemoveAtDispatch(index, in p);
         }
-        
+
         public bool RemoveLast(in T item)
         {
             var (index, p) = FindLast(item);
@@ -651,20 +651,32 @@ namespace Maxisoft.Utils.Collections.Queues
 
             return (-1, _end);
         }
-        
+
         private (long index, InternalPointer pointer) FindLast(in T item)
         {
+            if (IsEmpty)
+            {
+                return (-1, _begin);
+            }
+
             var comparer = EqualityComparer<T>.Default;
-            var p = _end - (LongLength > 0 ? 1 : 0);
-            for (var i = LongLength - 1; i >= 0; i--)
+            var p = _end - 1;
+
+            for (var i = LongLength - 1;;)
             {
                 if (ReferenceEquals(p.Value, item) || comparer.Equals(item, p.Value))
                 {
                     return (i, p);
                 }
 
+                if (--i < 0)
+                {
+                    break;
+                }
+
                 p -= 1;
             }
+
 
             return (-1, _begin);
         }
@@ -679,7 +691,8 @@ namespace Maxisoft.Utils.Collections.Queues
             var comparer = EqualityComparer<T>.Default;
             var forward = _begin;
             var backward = _end - 1;
-            for (long i = 0; i < (LongLength + 1) / 2; i++)
+            var limit = (LongLength + 1) / 2;
+            for (long i = 0;;)
             {
                 if (ReferenceEquals(forward.Value, item) || comparer.Equals(item, forward.Value))
                 {
@@ -689,6 +702,11 @@ namespace Maxisoft.Utils.Collections.Queues
                 if (ReferenceEquals(backward.Value, item) || comparer.Equals(item, backward.Value))
                 {
                     return (LongLength - i - 1, backward);
+                }
+
+                if (++i >= limit)
+                {
+                    break;
                 }
 
                 forward += 1;
@@ -702,7 +720,7 @@ namespace Maxisoft.Utils.Collections.Queues
         {
             return FindFastPath(in item).index;
         }
-        
+
         public long LastIndexOf(in T item)
         {
             return FindLast(in item).index;
