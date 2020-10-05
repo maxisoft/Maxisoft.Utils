@@ -145,14 +145,14 @@ namespace Maxisoft.Utils.Collections.LinkedLists
             return node;
         }
 
-        public static int IndexOf<T>(this LinkedList<T> list, in T value, bool fromStart)
-        {
-            return fromStart ? IndexOfFromStart(list, in value) : IndexOfFromEnd(list, in value);
-        }
-
         public static int IndexOf<T>(this LinkedList<T> list, in T value)
         {
             return IndexOfFromStart(list, value);
+        }
+        
+        public static int LastIndexOf<T>(this LinkedList<T> list, in T value)
+        {
+            return IndexOfFromEnd(list, value);
         }
 
         public static int IndexOfFromBoth<T>(this LinkedList<T> list, in T value)
