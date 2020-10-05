@@ -13,7 +13,7 @@ namespace Maxisoft.Utils.Benchmarks.Collections.LinkedLists
         private readonly LinkedListAsIList<int> _linkedListAsIList = new LinkedListAsIList<int>();
         private readonly TRandom _random = new TRandom();
 
-        [Params(1000, 10000)] public int N;
+        [Params(10, 100)] public int N;
 
         [IterationSetup]
         public void Setup()
