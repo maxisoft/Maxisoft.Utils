@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Maxisoft.Utils.Collections.Allocators;
 using Maxisoft.Utils.Collections.Queues;
 using Maxisoft.Utils.Random;
 using Xunit;
@@ -36,6 +37,10 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
             Assert.DoesNotContain(0, q);
             Assert.DoesNotContain(-1, q);
             Assert.DoesNotContain(1, q);
+            Assert.False(q.IsReadOnly);
+            Assert.Same(q, q.SyncRoot);
+            Assert.False(q.IsSynchronized);
+            Assert.False(q.IsFixedSize);
         }
 
         [Theory]
@@ -50,6 +55,21 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
         {
             Assert.Throws<ArgumentException>(() => new Deque<int>(chunk));
         }
+        
+        [Theory]
+        [InlineData(-0.0001)]
+        [InlineData(-1)]
+        [InlineData(-2)]
+        [InlineData(-float.Epsilon)]
+        [InlineData(1.0 + 1e-6)]
+        [InlineData(2 + 1e-6)]
+        [InlineData(float.NaN)]
+        [InlineData(float.PositiveInfinity)]
+        [InlineData(float.NegativeInfinity)]
+        public void TestConstructor_InvalidRatio(float ratio)
+        {
+            Assert.Throws<ArgumentException>(() => new Deque<int>(512, ratio, new DefaultAllocator<int>()));
+        }
 
 
         [Theory]
@@ -61,6 +81,27 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
             {
                 Assert.Equal(i, q.LongLength);
                 q.PushBack(i);
+                Assert.Equal(i + 1, q.LongLength);
+                Assert.Equal(Enumerable.Range(0, i + 1), q);
+            }
+
+            //construct an array with the expected same elements
+            var arr = size > 0 ? Enumerable.Range(0, (int) size).ToArray() : new int[0];
+
+            Assert.Equal(size, q.LongLength);
+            Assert.Equal(size, q.Length);
+            Assert.Equal(arr, q.ToArray());
+        }
+        
+        [Theory]
+        [ClassData(typeof(DataGenDifferentSizesAndChunkSize))]
+        public void Test_IList_Add(long size, long chunkSize)
+        {
+            var q = new Deque<int>(chunkSize);
+            for (var i = 0; i < size; i++)
+            {
+                Assert.Equal(i, q.LongLength);
+                ((IList)q).Add((object) i);
                 Assert.Equal(i + 1, q.LongLength);
                 Assert.Equal(Enumerable.Range(0, i + 1), q);
             }
@@ -138,6 +179,43 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
             }
 
             Assert.Equal(new long[] {8}, q);
+        }
+        
+        [Fact]
+        public void Test_IList_Indexof()
+        {
+            var q = new Deque<long> {1L, 8L};
+            Assert.Equal(0, ((IList) q).IndexOf((object) 1L));
+            Assert.Equal(1, ((IList) q).IndexOf((object) 8L));
+            Assert.Equal(-1, ((IList) q).IndexOf(new object()));
+            Assert.Equal(-1, ((IList) q).IndexOf((object) (int) 1)); // this object is a int not a long 
+            Assert.Equal(-1, ((IList) q).IndexOf((object) 12));
+        }
+        
+        [Fact]
+        public void Test_IList_Indexers()
+        {
+            var q = new Deque<long> {1L, 8L};
+            Assert.Equal(1L, ((IList)q)[0]);
+            Assert.Equal(8L, ((IList)q)[1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[2]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[3]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[int.MaxValue]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[-2]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[int.MinValue]);
+
+            ((IList) q)[0] = 2L;
+            Assert.Equal(new long[]{2, 8}, q);
+            ((IList) q)[1] = 5L;
+            Assert.Equal(new long[]{2, 5}, q);
+            
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[2] = 9L);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[3] = 9L);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[int.MaxValue] = 9L);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[-1] = 9L);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[-2] = 9L);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ((IList)q)[int.MinValue] = 9L);
         }
 
         [Theory]
@@ -226,7 +304,86 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
 
             Assert.True(q.Remove(2));
         }
+        
+        
+        [Fact]
+        public void Test_LastIndexOf_DuplicateValues_And_MultipleTimes()
+        {
+            var q = new Deque<long> {1L, 8L, 2L, 8L, 8L};
+            Assert.Equal(1, q.IndexOf(8));
+            Assert.Equal(4, q.IndexOfFast(8));
+            Assert.Equal(4, q.LastIndexOf(8));
+            Assert.Equal(0, q.LastIndexOf(1));
+            
+            Assert.Equal(-1, q.LastIndexOf(3));
+            Assert.Equal(-1, q.LastIndexOf(long.MaxValue));
+            Assert.Equal(-1, q.LastIndexOf(0));
+            Assert.Equal(-1, q.LastIndexOf(-1));
+        }
+        
+        [Fact]
+        public void Test_RemoveLast_DuplicateValues_And_MultipleTimes()
+        {
+            var q = new Deque<long> {1L, 8L, 2L, 8L, 8L};
+            Assert.True(q.RemoveLast(1));
+            Assert.Equal(new long[]{ 8L, 2L, 8L, 8L}, q);
+            Assert.True(q.RemoveLast(8L));
+            Assert.Equal(new long[]{ 8L, 2L, 8L}, q);
+            Assert.True(q.RemoveLast(8L));
+            Assert.Equal(new long[]{ 8L, 2L}, q);
+            Assert.True(q.RemoveLast(8L));
+            Assert.Equal(new long[]{ 2L}, q);
+            Assert.False(q.RemoveLast(8L));
+            Assert.False(q.RemoveLast(0));
+            Assert.False(q.RemoveLast(-1));
+            Assert.False(q.RemoveLast(long.MaxValue));
+            Assert.False(q.RemoveLast(long.MinValue));
+            Assert.True(q.RemoveLast(2L));
+            Assert.Empty(q);
 
+            {
+                Assert.False(q.RemoveLast(8L));
+                Assert.False(q.RemoveLast(0));
+                Assert.False(q.RemoveLast(-1));
+                Assert.False(q.RemoveLast(long.MaxValue));
+                Assert.False(q.RemoveLast(long.MinValue));
+                Assert.False(q.RemoveLast(1L));
+            }
+
+        }
+
+        
+        [Fact]
+        public void Test_IList_Remove_DuplicateValues_And_MultipleTimes()
+        {
+            var q = new Deque<long> {1L, 2L, 8L, 8L, 8L};
+            ((IList)q).Remove((object) 1L);
+            Assert.Equal(new long[] {2L, 8L, 8L, 8L}, q);
+            for (var i = 0; i < 3; i++)
+            {
+                ((IList)q).Remove((object) 8L);
+            }
+            Assert.Equal(new long[] {2L}, q);
+            ((IList)q).Remove((object) 1L);
+            Assert.Equal(new long[] {2L}, q);
+        }
+        
+        [Fact]
+        public void Test_RemoveFast_DuplicateValues_And_MultipleTimes()
+        {
+            var q = new Deque<long> {1L, 2L, 8L, 8L, 8L};
+            Assert.True(q.RemoveFast(1L));
+            Assert.Equal(new long[] {2L, 8L, 8L, 8L}, q);
+            for (var i = 0; i < 3; i++)
+            {
+                Assert.True(q.RemoveFast(8L));
+            }
+            Assert.False(q.RemoveFast(8L));
+            Assert.Equal(new long[] {2L}, q);
+            Assert.False(q.RemoveFast( 1L));
+            Assert.Equal(new long[] {2L}, q);
+        }
+        
         [Fact]
         public void TestRemove_LegacyCase()
         {
