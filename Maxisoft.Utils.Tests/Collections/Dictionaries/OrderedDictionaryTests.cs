@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Maxisoft.Utils.Collections;
 using Maxisoft.Utils.Collections.Dictionaries;
+using Maxisoft.Utils.Collections.Lists;
 using Xunit;
 using Xunit.Sdk;
 
@@ -93,6 +95,8 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                 var obj = objectPool[i];
                 Assert.Equal(obj, d[i]);
             }
+            
+            var other = new OrderedDictionary<string, object>();
         }
 
 
@@ -476,6 +480,13 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                 Assert.Equal(i, d.At(index: i).Value);
                 Assert.Equal(exp, d.At(index: i).Key);
             }
+
+            // test not the same exception for key or index
+            {
+                Assert.Throws<KeyNotFoundException>(() => d.At(key: int.MaxValue));
+                Assert.Throws<ArgumentOutOfRangeException>(() => d.At(index:int.MaxValue));
+            }
+
         }
 
         [Fact]
@@ -515,17 +526,149 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                 {"three", objectPool[3]},
             };
 
-            d.Move(2, 0);
-
-            var expected = new OrderedDictionary<string, object>()
             {
-                {"two", objectPool[2]},
+                d.Move(2, 0);
+
+                var expected = new OrderedDictionary<string, object>()
+                {
+                    {"two", objectPool[2]},
+                    {"zero", objectPool[0]},
+                    {"one", objectPool[1]},
+                    {"three", objectPool[3]},
+                };
+
+                Assert.Equal(expected, d);
+            }
+
+            {
+                d.Move(0, 2);
+                
+                var expected = new OrderedDictionary<string, object>()
+                {
+                    {"zero", objectPool[0]},
+                    {"one", objectPool[1]},
+                    {"two", objectPool[2]},
+                    {"three", objectPool[3]},
+                };
+
+                Assert.Equal(expected, d);
+            }
+            
+        }
+        
+        [Fact]
+        public void Test_2_Move()
+        {
+            var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
+            var d = new OrderedDictionary<string, object>()
+            {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
+                {"two", objectPool[2]},
                 {"three", objectPool[3]},
             };
 
-            Assert.Equal(expected, d);
+            {
+                d.SmallListMove(2, 0);
+
+                var expected = new OrderedDictionary<string, object>()
+                {
+                    {"two", objectPool[2]},
+                    {"zero", objectPool[0]},
+                    {"one", objectPool[1]},
+                    {"three", objectPool[3]},
+                };
+
+                Assert.Equal(expected, d);
+            }
+
+            {
+                d.NativeMove(0, 2);
+                
+                var expected = new OrderedDictionary<string, object>()
+                {
+                    {"zero", objectPool[0]},
+                    {"one", objectPool[1]},
+                    {"two", objectPool[2]},
+                    {"three", objectPool[3]},
+                };
+
+                Assert.Equal(expected, d);
+            }
+        }
+        
+        [Fact]
+        public void Test_Keys_And_Values_Properties()
+        {
+            var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
+            var d = new OrderedDictionary<string, object>()
+            {
+                {"zero", objectPool[0]},
+                {"one", objectPool[1]},
+                {"two", objectPool[2]},
+                {"three", objectPool[3]},
+            };
+
+            var keys = new ArrayList<string>()
+            {
+                "zero", "one", "two", "three"
+            };
+            
+            // Keys tests
+            {
+                Assert.Equal(keys, d.Keys);
+
+                Assert.True(d.Keys.Contains("one"));
+                Assert.True(d.Keys.Contains("zero"));
+                Assert.False(d.Keys.Contains("non existing element"));
+
+                Assert.Throws<InvalidOperationException>(() => d.Keys.Add("any"));
+                Assert.Throws<InvalidOperationException>(() => d.Keys.Remove("any"));
+                Assert.Throws<InvalidOperationException>(() => d.Keys.Clear());
+                Assert.Equal(keys.Count, d.Keys.Count);
+            
+                Assert.True(d.Keys.IsReadOnly);
+
+                // copy to
+                {
+                    var expected = keys.ToArray();
+                    Assert.Equal(expected, d.Keys.ToArray());
+                    Assert.Throws<ArgumentOutOfRangeException>(() => d.Keys.CopyTo(expected, -1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => d.Keys.CopyTo(expected, 1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => d.Keys.CopyTo(expected, -1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => d.Keys.CopyTo(expected, 1));
+                }
+            }
+
+            var values = objectPool.ToArrayList();
+            
+            // Values tests
+            {
+                Assert.Equal(values, d.Values);
+
+                Assert.True(d.Values.Contains(objectPool[0]));
+                Assert.True(d.Values.Contains(objectPool[1]));
+                Assert.False(d.Values.Contains(int.MaxValue));
+
+                Assert.Throws<InvalidOperationException>(() => d.Values.Add(objectPool[0]));
+                Assert.Throws<InvalidOperationException>(() => d.Values.Remove(objectPool[0]));
+                Assert.Throws<InvalidOperationException>(() => d.Values.Clear());
+                Assert.Equal(values.Count, d.Values.Count);
+            
+                Assert.True(d.Values.IsReadOnly);
+
+                // copy to
+                {
+                    var expected = values.ToArray();
+                    Assert.Equal(expected, d.Values.ToArray());
+                    Assert.Throws<ArgumentOutOfRangeException>(() => d.Values.CopyTo(expected, -1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => d.Values.CopyTo(expected, 1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => d.Values.CopyTo(expected, -1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => d.Values.CopyTo(expected, 1));
+                    
+                }
+            }
+            
         }
     }
 }
