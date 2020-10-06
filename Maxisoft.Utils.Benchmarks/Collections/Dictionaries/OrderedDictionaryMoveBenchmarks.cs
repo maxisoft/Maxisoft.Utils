@@ -7,16 +7,15 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Dictionaries
 {
     public class OrderedDictionaryMoveBenchmarks
     {
-        private OrderedDictionary<int, BigStruct> _dictionary = new OrderedDictionary<int, BigStruct>();
-
         private readonly TRandom _random = new TRandom();
+        private OrderedDictionary<int, BigStruct> _dictionary = new OrderedDictionary<int, BigStruct>();
 
         [Params(10, 100, 1000)] public int N;
 
         [IterationSetup]
         public void Setup()
         {
-            _dictionary = new OrderedDictionary<int, BigStruct>(capacity: N);
+            _dictionary = new OrderedDictionary<int, BigStruct>(N);
 
             for (var i = 0; i < N; i++)
             {
@@ -28,14 +27,6 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Dictionaries
         public void Cleanup()
         {
             _dictionary.Clear();
-        }
-
-        /// <summary>
-        /// Note that varying buffer's size shouldn't have a impact on this benchmark
-        /// </summary>
-        internal unsafe struct BigStruct
-        {
-            public fixed sbyte fixedBuffer[256];
         }
 
         [Benchmark]
@@ -62,6 +53,14 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Dictionaries
                 from += 1;
                 to -= 1;
             }
+        }
+
+        /// <summary>
+        ///     Note that varying buffer's size shouldn't have a impact on this benchmark
+        /// </summary>
+        internal unsafe struct BigStruct
+        {
+            public fixed sbyte fixedBuffer[256];
         }
     }
 }

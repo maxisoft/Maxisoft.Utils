@@ -32,7 +32,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         protected internal OrderedDictionary(in TDictionary initial) : this(in initial, new TList())
         {
         }
-        
+
         protected internal OrderedDictionary(in TDictionary initial, in TList list)
         {
             Dictionary = initial;
@@ -451,6 +451,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
                 {
                     throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "Out of bounds");
                 }
+
                 Dictionary.Indexes.CopyTo(array, arrayIndex);
             }
 
@@ -539,13 +540,15 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         }
     }
 
-    public class OrderedDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, ArrayList<TKey>, Dictionary<TKey, TValue>>
+    public class
+        OrderedDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, ArrayList<TKey>, Dictionary<TKey, TValue>>
     {
         public OrderedDictionary()
         {
         }
 
-        public OrderedDictionary(int capacity) : base(new Dictionary<TKey, TValue>(capacity), new ArrayList<TKey>(capacity))
+        public OrderedDictionary(int capacity) : base(new Dictionary<TKey, TValue>(capacity),
+            new ArrayList<TKey>(capacity))
         {
         }
 
@@ -557,12 +560,12 @@ namespace Maxisoft.Utils.Collections.Dictionaries
             new Dictionary<TKey, TValue>(capacity, comparer), new ArrayList<TKey>(capacity))
         {
         }
-        
+
         internal void NativeMove(int fromIndex, int toIndex)
         {
             base.Move(fromIndex, toIndex);
         }
-        
+
         internal void SpanMove(int fromIndex, int toIndex)
         {
             CheckForOutOfBounds(fromIndex);
