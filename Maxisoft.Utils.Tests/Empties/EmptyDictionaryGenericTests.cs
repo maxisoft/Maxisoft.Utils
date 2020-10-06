@@ -16,6 +16,7 @@ namespace Maxisoft.Utils.Tests.Empties
         {
             var dict = new EmptyDictionary<string, string>();
             Assert.Throws<InvalidOperationException>(() => dict.Add(key, value));
+            Assert.Throws<InvalidOperationException>(() => dict.Add(new KeyValuePair<string, string>(key, value)));
         }
         
         [Fact]
@@ -75,10 +76,11 @@ namespace Maxisoft.Utils.Tests.Empties
         }
         
         [Theory, AutoData]
-        public void TestRemove(string key)
+        public void TestRemove(string key, string value)
         {
             var dict = new EmptyDictionary<string, string>();
-            dict.Remove(key);
+            Assert.False(dict.Remove(key));
+            Assert.False(dict.Remove(new KeyValuePair<string, string>(key, value)));
             Assert.Empty(dict);
         }
         
