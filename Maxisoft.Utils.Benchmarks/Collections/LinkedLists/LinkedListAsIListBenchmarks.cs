@@ -6,8 +6,6 @@ using Troschuetz.Random;
 
 namespace Maxisoft.Utils.Benchmarks.Collections.LinkedLists
 {
-    [RPlotExporter]
-    [JsonExporter]
     public class LinkedListAsIListBenchmarks
     {
         private readonly LinkedListAsIList<int> _linkedListAsIList = new LinkedListAsIList<int>();
