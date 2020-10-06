@@ -28,9 +28,14 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         {
         }
 
-        public OrderedDictionary(in TDictionary initial)
+        protected internal OrderedDictionary(in TDictionary initial) : this(in initial, new TList())
+        {
+        }
+        
+        protected internal OrderedDictionary(in TDictionary initial, in TList list)
         {
             Dictionary = initial;
+            Indexes = list;
             foreach (var value in initial)
             {
                 Indexes.Add(value.Key);
@@ -539,7 +544,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         {
         }
 
-        public OrderedDictionary(int capacity) : base(new Dictionary<TKey, TValue>(capacity))
+        public OrderedDictionary(int capacity) : base(new Dictionary<TKey, TValue>(capacity), new List<TKey>(capacity))
         {
         }
 
@@ -548,11 +553,16 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         }
 
         public OrderedDictionary(int capacity, IEqualityComparer<TKey> comparer) : base(
-            new Dictionary<TKey, TValue>(capacity, comparer))
+            new Dictionary<TKey, TValue>(capacity, comparer), new List<TKey>(capacity))
         {
         }
-
-        public override void Move(int fromIndex, int toIndex)
+        
+        internal void NativeMove(int fromIndex, int toIndex)
+        {
+            base.Move(fromIndex, toIndex);
+        }
+        
+        internal void SmallListMove(int fromIndex, int toIndex)
         {
             CheckForOutOfBounds(fromIndex);
             CheckForOutOfBounds(toIndex);
@@ -580,6 +590,18 @@ namespace Maxisoft.Utils.Collections.Dictionaries
             }
 
             Indexes[toIndex] = tmp;
+        }
+
+        public override void Move(int fromIndex, int toIndex)
+        {
+            if (Count < 256)
+            {
+                SmallListMove(fromIndex, toIndex);
+            }
+            else
+            {
+                NativeMove(fromIndex, toIndex);
+            }
         }
     }
 }
