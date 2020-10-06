@@ -17,6 +17,8 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
             Assert.Throws<InvalidOperationException>(() => new DictionaryChain<string, int>());
             Assert.Throws<IndexOutOfRangeException>(() =>
                 new DictionaryChain<string, int>(new IDictionary<string, int>[0]));
+            Assert.Throws<IndexOutOfRangeException>(() =>
+                new DictionaryChain<string, int>(Enumerable.Empty<IDictionary<string, int>>()));
         }
 
         [Fact]
@@ -41,6 +43,8 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
             var chain = new DictionaryChain<string, int>(even, odd, empty);
             Assert.Equal(6, chain.Count);
             Assert.Equal(3, chain.DictionariesChain.Length);
+            Assert.False(chain.IsReadOnly);
+            evenMock.Verify(mock => mock.IsReadOnly);
             Assert.Same(even, chain.DictionariesChain.ToArray()[0]);
             var expected = new OrderedDictionary<string, int>
             {
@@ -179,6 +183,10 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                 Assert.False(chain.Remove("one"));
                 evenMock.Verify(mock => mock.Remove("one"), Times.Exactly(2));
                 evenMock.VerifyNoOtherCalls();
+                evenMock.Invocations.Clear();
+                Assert.False(chain.Remove(new KeyValuePair<string, int>("one", -1)));
+                evenMock.Verify(mock => mock.Remove(new KeyValuePair<string, int>("one", -1)), Times.Exactly(1));
+                evenMock.VerifyNoOtherCalls();
                 expected.Move(expected.IndexOf("one"), 4);
                 expected["one"] = 1;
                 Assert.Equal(expected, chain);
@@ -296,6 +304,27 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                 evenMock.Invocations.Clear();
 
                 Assert.Equal(-1, odd["one"]); // odd's pair ("one, 1) changed
+                evenMock.Invocations.Clear();
+                wasEmptyMock.Invocations.Clear();
+            }
+            
+            even.Remove("one");
+            Assert.False(even.ContainsKey("one"));
+            wasEmptyMock.Object.Clear();
+            evenMock.Invocations.Clear();
+            wasEmptyMock.Invocations.Clear();
+            
+            // Test update all with no upsert
+            {
+                chain.UpdateAll("one", -2, upsert: false);
+                evenMock.Verify(mock => mock.ContainsKey("one"));
+                evenMock.VerifyNoOtherCalls();
+                wasEmptyMock.Verify(mock => mock.ContainsKey("one"));
+                wasEmptyMock.VerifyNoOtherCalls();
+                Assert.Equal(-2, chain["one"]);
+                
+                // now re add
+                chain.UpdateAll("one", -1, upsert: true);
                 evenMock.Invocations.Clear();
                 wasEmptyMock.Invocations.Clear();
             }
@@ -472,6 +501,181 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
 
             Assert.Throws<ArgumentOutOfRangeException>(() => chain.CopyTo(bigArray, chainCount + 1));
             Assert.Throws<ArgumentOutOfRangeException>(() => chain.CopyTo(bigArray, -1));
+        }
+
+        [Fact]
+        public void Test_Indexer_NonExistingKey()
+        {
+            var evenMock = new Mock<VirtualDictionaryWrapper<string, int, OrderedDictionary<string, int>>>
+                {CallBase = true};
+            evenMock.Object.Add("zero", 0);
+            evenMock.Object.Add("two", 2);
+            evenMock.Object.Add("four", 4);
+            evenMock.Invocations.Clear();
+
+            var even = evenMock.Object;
+            var odd = new OrderedDictionary<string, int>
+            {
+                {"one", 1},
+                {"three", 3},
+                {"five", 5}
+            };
+
+            var expected = new OrderedDictionary<string, int>
+            {
+                {"zero", 0},
+                {"two", 2},
+                {"four", 4},
+                {"one", 1},
+                {"three", 3},
+                {"five", 5}
+            };
+
+
+            var chain = new DictionaryChain<string, int>(even, odd);
+            var chainCount = chain.Count; // save result as Count is expensive to compute
+            Assert.Equal(6, chainCount);
+
+            Assert.Throws<KeyNotFoundException>(() => chain["non existing"]);
+            evenMock.Verify(mock => mock.TryGetValue("non existing", out It.Ref<int>.IsAny));
+        }
+
+        [Fact]
+        public void Test_ContainsAny()
+        {
+            var evenMock = new Mock<VirtualDictionaryWrapper<string, int, OrderedDictionary<string, int>>>
+                {CallBase = true};
+            evenMock.Object.Add("zero", 0);
+            evenMock.Object.Add("two", 2);
+            evenMock.Object.Add("four", 4);
+            evenMock.Invocations.Clear();
+
+            var even = evenMock.Object;
+            var odd = new OrderedDictionary<string, int>
+            {
+                {"zero", int.MinValue},
+                {"one", 1},
+                {"three", 3},
+                {"five", 5}
+            };
+
+            var empty = new NoOpDictionary<string, int>();
+            var chain = new DictionaryChain<string, int>(even, odd, empty);
+            Assert.True(chain.ContainsAny(new KeyValuePair<string, int>("zero", 0)));
+            Assert.True(chain.ContainsAny(new KeyValuePair<string, int>("zero", int.MinValue)));
+            Assert.False(chain.ContainsAny(new KeyValuePair<string, int>("zero", 10)));
+            Assert.False(chain.ContainsAny(new KeyValuePair<string, int>("non existing", 0)));
+        }
+        
+        [Fact]
+        public void Test_BuildFlatDictionary()
+        {
+            var evenMock = new Mock<VirtualDictionaryWrapper<string, int, OrderedDictionary<string, int>>>
+                {CallBase = true};
+            evenMock.Object.Add("zero", 0);
+            evenMock.Object.Add("two", 2);
+            evenMock.Object.Add("four", 4);
+            evenMock.Invocations.Clear();
+
+            var even = evenMock.Object;
+            var odd = new OrderedDictionary<string, int>
+            {
+                {"zero", int.MinValue},
+                {"one", 1},
+                {"three", 3},
+                {"five", 5}
+            };
+
+            var empty = new NoOpDictionary<string, int>();
+            var chain = new DictionaryChain<string, int>(even, odd, empty);
+
+            var flat = chain.BuildFlatDictionary<OrderedDictionary<string, int>>();
+            Assert.Equal(chain.Count, flat.Count);
+
+            Assert.Equal(chain, flat); // note that we use OrderedDictionary to enforce pairs order
+        }
+        
+        
+        [Fact]
+        public void Test_Keys_And_Values_Properties()
+        {
+            var evenMock = new Mock<VirtualDictionaryWrapper<string, int, OrderedDictionary<string, int>>>
+                {CallBase = true};
+            evenMock.Object.Add("zero", 0);
+            evenMock.Object.Add("two", 2);
+            evenMock.Object.Add("four", 4);
+            evenMock.Invocations.Clear();
+
+            var even = evenMock.Object;
+            var odd = new OrderedDictionary<string, int>
+            {
+                {"zero", int.MinValue},
+                {"one", 1},
+                {"three", 3},
+                {"five", 5}
+            };
+
+            var empty = new NoOpDictionary<string, int>();
+            var chain = new DictionaryChain<string, int>(even, odd, empty);
+
+            var flat = chain.BuildFlatDictionary<OrderedDictionary<string, int>>();
+            Assert.Equal(chain.Count, flat.Count);
+
+            Assert.Equal(chain, flat); // note that we use OrderedDictionary to enforce pairs order
+
+            // Keys tests
+            {
+                Assert.Equal(flat.Keys, chain.Keys);
+
+                Assert.True(chain.Keys.Contains("one"));
+                Assert.True(chain.Keys.Contains("zero"));
+                Assert.False(chain.Keys.Contains("non existing element"));
+
+                Assert.Throws<InvalidOperationException>(() => chain.Keys.Add("any"));
+                Assert.Throws<InvalidOperationException>(() => chain.Keys.Remove("any"));
+                Assert.Throws<InvalidOperationException>(() => chain.Keys.Clear());
+                Assert.Equal(flat.Keys.Count, chain.Keys.Count);
+            
+                Assert.True(chain.Keys.IsReadOnly);
+
+                // copy to
+                {
+                    var expected = flat.Keys.ToArray();
+                    Assert.Equal(expected, chain.Keys.ToArray());
+                    Assert.Throws<ArgumentOutOfRangeException>(() => chain.Keys.CopyTo(expected, -1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => chain.Keys.CopyTo(expected, 1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => flat.Keys.CopyTo(expected, -1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => flat.Keys.CopyTo(expected, 1));
+                }
+            }
+            
+            // Values tests
+            {
+                Assert.Equal(flat.Values, chain.Values);
+
+                Assert.True(chain.Values.Contains(0));
+                Assert.True(chain.Values.Contains(1));
+                Assert.False(chain.Values.Contains(int.MaxValue));
+
+                Assert.Throws<InvalidOperationException>(() => chain.Values.Add(int.MaxValue));
+                Assert.Throws<InvalidOperationException>(() => chain.Values.Remove(0));
+                Assert.Throws<InvalidOperationException>(() => chain.Values.Clear());
+                Assert.Equal(flat.Values.Count, chain.Values.Count);
+            
+                Assert.True(chain.Values.IsReadOnly);
+
+                // copy to
+                {
+                    var expected = flat.Values.ToArray();
+                    Assert.Equal(expected, chain.Values.ToArray());
+                    Assert.Throws<ArgumentOutOfRangeException>(() => chain.Values.CopyTo(expected, -1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => chain.Values.CopyTo(expected, 1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => flat.Values.CopyTo(expected, -1));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => flat.Values.CopyTo(expected, 1));
+                    
+                }
+            }
+            
         }
 
         /// <summary>
