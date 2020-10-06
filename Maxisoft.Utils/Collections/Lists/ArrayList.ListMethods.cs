@@ -163,13 +163,13 @@ namespace Maxisoft.Utils.Collections.Lists
 
             return Array.IndexOf(_array, item, index, count);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int LastIndexOf(in T item)
         {
             return LastIndexOf(in item, 0, 0);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int LastIndexOf(in T item, int index, int count)
         {
@@ -181,8 +181,8 @@ namespace Maxisoft.Utils.Collections.Lists
         {
             InsertRange<TCollection>(Count, in collection);
         }
-        
-        
+
+
         public void AddRange(in IEnumerable<T> collection)
         {
             if (collection is ICollection<T> c)
@@ -190,6 +190,7 @@ namespace Maxisoft.Utils.Collections.Lists
                 AddRange<ICollection<T>>(in c);
                 return;
             }
+
             foreach (var item in collection)
             {
                 Add(item);

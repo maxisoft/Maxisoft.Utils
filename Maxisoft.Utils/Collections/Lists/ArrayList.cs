@@ -48,9 +48,15 @@ namespace Maxisoft.Utils.Collections.Lists
         }
 
 
-        public Span<T>.Enumerator GetEnumerator()
+        public ref T this[int index]
         {
-            return AsSpan().GetEnumerator();
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+
+            {
+                CheckForOutOfBounds(index, nameof(index));
+                return ref _array[index];
+            }
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
@@ -133,7 +139,7 @@ namespace Maxisoft.Utils.Collections.Lists
         }
 
 
-        public T this[int index]
+        T IList<T>.this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -147,6 +153,22 @@ namespace Maxisoft.Utils.Collections.Lists
                 CheckForOutOfBounds(index, nameof(index));
                 _array[index] = value;
             }
+        }
+
+        T IReadOnlyList<T>.this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                CheckForOutOfBounds(index, nameof(index));
+                return _array[index];
+            }
+        }
+
+
+        public Span<T>.Enumerator GetEnumerator()
+        {
+            return AsSpan().GetEnumerator();
         }
 
         protected internal virtual int ComputeGrowSize(int size, int capacity)
@@ -174,22 +196,6 @@ namespace Maxisoft.Utils.Collections.Lists
                 var capacity = Count;
                 Allocator.ReAlloc(ref _array, ref capacity);
                 Count = capacity;
-            }
-        }
-
-        public void Resize(int size, bool clear = true)
-        {
-            if (size < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(size), size, "negative");
-            }
-
-            var prevSize = Count;
-            EnsureCapacity(size);
-            Count = size;
-            if (clear && size < prevSize)
-            {
-                Array.Clear(_array, size, prevSize - size);
             }
         }
 
