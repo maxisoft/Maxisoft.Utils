@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Maxisoft.Utils.Collections.Lists;
 using Maxisoft.Utils.Collections.UpdateGuards;
 
 namespace Maxisoft.Utils.Collections.Dictionaries
@@ -538,13 +539,13 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         }
     }
 
-    public class OrderedDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, List<TKey>, Dictionary<TKey, TValue>>
+    public class OrderedDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, ArrayList<TKey>, Dictionary<TKey, TValue>>
     {
         public OrderedDictionary()
         {
         }
 
-        public OrderedDictionary(int capacity) : base(new Dictionary<TKey, TValue>(capacity), new List<TKey>(capacity))
+        public OrderedDictionary(int capacity) : base(new Dictionary<TKey, TValue>(capacity), new ArrayList<TKey>(capacity))
         {
         }
 
@@ -553,7 +554,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         }
 
         public OrderedDictionary(int capacity, IEqualityComparer<TKey> comparer) : base(
-            new Dictionary<TKey, TValue>(capacity, comparer), new List<TKey>(capacity))
+            new Dictionary<TKey, TValue>(capacity, comparer), new ArrayList<TKey>(capacity))
         {
         }
         
@@ -562,7 +563,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
             base.Move(fromIndex, toIndex);
         }
         
-        internal void SmallListMove(int fromIndex, int toIndex)
+        internal void SpanMove(int fromIndex, int toIndex)
         {
             CheckForOutOfBounds(fromIndex);
             CheckForOutOfBounds(toIndex);
@@ -573,35 +574,12 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
             using var ug = Version.CreateGuard(true);
 
-            var tmp = Indexes[fromIndex];
-            if (fromIndex < toIndex)
-            {
-                for (var i = fromIndex; i < toIndex; i++)
-                {
-                    Indexes[i] = Indexes[i + 1];
-                }
-            }
-            else
-            {
-                for (var i = fromIndex; i > toIndex; i--)
-                {
-                    Indexes[i] = Indexes[i - 1];
-                }
-            }
-
-            Indexes[toIndex] = tmp;
+            Indexes.Move(fromIndex, toIndex);
         }
 
         public override void Move(int fromIndex, int toIndex)
         {
-            if (Count < 256)
-            {
-                SmallListMove(fromIndex, toIndex);
-            }
-            else
-            {
-                NativeMove(fromIndex, toIndex);
-            }
+            SpanMove(fromIndex, toIndex);
         }
     }
 }
