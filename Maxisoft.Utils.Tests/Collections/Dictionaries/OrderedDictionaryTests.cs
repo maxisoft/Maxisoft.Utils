@@ -569,7 +569,7 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
             };
 
             {
-                d.SmallListMove(2, 0);
+                d.SpanMove(2, 0);
 
                 var expected = new OrderedDictionary<string, object>()
                 {

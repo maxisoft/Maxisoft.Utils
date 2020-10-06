@@ -39,20 +39,20 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Dictionaries
         }
 
         [Benchmark]
-        public void SmallListMove()
+        public void SpanMove()
         {
             var from = 0;
             var to = _dictionary.Count - 1;
             for (var i = 0; i < _dictionary.Count; i++)
             {
-                _dictionary.SmallListMove(from, to);
+                _dictionary.SpanMove(from, to);
                 from += 1;
                 to -= 1;
             }
         }
 
         [Benchmark]
-        public void MoveNative()
+        public void NativeMove()
         {
             var from = 0;
             var to = _dictionary.Count - 1;
