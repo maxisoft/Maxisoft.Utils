@@ -436,6 +436,15 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
             public void CopyTo(TKey[] array, int arrayIndex)
             {
+                if (arrayIndex < 0 || arrayIndex > array.Length)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "Out of bounds");
+                }
+
+                if (array.Length - arrayIndex < Dictionary.Count)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "Out of bounds");
+                }
                 Dictionary.Indexes.CopyTo(array, arrayIndex);
             }
 

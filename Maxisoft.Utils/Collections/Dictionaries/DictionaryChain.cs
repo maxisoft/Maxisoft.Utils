@@ -374,28 +374,22 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
     public class DictionaryChain<TKey, TValue> : DictionaryChain<TKey, TValue, IDictionary<TKey, TValue>>
     {
-        public DictionaryChain(IDictionary<TKey, TValue>[] dictionaries, IDictionary<TKey, TValue> modifiable,
+        internal DictionaryChain(IDictionary<TKey, TValue>[] dictionaries, IDictionary<TKey, TValue> modifiable,
             IEqualityComparer<TKey>? equalityComparer = null) : base(dictionaries, modifiable, equalityComparer)
         {
         }
 
-        public DictionaryChain(IEnumerable<IDictionary<TKey, TValue>> dictionaries,
-            IDictionary<TKey, TValue> modifiable, IEqualityComparer<TKey>? equalityComparer = null) : base(dictionaries,
-            modifiable, equalityComparer)
-        {
-        }
-
-        public DictionaryChain() : base(new EmptyDictionary<TKey, TValue>())
+        internal DictionaryChain() : base(new EmptyDictionary<TKey, TValue>())
         {
             throw new InvalidOperationException("");
         }
 
-        public DictionaryChain(params IDictionary<TKey, TValue>[] dictionaries) : base(dictionaries)
+        public DictionaryChain(params IDictionary<TKey, TValue>[] dictionaries) : this(dictionaries, null)
         {
         }
 
         public DictionaryChain(IDictionary<TKey, TValue>[] dictionaries,
-            IEqualityComparer<TKey>? equalityComparer = null) : base(dictionaries, equalityComparer)
+            IEqualityComparer<TKey>? equalityComparer = null) : this(dictionaries, dictionaries[0], equalityComparer)
         {
         }
 
