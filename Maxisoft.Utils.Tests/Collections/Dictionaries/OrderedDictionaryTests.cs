@@ -46,7 +46,11 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
             //delete 1/3 of data
             for (var i = maxSize - 1; i >= 0; i--)
             {
-                if (i % 3 != 0) continue;
+                if (i % 3 != 0)
+                {
+                    continue;
+                }
+
                 var key = $"{i + 1}";
                 Assert.Equal(adversarial.Contains(key), d.ContainsKey(key));
 
@@ -74,12 +78,12 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_Constructor()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             Assert.Equal(objectPool.Length, d.Count);
@@ -95,7 +99,7 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                 var obj = objectPool[i];
                 Assert.Equal(obj, d[i]);
             }
-            
+
             var other = new OrderedDictionary<string, object>();
         }
 
@@ -104,12 +108,12 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_IndexOf()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             Assert.Equal(objectPool.Length, d.Count);
@@ -130,12 +134,12 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_IndexOf_Same_Key_Value_Type()
         {
             const int numElement = 4;
-            var d = new OrderedDictionary<string, string>()
+            var d = new OrderedDictionary<string, string>
             {
                 {"zero", "0"},
                 {"one", "1"},
                 {"two", "2"},
-                {"three", "3"},
+                {"three", "3"}
             };
 
             Assert.Equal(numElement, d.Count);
@@ -158,12 +162,12 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_Clear()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             Assert.Equal(objectPool.Length, d.Count);
@@ -183,17 +187,17 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_Contains()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             Assert.Equal(objectPool.Length, d.Count);
 
-            for (int i = 0; i < d.Count; i++)
+            for (var i = 0; i < d.Count; i++)
             {
                 var key = numberToString[i];
                 Assert.Contains(new KeyValuePair<string, object>(key, objectPool[i]), d);
@@ -219,26 +223,30 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_CopyTo_Adversarial(int arrayLength, int arrayIndex)
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
-            var adversarial = new OrderedDictionary()
+            var adversarial = new OrderedDictionary
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             Assert.Equal(adversarial.GetKeyValuePairEnumerator<string, object>(), d);
 
             var toArray = new KeyValuePair<string, object>[arrayLength];
-            void TestCode() => d.CopyTo(toArray, arrayIndex);
+
+            void TestCode()
+            {
+                d.CopyTo(toArray, arrayIndex);
+            }
 
             static IEnumerable<KeyValuePair<TKey, TValue>> GetKeyValuePairEnumerator<TKey, TValue>(
                 IEnumerable enumerable)
@@ -295,12 +303,12 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_Add()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
             var marker = new object();
 
@@ -324,15 +332,15 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_Indexer()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
-            for (int i = 0; i < d.Count; i++)
+            for (var i = 0; i < d.Count; i++)
             {
                 Assert.Equal(objectPool[i], d[i]);
                 Assert.Equal(objectPool[i], d[numberToString[i]]);
@@ -364,20 +372,20 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_Insert()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
-            var adversarial = new OrderedDictionary()
+            var adversarial = new OrderedDictionary
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             var marker = new object();
@@ -418,12 +426,12 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_UpdateAt()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             var marker = new object();
@@ -484,31 +492,30 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
             // test not the same exception for key or index
             {
                 Assert.Throws<KeyNotFoundException>(() => d.At(key: int.MaxValue));
-                Assert.Throws<ArgumentOutOfRangeException>(() => d.At(index:int.MaxValue));
+                Assert.Throws<ArgumentOutOfRangeException>(() => d.At(index: int.MaxValue));
             }
-
         }
 
         [Fact]
         public void Test_Swap()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             d.Swap(0, 3);
 
-            var expected = new OrderedDictionary<string, object>()
+            var expected = new OrderedDictionary<string, object>
             {
                 {"three", objectPool[3]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"zero", objectPool[0]},
+                {"zero", objectPool[0]}
             };
 
             Assert.Equal(expected, d);
@@ -518,23 +525,23 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
         public void Test_Move()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             {
                 d.Move(2, 0);
 
-                var expected = new OrderedDictionary<string, object>()
+                var expected = new OrderedDictionary<string, object>
                 {
                     {"two", objectPool[2]},
                     {"zero", objectPool[0]},
                     {"one", objectPool[1]},
-                    {"three", objectPool[3]},
+                    {"three", objectPool[3]}
                 };
 
                 Assert.Equal(expected, d);
@@ -542,41 +549,40 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
 
             {
                 d.Move(0, 2);
-                
-                var expected = new OrderedDictionary<string, object>()
+
+                var expected = new OrderedDictionary<string, object>
                 {
                     {"zero", objectPool[0]},
                     {"one", objectPool[1]},
                     {"two", objectPool[2]},
-                    {"three", objectPool[3]},
+                    {"three", objectPool[3]}
                 };
 
                 Assert.Equal(expected, d);
             }
-            
         }
-        
+
         [Fact]
         public void Test_2_Move()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             {
                 d.SpanMove(2, 0);
 
-                var expected = new OrderedDictionary<string, object>()
+                var expected = new OrderedDictionary<string, object>
                 {
                     {"two", objectPool[2]},
                     {"zero", objectPool[0]},
                     {"one", objectPool[1]},
-                    {"three", objectPool[3]},
+                    {"three", objectPool[3]}
                 };
 
                 Assert.Equal(expected, d);
@@ -584,36 +590,36 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
 
             {
                 d.NativeMove(0, 2);
-                
-                var expected = new OrderedDictionary<string, object>()
+
+                var expected = new OrderedDictionary<string, object>
                 {
                     {"zero", objectPool[0]},
                     {"one", objectPool[1]},
                     {"two", objectPool[2]},
-                    {"three", objectPool[3]},
+                    {"three", objectPool[3]}
                 };
 
                 Assert.Equal(expected, d);
             }
         }
-        
+
         [Fact]
         public void Test_Keys_And_Values_Properties()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedDictionary<string, object>()
+            var d = new OrderedDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
-            var keys = new ArrayList<string>()
+            var keys = new ArrayList<string>
             {
                 "zero", "one", "two", "three"
             };
-            
+
             // Keys tests
             {
                 Assert.Equal(keys, d.Keys);
@@ -626,7 +632,7 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                 Assert.Throws<InvalidOperationException>(() => d.Keys.Remove("any"));
                 Assert.Throws<InvalidOperationException>(() => d.Keys.Clear());
                 Assert.Equal(keys.Count, d.Keys.Count);
-            
+
                 Assert.True(d.Keys.IsReadOnly);
 
                 // copy to
@@ -641,7 +647,7 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
             }
 
             var values = objectPool.ToArrayList();
-            
+
             // Values tests
             {
                 Assert.Equal(values, d.Values);
@@ -654,7 +660,7 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                 Assert.Throws<InvalidOperationException>(() => d.Values.Remove(objectPool[0]));
                 Assert.Throws<InvalidOperationException>(() => d.Values.Clear());
                 Assert.Equal(values.Count, d.Values.Count);
-            
+
                 Assert.True(d.Values.IsReadOnly);
 
                 // copy to
@@ -665,10 +671,8 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
                     Assert.Throws<ArgumentOutOfRangeException>(() => d.Values.CopyTo(expected, 1));
                     Assert.Throws<ArgumentOutOfRangeException>(() => d.Values.CopyTo(expected, -1));
                     Assert.Throws<ArgumentOutOfRangeException>(() => d.Values.CopyTo(expected, 1));
-                    
                 }
             }
-            
         }
     }
 }
