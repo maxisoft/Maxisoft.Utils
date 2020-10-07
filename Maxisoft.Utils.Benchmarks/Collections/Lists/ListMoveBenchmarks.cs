@@ -50,7 +50,7 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Dictionaries
             }
         }
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public void NativeMove()
         {
             var from = 0;

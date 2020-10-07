@@ -49,7 +49,7 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Lists
             }
         }
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public void Swap()
         {
             var from = 0;

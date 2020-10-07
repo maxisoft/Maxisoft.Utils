@@ -73,7 +73,7 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Queues
             return h;
         }
         
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public long LinkedList_AddRemove()
         {
             return AddRemove(_linkedList);
