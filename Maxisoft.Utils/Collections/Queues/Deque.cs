@@ -19,15 +19,14 @@ namespace Maxisoft.Utils.Collections.Queues
     public partial class Deque<T> : BaseUpdateGuardedContainer, IDeque<T>, IList<T>, IReadOnlyList<T>, IList,
         ISerializable
     {
-        private readonly LinkedList<T[]> _map = new LinkedList<T[]>();
         private static readonly DefaultAllocator<T> DefaultAllocator = new DefaultAllocator<T>();
+        private readonly LinkedList<T[]> _map = new LinkedList<T[]>();
         protected internal readonly IAllocator<T> Allocator = DefaultAllocator;
         protected internal readonly long ChunkSize;
         private InternalPointer _begin;
         private InternalPointer _end;
-        public float InitialChunkRatio { get; protected internal set; } = 0.5f;
 
-        internal protected Deque(IAllocator<T> allocator)
+        protected internal Deque(IAllocator<T> allocator)
         {
             // ReSharper disable once VirtualMemberCallInConstructor
             ChunkSize = OptimalChunkSize();
@@ -97,7 +96,9 @@ namespace Maxisoft.Utils.Collections.Queues
             }
         }
 
-        public bool TrimOnDeletion { get; set; } = false;
+        public float InitialChunkRatio { get; protected internal set; } = 0.5f;
+
+        public bool TrimOnDeletion { get; set; }
 
         public bool IsEmpty => LongLength == 0;
 
@@ -176,15 +177,7 @@ namespace Maxisoft.Utils.Collections.Queues
             return RemoveAtDispatch(index, in p);
         }
 
-        public bool RemoveLast(in T item)
-        {
-            var (index, p) = FindLast(item);
-            return RemoveAtDispatch(index, in p);
-        }
-
         public int Count => Length;
-
-        bool IList.IsReadOnly => false;
         bool ICollection<T>.IsReadOnly => false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -215,7 +208,7 @@ namespace Maxisoft.Utils.Collections.Queues
             result = Front();
             return true;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Back()
         {
@@ -300,6 +293,8 @@ namespace Maxisoft.Utils.Collections.Queues
             result = PopFront();
             return true;
         }
+
+        bool IList.IsReadOnly => false;
 
         int IList.Add(object value)
         {
@@ -387,7 +382,7 @@ namespace Maxisoft.Utils.Collections.Queues
             {
                 throw new ArgumentOutOfRangeException(nameof(index), index, $">= {LongLength}");
             }
-            
+
             if (index == 0)
             {
                 PopFront();
@@ -431,6 +426,12 @@ namespace Maxisoft.Utils.Collections.Queues
             T[] array = new T[Count];
             CopyTo(array, 0);
             info.AddValue(nameof(array), array, typeof(T[]));
+        }
+
+        public bool RemoveLast(in T item)
+        {
+            var (index, p) = FindLast(item);
+            return RemoveAtDispatch(index, in p);
         }
 
         public virtual long OptimalChunkSize()
@@ -612,16 +613,28 @@ namespace Maxisoft.Utils.Collections.Queues
         {
             var node = pointer.Node;
             var initialShift = pointer.DistanceToBeginning;
+            var isEnd = ReferenceEquals(_end.Node, node);
             while (node is {})
             {
                 var next = node.Next;
-                Array.Copy(node.Value, 1 + initialShift, node.Value, initialShift,
-                    ChunkSize - initialShift - 1);
+                var length = ChunkSize - initialShift - 1;
+                if (isEnd)
+                {
+                    length = Math.Max(_end.DistanceToBeginning - initialShift - 1, 0);
+                }
+
+                Array.Copy(node.Value, 1 + initialShift, node.Value, initialShift, length);
+                if (isEnd)
+                {
+                    break;
+                }
+
                 if (!(next is null))
                 {
                     node.Value[ChunkSize - 1] = next.Value[0];
                 }
 
+                isEnd = ReferenceEquals(_end.Node, next);
                 node = next;
                 initialShift = 0;
             }
@@ -640,15 +653,37 @@ namespace Maxisoft.Utils.Collections.Queues
         {
             var node = pointer.Node;
             var length = pointer.DistanceToBeginning;
+            var startIndex = 0L;
+            var isBegin = ReferenceEquals(node, _begin.Node);
             while (node is {})
             {
                 var previous = node.Previous;
-                Array.Copy(node.Value, 0, node.Value, 1, length);
+                if (isBegin)
+                {
+                    startIndex = _begin.DistanceToBeginning;
+                    if (ReferenceEquals(pointer.Node, node))
+                    {
+                        length = Math.Max(pointer.Index - startIndex, 0);
+                    }
+                    else
+                    {
+                        length = _begin.DistanceToEnd - 1;
+                    }
+                }
+
+
+                Array.Copy(node.Value, startIndex, node.Value, startIndex + 1, length);
+                if (isBegin)
+                {
+                    break;
+                }
+
                 if (!(previous is null))
                 {
                     node.Value[0] = previous.Value[ChunkSize - 1];
                 }
 
+                isBegin = ReferenceEquals(previous, _begin.Node);
                 node = previous;
                 length = ChunkSize - 1;
             }
