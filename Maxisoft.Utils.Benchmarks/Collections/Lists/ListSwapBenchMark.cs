@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
@@ -19,9 +20,13 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Lists
         [IterationSetup]
         public void Setup()
         {
+            var random = new TRandom(N);
             _list = new ArrayList<BigStruct>(capacity: N);
-
             _list.Resize(N);
+            for (var i = 0; i < N; i++)
+            {
+                random.NextBytes(_list[i].AsSpan());                
+            }
         }
 
         [IterationCleanup]
@@ -32,7 +37,16 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Lists
         
         internal unsafe struct BigStruct
         {
-            public fixed sbyte fixedBuffer[256];
+            public const int DataStructSize = 256;
+            public fixed byte fixedBuffer[DataStructSize];
+
+            public Span<byte> AsSpan()
+            {
+                fixed (byte* ptr = fixedBuffer)
+                {
+                    return new Span<byte>(ptr, DataStructSize);
+                }
+            }
         }
 
         [Benchmark]

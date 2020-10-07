@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using Maxisoft.Utils.Collections.Dictionaries;
 using Troschuetz.Random;
@@ -19,7 +20,9 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Dictionaries
 
             for (var i = 0; i < N; i++)
             {
-                _dictionary.Add(new KeyValuePair<int, BigStruct>(_random.Next(), default));
+                var pair = new KeyValuePair<int, BigStruct>(_random.Next(), default);
+                _random.NextBytes(pair.Value.AsSpan());
+                _dictionary.Add(pair);
             }
         }
 
@@ -60,7 +63,16 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Dictionaries
         /// </summary>
         internal unsafe struct BigStruct
         {
-            public fixed sbyte fixedBuffer[256];
+            public const int DataStructSize = 256;
+            public fixed byte fixedBuffer[DataStructSize];
+
+            public Span<byte> AsSpan()
+            {
+                fixed (byte* ptr = fixedBuffer)
+                {
+                    return new Span<byte>(ptr, DataStructSize);
+                }
+            }
         }
     }
 }

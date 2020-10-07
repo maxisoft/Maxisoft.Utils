@@ -10,27 +10,27 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <seealso cref="Deque{T}" />
-    public class DequePooled<T> : Deque<T>, IDisposable
+    public class PooledDeque<T> : Deque<T>, IDisposable
     {
         /// <summary>
         ///     Construct a new <see cref="Deque{T}" /> using the <see cref="DefaultPool" />
         /// </summary>
-        public DequePooled() : this(ComputeOptimalChunkSize())
+        public PooledDeque() : this(ComputeOptimalChunkSize())
         {
         }
 
-        public DequePooled(ArrayPool<T> pool) : base(new PooledAllocator<T>(pool))
+        public PooledDeque(ArrayPool<T> pool) : base(new PooledAllocator<T>(pool))
         {
             TrimOnDeletion = true;
         }
 
-        public DequePooled(ArrayPool<T> pool, long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize,
+        public PooledDeque(ArrayPool<T> pool, long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize,
             usage.ToRatio(), new PooledAllocator<T>(pool))
         {
             TrimOnDeletion = true;
         }
 
-        public DequePooled(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize, usage.ToRatio(), new PooledAllocator<T>(DefaultPool.Value))
+        public PooledDeque(long chunkSize, DequeInitialUsage usage = DequeInitialUsage.Both) : base(chunkSize, usage.ToRatio(), new PooledAllocator<T>(DefaultPool.Value))
         {
             TrimOnDeletion = true;
         }
@@ -70,7 +70,7 @@ namespace Maxisoft.Utils.Collections.Queues.Specialized
             ReleaseUnmanagedResources();
         }
 
-        ~DequePooled()
+        ~PooledDeque()
         {
             Dispose(false);
         }

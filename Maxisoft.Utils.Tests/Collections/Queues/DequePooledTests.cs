@@ -10,7 +10,7 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
         [Fact]
         public void TestDequePooled()
         {
-            var q = new DequePooled<double>();
+            var q = new PooledDeque<double>();
             Assert.Empty(q);
             Assert.Equal(q.ChunkSize, q.OptimalChunkSize());
             var adversarial = new LinkedListAsIList<double>();
