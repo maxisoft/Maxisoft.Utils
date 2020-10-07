@@ -9,6 +9,7 @@ using Troschuetz.Random;
 
 namespace Maxisoft.Utils.Benchmarks.Collections.Lists
 {
+    [MemoryDiagnoser]
     public class ListSwapBenchmarks
     {
         private ArrayList<BigStruct> _list = new ArrayList<BigStruct>();

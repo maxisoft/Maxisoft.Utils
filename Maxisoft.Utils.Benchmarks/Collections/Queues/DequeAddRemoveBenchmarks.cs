@@ -11,6 +11,7 @@ using Troschuetz.Random;
 
 namespace Maxisoft.Utils.Benchmarks.Collections.Queues
 {
+    [MemoryDiagnoser]
     public class DequeAddRemoveBenchmarks
     {
         private LinkedListAsIList<DataStruct> _linkedList = new LinkedListAsIList<DataStruct>();
