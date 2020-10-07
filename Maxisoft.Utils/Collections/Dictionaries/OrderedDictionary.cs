@@ -20,11 +20,9 @@ namespace Maxisoft.Utils.Collections.Dictionaries
     ///     :<c>TValue</c>.
     /// </typeparam>
     /// <seealso cref="OrderedDictionary{TKey,TValue}" />
-    public abstract class OrderedDictionary<TKey, TValue, TList, TDictionary> : IOrderedDictionary<TKey, TValue>
+    public abstract class OrderedDictionary<TKey, TValue, TList, TDictionary> : BaseUpdateGuardedContainer, IOrderedDictionary<TKey, TValue>
         where TList : class, IList<TKey>, new() where TDictionary : class, IDictionary<TKey, TValue>, new()
     {
-        protected readonly UpdateGuardedContainer Version = new UpdateGuardedContainer();
-
         public OrderedDictionary()
         {
         }
@@ -49,9 +47,10 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            using var _ = Version.CreateGuard();
+            var version = Version;
             foreach (var key in Indexes)
             {
+                CheckForConcurrentModification(version);
                 var res = Dictionary.TryGetValue(key, out var value);
                 Debug.Assert(res);
                 yield return new KeyValuePair<TKey, TValue>(key, value);
@@ -75,9 +74,9 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
         public void Clear()
         {
-            using var _ = Version.CreateGuard(true);
             Indexes.Clear();
             Dictionary.Clear();
+            Version += 1;
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
@@ -96,8 +95,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
             {
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "Out of bounds");
             }
-
-            using var ug = Version.CreateGuard();
+            
             var c = 0;
             foreach (var index in Indexes)
             {
@@ -135,7 +133,6 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
         public bool Remove(TKey key)
         {
-            using var ug = Version.CreateGuard(true);
             if (Dictionary.Remove(key))
             {
                 var removed = Indexes.Remove(key);
@@ -144,6 +141,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
                     throw new InvalidOperationException();
                 }
 
+                Version += 1;
                 return removed;
             }
 
@@ -186,28 +184,28 @@ namespace Maxisoft.Utils.Collections.Dictionaries
             {
                 throw new ArgumentException("key already exists");
             }
-
-            using var ug = Version.CreateGuard(true);
+            
             Indexes.Insert(index, key);
             DoUpdate(in key, in value, false);
+            Version += 1;
         }
 
         public void RemoveAt(int index)
         {
             CheckForOutOfBounds(index);
-
-            using var ug = Version.CreateGuard(true);
+            
             var key = Indexes[index];
             Indexes.RemoveAt(index);
             if (!Dictionary.Remove(key))
             {
                 throw new InvalidOperationException();
             }
+
+            Version += 1;
         }
 
         public int IndexOf(in TKey key)
         {
-            using var _ = Version.CreateGuard();
             return Indexes.IndexOf(key);
         }
 
@@ -226,7 +224,6 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         public int IndexOf<TEqualityComparer>(in TValue value, TEqualityComparer comparer)
             where TEqualityComparer : IEqualityComparer<TValue>
         {
-            using var _ = Version.CreateGuard();
             var c = 0;
             foreach (var pair in this)
             {
@@ -281,8 +278,8 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         /// <exception cref="KeyNotFoundException">when the <paramref name="key">key</paramref> doesn't exists.</exception>
         public TKey UpdateAt(in TKey key, in TValue value)
         {
-            using var ug = Version.CreateGuard(true);
             DoUpdate(in key, in value);
+            Version += 1;
             return key;
         }
 
@@ -296,11 +293,11 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         public TKey UpdateAt(int index, in TValue value)
         {
             CheckForOutOfBounds(index);
-
-            using var ug = Version.CreateGuard(true);
+            
             var key = Indexes[index];
             Debug.Assert(Dictionary.ContainsKey(key));
             DoUpdate(in key, in value, false);
+            Version += 1;
             return key;
         }
 
@@ -315,10 +312,10 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         {
             CheckForOutOfBounds(firstIndex);
             CheckForOutOfBounds(secondIndex);
-            using var ug = Version.CreateGuard(true);
             var tmp = Indexes[secondIndex];
             Indexes[secondIndex] = Indexes[firstIndex];
             Indexes[firstIndex] = tmp;
+            Version += 1;
         }
 
 
@@ -337,14 +334,14 @@ namespace Maxisoft.Utils.Collections.Dictionaries
             {
                 return;
             }
-
-            using var ug = Version.CreateGuard(true);
+            
 
             // This is a naive way for the best TList compatibility
             var tmp = Indexes[fromIndex];
             Indexes.RemoveAt(fromIndex);
             Indexes.Insert(toIndex, tmp);
             Debug.Assert(Dictionary.Count == Indexes.Count);
+            Version += 1;
         }
 
         protected void DoUpdate(in TKey key, in TValue value, bool ensureExists = true)
@@ -359,7 +356,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
         protected void DoAdd(in TKey key, in TValue value, bool upsert = false)
         {
-            using var ug = Version.CreateGuard(true);
+            var version = Version;
             if (Dictionary.ContainsKey(key))
             {
                 if (!upsert)
@@ -368,6 +365,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
                 }
 
                 DoUpdate(in key, in value, false);
+                Version += 1;
                 return;
             }
 
@@ -378,12 +376,13 @@ namespace Maxisoft.Utils.Collections.Dictionaries
             }
             catch (Exception)
             {
-                ug.Check();
+                CheckForConcurrentModification(version);
                 Indexes.RemoveAt(Indexes.Count - 1);
                 throw;
             }
             finally
             {
+                Version += 1;
                 Debug.Assert(Dictionary.Count == Indexes.Count);
             }
         }
@@ -417,6 +416,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
             public IEnumerator<TKey> GetEnumerator()
             {
+                //TODO for now we rely on Indexes's internal version
                 return Dictionary.Indexes.GetEnumerator();
             }
 
@@ -477,11 +477,11 @@ namespace Maxisoft.Utils.Collections.Dictionaries
 
             public IEnumerator<TValue> GetEnumerator()
             {
-                using var ug = Dictionary.Version.CreateGuard();
+                var version = Dictionary.Version;
 
                 foreach (var pair in Dictionary)
                 {
-                    ug.Check();
+                    Dictionary.CheckForConcurrentModification(version);
                     yield return pair.Value;
                 }
             }
@@ -517,8 +517,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries
                 {
                     throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "Out of bounds");
                 }
-
-                using var ug = Dictionary.Version.CreateGuard();
+                
                 var c = 0;
                 foreach (var index in Dictionary.Indexes)
                 {
@@ -541,14 +540,14 @@ namespace Maxisoft.Utils.Collections.Dictionaries
     }
 
     public class
-        OrderedDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, ArrayList<TKey>, Dictionary<TKey, TValue>>
+        OrderedDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, List<TKey>, Dictionary<TKey, TValue>>
     {
         public OrderedDictionary()
         {
         }
 
         public OrderedDictionary(int capacity) : base(new Dictionary<TKey, TValue>(capacity),
-            new ArrayList<TKey>(capacity))
+            new List<TKey>(capacity))
         {
         }
 
@@ -557,32 +556,8 @@ namespace Maxisoft.Utils.Collections.Dictionaries
         }
 
         public OrderedDictionary(int capacity, IEqualityComparer<TKey> comparer) : base(
-            new Dictionary<TKey, TValue>(capacity, comparer), new ArrayList<TKey>(capacity))
+            new Dictionary<TKey, TValue>(capacity, comparer), new List<TKey>(capacity))
         {
-        }
-
-        internal void NativeMove(int fromIndex, int toIndex)
-        {
-            base.Move(fromIndex, toIndex);
-        }
-
-        internal void SpanMove(int fromIndex, int toIndex)
-        {
-            CheckForOutOfBounds(fromIndex);
-            CheckForOutOfBounds(toIndex);
-            if (fromIndex == toIndex)
-            {
-                return;
-            }
-
-            using var ug = Version.CreateGuard(true);
-
-            Indexes.Move(fromIndex, toIndex);
-        }
-
-        public override void Move(int fromIndex, int toIndex)
-        {
-            SpanMove(fromIndex, toIndex);
         }
     }
 }
