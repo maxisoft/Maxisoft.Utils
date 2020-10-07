@@ -453,6 +453,12 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
             };
         }
 
+        [Fact]
+        public void Test_Regressions()
+        {
+            TestRemove_Fuzzing(size: 13, chunkSize: 10, index: 3);
+        }
+
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
