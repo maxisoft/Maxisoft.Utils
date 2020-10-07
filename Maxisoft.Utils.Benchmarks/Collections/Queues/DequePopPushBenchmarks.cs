@@ -118,7 +118,7 @@ namespace Maxisoft.Utils.Benchmarks.Collections.Queues
             return h;
         }
         
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public long LinkedList_PopPush()
         {
             return PopPush(in _linkedList);

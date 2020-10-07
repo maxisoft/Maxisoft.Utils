@@ -29,7 +29,7 @@ namespace Maxisoft.Utils.Benchmarks.Collections.LinkedLists
             _linkedListAsIList.Clear();
         }
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public void IndexOfFromStart()
         {
             // note this is clearly not the good way to iterate over a linkedlist
