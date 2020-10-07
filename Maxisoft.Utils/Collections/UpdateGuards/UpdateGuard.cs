@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Maxisoft.Utils.Collections.UpdateGuards
 {
-    public struct UpdateGuard<T> : IDisposable where T : class, IUpdateGuarded
+    public struct UpdateGuard<T>: IDisposable where T : class, IUpdateGuarded
     {
         public readonly int Version;
         public bool PostIncrementVersionCounter { get; set; }
@@ -11,6 +12,7 @@ namespace Maxisoft.Utils.Collections.UpdateGuards
 
         public readonly T Guarded;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UpdateGuard(T guarded)
         {
             Version = guarded.GetInternalVersionCounter();
@@ -19,6 +21,7 @@ namespace Maxisoft.Utils.Collections.UpdateGuards
             CancelChecks = false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly void Check(bool force = true)
         {
             if ((!CancelChecks || force) && Guarded.GetInternalVersionCounter() != Version)
@@ -27,6 +30,8 @@ namespace Maxisoft.Utils.Collections.UpdateGuards
             }
         }
 
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
             Check(false);

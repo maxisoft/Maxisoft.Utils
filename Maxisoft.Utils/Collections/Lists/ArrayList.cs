@@ -43,6 +43,7 @@ namespace Maxisoft.Utils.Collections.Lists
 
         public int Capacity
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _array.Length;
             set => EnsureCapacity(value);
         }
@@ -69,6 +70,7 @@ namespace Maxisoft.Utils.Collections.Lists
             return ((IEnumerable<T>) this).GetEnumerator();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(T item)
         {
             GrowIfNeeded();
@@ -107,7 +109,14 @@ namespace Maxisoft.Utils.Collections.Lists
             return true;
         }
 
-        public int Count { get; protected set; }
+
+        public int Count
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            protected set;
+        }
 
         public bool IsReadOnly => false;
 
@@ -131,6 +140,7 @@ namespace Maxisoft.Utils.Collections.Lists
             Count += 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveAt(int index)
         {
             CheckForOutOfBounds(index, nameof(index));

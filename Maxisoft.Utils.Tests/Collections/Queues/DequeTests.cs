@@ -37,10 +37,11 @@ namespace Maxisoft.Utils.Tests.Collections.Queues
             Assert.DoesNotContain(0, q);
             Assert.DoesNotContain(-1, q);
             Assert.DoesNotContain(1, q);
-            Assert.False(q.IsReadOnly);
-            Assert.Same(q, q.SyncRoot);
-            Assert.False(q.IsSynchronized);
-            Assert.False(q.IsFixedSize);
+            Assert.False(((IList) q).IsReadOnly);
+            Assert.False(((IList<int>) q).IsReadOnly);
+            Assert.Same(q, ((IList) q).SyncRoot);
+            Assert.False(((IList) q).IsSynchronized);
+            Assert.False(((IList) q).IsFixedSize);
         }
 
         [Theory]

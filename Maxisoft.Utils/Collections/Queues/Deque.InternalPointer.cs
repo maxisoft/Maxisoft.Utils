@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Maxisoft.Utils.Collections.Queues
 {
@@ -13,6 +14,7 @@ namespace Maxisoft.Utils.Collections.Queues
             private readonly LinkedListNode<T[]>? _node;
             internal readonly long ChunkSize;
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public InternalPointer(LinkedListNode<T[]>? node, long index, long chunkSize)
             {
                 _node = node;
@@ -33,6 +35,7 @@ namespace Maxisoft.Utils.Collections.Queues
             public bool HasNode => !ReferenceEquals(_node, null);
             public bool Valid => HasNode && Index >= 0 && Index < ChunkSize;
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private void ThrowForNullNode()
             {
                 if (!HasNode)

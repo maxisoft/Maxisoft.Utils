@@ -16,10 +16,10 @@ namespace Maxisoft.Utils.Collections.Queues
     [DebuggerTypeProxy(typeof(Deque<>.DebuggerTypeProxyImpl))]
     [Serializable]
     [JsonDequeConverter]
-    public partial class Deque<T> : IDeque<T>, IList<T>, IReadOnlyList<T>, IList, ISerializable
+    public partial class Deque<T> : BaseUpdateGuardedContainer, IDeque<T>, IList<T>, IReadOnlyList<T>, IList,
+        ISerializable
     {
         private readonly LinkedList<T[]> _map = new LinkedList<T[]>();
-        private readonly UpdateGuardedContainer _version = new UpdateGuardedContainer();
         private static readonly DefaultAllocator<T> DefaultAllocator = new DefaultAllocator<T>();
         protected internal readonly IAllocator<T> Allocator = DefaultAllocator;
         protected internal readonly long ChunkSize;
@@ -73,7 +73,7 @@ namespace Maxisoft.Utils.Collections.Queues
             SerializationInfo info,
             StreamingContext context)
         {
-            _version = (UpdateGuardedContainer) info.GetValue(nameof(_version), typeof(UpdateGuardedContainer));
+            Version = info.GetInt32(nameof(Version));
             var count = info.GetInt64(nameof(Count));
             ChunkSize = info.GetInt64(nameof(ChunkSize));
             TrimOnDeletion = info.GetBoolean(nameof(TrimOnDeletion));
@@ -110,17 +110,19 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public T this[long index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => At(index);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => At(index) = value;
         }
 
         public IEnumerator<T> GetEnumerator()
         {
             var p = _begin;
-            using var ug = _version.CreateGuard();
+            var version = Version;
             for (long i = 0; i < LongLength; i++)
             {
-                ug.Check();
+                CheckForConcurrentModification(version);
                 yield return p.Value;
                 p += 1;
             }
@@ -138,7 +140,6 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public void Clear()
         {
-            using var _ = _version.CreateGuard(true);
             while (_map.First != null)
             {
                 Free(_map.First.Value);
@@ -148,6 +149,7 @@ namespace Maxisoft.Utils.Collections.Queues
             LongLength = 0;
             _begin = default;
             _end = default;
+            Version += 1;
         }
 
         public bool Contains(T item)
@@ -157,7 +159,6 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            using var ug = _version.CreateGuard();
             long c = 0;
             var p = _begin;
             while (c < LongLength)
@@ -183,13 +184,16 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public int Count => Length;
 
-        public bool IsReadOnly => false;
+        bool IList.IsReadOnly => false;
+        bool ICollection<T>.IsReadOnly => false;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T At(long index)
         {
             return ref GetPointerForIndex(index).Value;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Front()
         {
             if (IsEmpty)
@@ -211,7 +215,8 @@ namespace Maxisoft.Utils.Collections.Queues
             result = Front();
             return true;
         }
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T Back()
         {
             if (IsEmpty)
@@ -247,7 +252,6 @@ namespace Maxisoft.Utils.Collections.Queues
         public T PopBack()
         {
             var res = Back();
-            using var _ = _version.CreateGuard(true);
             LongLength -= 1;
             _end -= 1;
             if (TrimOnDeletion)
@@ -255,13 +259,13 @@ namespace Maxisoft.Utils.Collections.Queues
                 TrimEnd();
             }
 
+            Version += 1;
             return res;
         }
 
         public T PopFront()
         {
             var res = Front();
-            using var _ = _version.CreateGuard(true);
             LongLength -= 1;
             _begin += 1;
             if (TrimOnDeletion)
@@ -269,6 +273,7 @@ namespace Maxisoft.Utils.Collections.Queues
                 TrimBeginning();
             }
 
+            Version += 1;
             return res;
         }
 
@@ -340,9 +345,9 @@ namespace Maxisoft.Utils.Collections.Queues
             CopyTo((T[]) array, index);
         }
 
-        public bool IsSynchronized => false;
+        bool ICollection.IsSynchronized => false;
 
-        public object SyncRoot => this;
+        object ICollection.SyncRoot => this;
 
         object IList.this[int index]
         {
@@ -350,7 +355,7 @@ namespace Maxisoft.Utils.Collections.Queues
             set => At(index) = (T) value;
         }
 
-        public bool IsFixedSize => false;
+        bool IList.IsFixedSize => false;
 
         public int IndexOf(T item)
         {
@@ -378,6 +383,23 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public void RemoveAt(int index)
         {
+            if (index >= LongLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), index, $">= {LongLength}");
+            }
+            
+            if (index == 0)
+            {
+                PopFront();
+                return;
+            }
+
+            if (index == Count - 1)
+            {
+                PopBack();
+                return;
+            }
+
             var p = GetPointerForIndex(index);
             var res = RemoveAtDispatch(index, p);
             Debug.Assert(res);
@@ -396,7 +418,7 @@ namespace Maxisoft.Utils.Collections.Queues
                 throw new ArgumentNullException(nameof(info));
             }
 
-            info.AddValue(nameof(_version), _version);
+            info.AddValue(nameof(Version), Version);
             info.AddValue(nameof(Count), LongLength);
             info.AddValue(nameof(ChunkSize), ChunkSize);
             info.AddValue(nameof(TrimOnDeletion), TrimOnDeletion);
@@ -482,15 +504,14 @@ namespace Maxisoft.Utils.Collections.Queues
 
         public void TrimExcess()
         {
-            using var _ = _version.CreateGuard(true);
             TrimBeginning();
             TrimEnd();
+            Version += 1;
         }
 
         private void Prepend(in T item)
         {
             InitIfNeeded();
-            using var _ = _version.CreateGuard(true);
             if (_begin.DistanceToBeginning == 0) // chunk is full
             {
                 if (_begin.Node.Previous is null)
@@ -507,13 +528,13 @@ namespace Maxisoft.Utils.Collections.Queues
 
             _begin.Value = item;
             LongLength += 1;
+            Version += 1;
         }
 
 
         private void Append(in T item)
         {
             InitIfNeeded();
-            using var _ = _version.CreateGuard(true);
             if (_end.DistanceToEnd == 0) // chunk is full
             {
                 if (_end.Node.Next is null)
@@ -535,8 +556,10 @@ namespace Maxisoft.Utils.Collections.Queues
             _end.Value = item;
             _end += 1;
             LongLength += 1;
+            Version += 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected T[] Alloc(long size)
         {
             Debug.Assert(size == ChunkSize);
@@ -546,16 +569,30 @@ namespace Maxisoft.Utils.Collections.Queues
             return res;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void Free(T[] data)
         {
             Allocator.Free(ref data);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool RemoveAtDispatch(long index, in InternalPointer pointer)
         {
             if (index < 0)
             {
                 return false;
+            }
+
+            if (index == 0)
+            {
+                PopFront();
+                return true;
+            }
+
+            if (index == Count - 1)
+            {
+                PopBack();
+                return true;
             }
 
 
@@ -573,20 +610,19 @@ namespace Maxisoft.Utils.Collections.Queues
 
         private void RemoveRight(in InternalPointer pointer)
         {
-            using var ug = _version.CreateGuard(true);
             var node = pointer.Node;
             var initialShift = pointer.DistanceToBeginning;
-            while (!(node is null))
+            while (node is {})
             {
-                ug.Check();
+                var next = node.Next;
                 Array.Copy(node.Value, 1 + initialShift, node.Value, initialShift,
                     ChunkSize - initialShift - 1);
-                if (!(node.Next is null))
+                if (!(next is null))
                 {
-                    node.Value[ChunkSize - 1] = node.Next.Value[0];
+                    node.Value[ChunkSize - 1] = next.Value[0];
                 }
 
-                node = node.Next;
+                node = next;
                 initialShift = 0;
             }
 
@@ -596,23 +632,24 @@ namespace Maxisoft.Utils.Collections.Queues
             {
                 TrimEnd();
             }
+
+            Version += 1;
         }
 
         private void RemoveLeft(in InternalPointer pointer)
         {
-            using var ug = _version.CreateGuard(true);
             var node = pointer.Node;
             var length = pointer.DistanceToBeginning;
-            while (!(node is null))
+            while (node is {})
             {
-                ug.Check();
+                var previous = node.Previous;
                 Array.Copy(node.Value, 0, node.Value, 1, length);
-                if (!(node.Previous is null))
+                if (!(previous is null))
                 {
-                    node.Value[0] = node.Previous.Value[ChunkSize - 1];
+                    node.Value[0] = previous.Value[ChunkSize - 1];
                 }
 
-                node = node.Previous;
+                node = previous;
                 length = ChunkSize - 1;
             }
 
@@ -622,6 +659,8 @@ namespace Maxisoft.Utils.Collections.Queues
             {
                 TrimBeginning();
             }
+
+            Version += 1;
         }
 
         public bool RemoveFast(in T item)
@@ -716,11 +755,13 @@ namespace Maxisoft.Utils.Collections.Queues
             return (-1, _end);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long IndexOfFast(in T item)
         {
             return FindFastPath(in item).index;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long LastIndexOf(in T item)
         {
             return FindLast(in item).index;
@@ -729,13 +770,11 @@ namespace Maxisoft.Utils.Collections.Queues
         private void InsertLeft(InternalPointer pointer, in T item)
         {
             Prepend(_begin.Value);
-            using var ug = _version.CreateGuard(true);
             var beginIt = _begin + 1;
             var node = beginIt.Node!;
             var initialShift = beginIt.DistanceToBeginning;
             while (!ReferenceEquals(node, pointer.Node))
             {
-                ug.Check();
                 if (node.Previous is { })
                 {
                     node.Previous.Value[ChunkSize - 1] = node.Value[0];
@@ -756,18 +795,17 @@ namespace Maxisoft.Utils.Collections.Queues
 
             Array.Copy(node.Value, 1, node.Value, 0, pointer.Index);
             (pointer - 1).Value = item;
+            Version += 1;
         }
 
         private void InsertRight(in InternalPointer pointer, in T item)
         {
             Append((_end - 1).Value);
-            using var ug = _version.CreateGuard(true);
             var endIt = _end - 1;
             var node = endIt.Node!;
             var effectiveLength = endIt.DistanceToBeginning;
             while (!ReferenceEquals(node, pointer.Node))
             {
-                ug.Check();
                 if (node.Next is { })
                 {
                     node.Next.Value[0] = node.Value[ChunkSize - 1];
@@ -790,9 +828,10 @@ namespace Maxisoft.Utils.Collections.Queues
             Array.Copy(node.Value, pointer.Index, node.Value, pointer.Index + 1,
                 ChunkSize - pointer.Index - 1);
             pointer.Value = item;
+            Version += 1;
         }
 
-        // ReSharper disable once MemberCanBePrivate.Global
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected internal InternalPointer GetPointerForIndex(long index)
         {
             InternalPointer p;
@@ -820,6 +859,7 @@ namespace Maxisoft.Utils.Collections.Queues
             return p;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ThrowForEmptyQueue()
         {
             Debug.Assert(LongLength == 0);

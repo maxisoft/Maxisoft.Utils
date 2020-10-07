@@ -11,11 +11,11 @@ using Xunit.Sdk;
 
 namespace Maxisoft.Utils.Tests.Collections.Queues.Specialized
 {
-    public class DequePooledFuzzingTests
+    public class PooledDequeFuzzingTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
 
-        public DequePooledFuzzingTests(ITestOutputHelper testOutputHelper)
+        public PooledDequeFuzzingTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
         }
@@ -31,11 +31,11 @@ namespace Maxisoft.Utils.Tests.Collections.Queues.Specialized
             Deque<sbyte> q;
             if (chunkSize.HasValue)
             {
-                q = new DequePooled<sbyte>(chunkSize.Value);
+                q = new PooledDeque<sbyte>(chunkSize.Value);
             }
             else
             {
-                q = new DequePooled<sbyte>();
+                q = new PooledDeque<sbyte>();
             }
 
             var history = new List<(long index, sbyte value, int action)>();
