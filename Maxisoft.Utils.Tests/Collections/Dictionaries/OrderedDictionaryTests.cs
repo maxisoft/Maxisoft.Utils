@@ -575,7 +575,7 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
             };
 
             {
-                d.SpanMove(2, 0);
+                d.Move(2, 0);
 
                 var expected = new OrderedDictionary<string, object>
                 {
@@ -589,7 +589,7 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries
             }
 
             {
-                d.NativeMove(0, 2);
+                d.Move(0, 2);
 
                 var expected = new OrderedDictionary<string, object>
                 {

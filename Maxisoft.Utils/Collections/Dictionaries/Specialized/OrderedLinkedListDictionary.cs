@@ -31,7 +31,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
 
         public void PushFront(in TKey key, in TValue value)
         {
-            using var ug = Version.CreateGuard(true);
+            var version = Version;
             if (Dictionary.ContainsKey(key))
             {
                 throw new ArgumentException("key already exists", nameof(key));
@@ -44,12 +44,13 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
             }
             catch (Exception)
             {
-                ug.Check();
+                CheckForConcurrentModification(version);
                 Indexes.RemoveAt(0);
                 throw;
             }
             finally
             {
+                Version += 1;
                 Debug.Assert(Dictionary.Count == Indexes.Count);
             }
         }
@@ -61,7 +62,6 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
                 result = default;
                 return false;
             }
-            using var ug = Version.CreateGuard(true);
             var key = Indexes.Last.Value;
             Indexes.RemoveLast();
             if (!Dictionary.TryGetValue(key, out var value))
@@ -74,6 +74,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
             }
             Debug.Assert(Dictionary.Count == Indexes.Count);
             result = new KeyValuePair<TKey, TValue>(key, value);
+            Version += 1;
             return true;
         }
 
@@ -84,7 +85,6 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
                 result = default;
                 return false;
             }
-            using var ug = Version.CreateGuard(true);
             var key = Indexes.First.Value;
             Indexes.RemoveFirst();
             if (!Dictionary.TryGetValue(key, out var value))
@@ -98,6 +98,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
             }
             Debug.Assert(Dictionary.Count == Indexes.Count);
             result = new KeyValuePair<TKey, TValue>(key, value);
+            Version += 1;
             return true;
         }
 
@@ -106,12 +107,12 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
             CheckForOutOfBounds(firstIndex);
             CheckForOutOfBounds(secondIndex);
             
-            using var ug = Version.CreateGuard(true);
             var firstNode = Indexes.At(firstIndex);
             var secondNode = Indexes.At(secondIndex);
             var tmp = firstNode.Value;
             firstNode.Value = secondNode.Value;
             secondNode.Value = tmp;
+            Version += 1;
         }
     }
 }
