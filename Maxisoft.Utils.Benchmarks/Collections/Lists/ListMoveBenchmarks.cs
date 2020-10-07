@@ -7,6 +7,7 @@ using Troschuetz.Random;
 
 namespace Maxisoft.Utils.Benchmarks.Collections.Dictionaries
 {
+    [MemoryDiagnoser]
     public class ListMoveBenchmarks
     {
         private readonly TRandom _random = new TRandom();
