@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Linq;
 using Maxisoft.Utils.Collections.Dictionaries.Specialized;
 using Xunit;
@@ -72,6 +73,13 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
                 var marker = new object();
                 d.PushFront("front", marker);
                 Assert.Equal(marker, d[0]);
+                
+                // reinsert the same key should throw
+                {
+                    var size = d.Count;
+                    Assert.Throws<ArgumentException>(() => d.PushFront("front", marker));
+                    Assert.Equal(size, d.Count);
+                }
                 
                 var expected = new OrderedDequeDictionary<string, object>()
                 {
