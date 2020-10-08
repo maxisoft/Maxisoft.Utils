@@ -228,5 +228,23 @@ namespace Maxisoft.Utils.Collections.LinkedLists
 
             return -1;
         }
+
+        public static void Swap<T>(this LinkedList<T> list, int firstIndex, int secondIndex)
+        {
+            if ((uint) firstIndex >= (uint) list.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(firstIndex), firstIndex, null);
+            }
+            if ((uint) secondIndex >= (uint) list.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(secondIndex), secondIndex, null);
+            }
+
+            var firstNode = list.At(firstIndex);
+            var secondNode = list.At(secondIndex);
+            var tmp = firstNode.Value;
+            firstNode.Value = secondNode.Value;
+            secondNode.Value = tmp;
+        }
     }
 }
