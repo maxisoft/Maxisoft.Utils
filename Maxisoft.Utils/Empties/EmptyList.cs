@@ -6,9 +6,15 @@ namespace Maxisoft.Utils.Empties
 {
     public readonly struct EmptyList<T> : IList<T>, IEmpty
     {
-        public IEnumerator<T> GetEnumerator()
+        
+        public EmptyEnumerator<T> GetEnumerator()
         {
             return new EmptyEnumerator<T>();
+        }
+        
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -66,9 +72,16 @@ namespace Maxisoft.Utils.Empties
 
     public readonly struct EmptyList : IList, IEmpty
     {
-        public IEnumerator GetEnumerator()
+        
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public EmptyEnumerator GetEnumerator()
         {
             return new EmptyEnumerator();
+        }
+        
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         public void CopyTo(Array array, int index)
