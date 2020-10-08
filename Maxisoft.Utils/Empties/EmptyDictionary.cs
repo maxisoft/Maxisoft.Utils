@@ -6,9 +6,15 @@ namespace Maxisoft.Utils.Empties
 {
     public readonly struct EmptyDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IEmpty
     {
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+
+        public EmptyEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             return new EmptyEnumerator<KeyValuePair<TKey, TValue>>();
+        }
+        
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -89,10 +95,15 @@ namespace Maxisoft.Utils.Empties
         {
             return false;
         }
-
-        public IDictionaryEnumerator GetEnumerator()
+        
+        public EmptyDictionaryEnumerator GetEnumerator()
         {
             return new EmptyDictionaryEnumerator();
+        }
+        
+        IDictionaryEnumerator IDictionary.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         public void Remove(object key)
