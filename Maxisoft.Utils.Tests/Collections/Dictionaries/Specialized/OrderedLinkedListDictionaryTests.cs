@@ -1,5 +1,7 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Linq;
+using Maxisoft.Utils.Collections.Dictionaries;
 using Maxisoft.Utils.Collections.Dictionaries.Specialized;
 using Xunit;
 
@@ -72,6 +74,14 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
                 var marker = new object();
                 d.PushFront("front", marker);
                 Assert.Equal(marker, d[0]);
+                
+                // reinsert the same key should throw
+                {
+                    var size = d.Count;
+                    Assert.Throws<ArgumentException>(() => d.PushFront("front", marker));
+                    Assert.Equal(size, d.Count);
+                }
+                
                 
                 var expected = new OrderedLinkedListDictionary<string, object>()
                 {
@@ -147,6 +157,31 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
             Assert.True(d.Count == 0);
             Assert.False(d.TryPopFront(out _));
             Assert.False(d.TryPopBack(out _));
+        }
+        
+        [Fact]
+        public void Test_Swap()
+        {
+            var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
+            var d = new OrderedLinkedListDictionary<string, object>
+            {
+                {"zero", objectPool[0]},
+                {"one", objectPool[1]},
+                {"two", objectPool[2]},
+                {"three", objectPool[3]}
+            };
+
+            d.Swap(0, 3);
+
+            var expected = new OrderedDictionary<string, object>
+            {
+                {"three", objectPool[3]},
+                {"one", objectPool[1]},
+                {"two", objectPool[2]},
+                {"zero", objectPool[0]}
+            };
+
+            Assert.Equal(expected, d);
         }
     }
 }
