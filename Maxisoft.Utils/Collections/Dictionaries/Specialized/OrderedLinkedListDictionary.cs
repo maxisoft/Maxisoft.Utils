@@ -104,14 +104,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
 
         public override void Swap(int firstIndex, int secondIndex)
         {
-            CheckForOutOfBounds(firstIndex);
-            CheckForOutOfBounds(secondIndex);
-            
-            var firstNode = Indexes.At(firstIndex);
-            var secondNode = Indexes.At(secondIndex);
-            var tmp = firstNode.Value;
-            firstNode.Value = secondNode.Value;
-            secondNode.Value = tmp;
+            Indexes.Swap(firstIndex, secondIndex);
             Version += 1;
         }
     }
