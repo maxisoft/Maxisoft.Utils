@@ -101,6 +101,43 @@ namespace Maxisoft.Utils.Tests.Collections.Queues.Specialized
                 Assert.Throws<InvalidOperationException>(() => q.PopFront());
                 Assert.Throws<InvalidOperationException>(() => q.PopBack());
             }
+            
+            
+            {
+                q.Clear();
+                Assert.Empty(q);
+            }
+
+            {
+                for (var i = 0; i < maxSize; i++)
+                {
+                    q.PushBack(i);
+                }
+                Assert.Equal(Enumerable.Range(0, maxSize), q);
+
+                Assert.True(q.Remove(0));
+                Assert.Equal(Enumerable.Range(1, maxSize - 1), q);
+                Assert.Equal(1, q.At(0));
+                Assert.Equal(1, q.Front());
+                foreach (var i in Enumerable.Range(1, maxSize - 1))
+                {
+                    Assert.Contains(i, q);
+                }
+                Assert.Equal(maxSize - 1, q.Back());
+                
+                Assert.Equal(6, q.IndexOf(7));
+                q.Insert(0, 0);
+                Assert.Equal(Enumerable.Range(0, maxSize), q);
+                q.RemoveAt(0);
+                Assert.Equal(Enumerable.Range(1, maxSize - 1), q);
+                q.Insert(q.Count, int.MaxValue);
+                q[^1] = q.Count;
+                Assert.Equal(Enumerable.Range(1, maxSize), q);
+            }
+
+            {
+                Assert.False(q.IsReadOnly);
+            }
         }
     }
 }
