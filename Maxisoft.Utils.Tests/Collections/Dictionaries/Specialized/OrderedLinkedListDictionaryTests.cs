@@ -34,7 +34,11 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
             //delete 1/3 of data
             for (var i = maxSize - 1; i >= 0; i--)
             {
-                if (i % 3 != 0) continue;
+                if (i % 3 != 0)
+                {
+                    continue;
+                }
+
                 var key = $"{i + 1}";
                 Assert.Equal(adversarial.Contains(key), d.ContainsKey(key));
 
@@ -62,34 +66,34 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
         public void Test_Deque_Methods()
         {
             var objectPool = Enumerable.Range(0, 4).Select(i => new object()).ToArray();
-            var d = new OrderedLinkedListDictionary<string, object>()
+            var d = new OrderedLinkedListDictionary<string, object>
             {
                 {"zero", objectPool[0]},
                 {"one", objectPool[1]},
                 {"two", objectPool[2]},
-                {"three", objectPool[3]},
+                {"three", objectPool[3]}
             };
 
             {
                 var marker = new object();
                 d.PushFront("front", marker);
                 Assert.Equal(marker, d[0]);
-                
+
                 // reinsert the same key should throw
                 {
                     var size = d.Count;
                     Assert.Throws<ArgumentException>(() => d.PushFront("front", marker));
                     Assert.Equal(size, d.Count);
                 }
-                
-                
-                var expected = new OrderedLinkedListDictionary<string, object>()
+
+
+                var expected = new OrderedLinkedListDictionary<string, object>
                 {
                     {"front", marker},
                     {"zero", objectPool[0]},
                     {"one", objectPool[1]},
                     {"two", objectPool[2]},
-                    {"three", objectPool[3]},
+                    {"three", objectPool[3]}
                 };
 
 
@@ -101,15 +105,15 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
                 Assert.True(res);
                 Assert.Equal("front", pair.Key);
                 Assert.Same(marker, pair.Value);
-            
-                expected = new OrderedLinkedListDictionary<string, object>()
+
+                expected = new OrderedLinkedListDictionary<string, object>
                 {
                     {"zero", objectPool[0]},
                     {"one", objectPool[1]},
                     {"two", objectPool[2]},
-                    {"three", objectPool[3]},
+                    {"three", objectPool[3]}
                 };
-            
+
                 Assert.Equal(expected, d);
             }
 
@@ -118,13 +122,13 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
                 var marker = new object();
 
                 d.PushBack("back", marker);
-                var expected = new OrderedLinkedListDictionary<string, object>()
+                var expected = new OrderedLinkedListDictionary<string, object>
                 {
                     {"zero", objectPool[0]},
                     {"one", objectPool[1]},
                     {"two", objectPool[2]},
                     {"three", objectPool[3]},
-                    {"back", marker},
+                    {"back", marker}
                 };
 
 
@@ -136,15 +140,15 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
                 Assert.True(res);
                 Assert.Equal("back", pair.Key);
                 Assert.Same(marker, pair.Value);
-            
-                expected = new OrderedLinkedListDictionary<string, object>()
+
+                expected = new OrderedLinkedListDictionary<string, object>
                 {
                     {"zero", objectPool[0]},
                     {"one", objectPool[1]},
                     {"two", objectPool[2]},
-                    {"three", objectPool[3]},
+                    {"three", objectPool[3]}
                 };
-            
+
                 Assert.Equal(expected, d);
             }
 
@@ -158,7 +162,7 @@ namespace Maxisoft.Utils.Tests.Collections.Dictionaries.Specialized
             Assert.False(d.TryPopFront(out _));
             Assert.False(d.TryPopBack(out _));
         }
-        
+
         [Fact]
         public void Test_Swap()
         {

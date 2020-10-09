@@ -149,7 +149,7 @@ namespace Maxisoft.Utils.Collections.LinkedLists
         {
             return IndexOfFromStart(list, value);
         }
-        
+
         public static int LastIndexOf<T>(this LinkedList<T> list, in T value)
         {
             return IndexOfFromEnd(list, value);
@@ -235,6 +235,7 @@ namespace Maxisoft.Utils.Collections.LinkedLists
             {
                 throw new ArgumentOutOfRangeException(nameof(firstIndex), firstIndex, null);
             }
+
             if ((uint) secondIndex >= (uint) list.Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(secondIndex), secondIndex, null);

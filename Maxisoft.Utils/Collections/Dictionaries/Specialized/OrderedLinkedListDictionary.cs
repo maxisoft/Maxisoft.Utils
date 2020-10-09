@@ -5,25 +5,28 @@ using Maxisoft.Utils.Collections.LinkedLists;
 
 namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
 {
-    public class OrderedLinkedListDictionary<TKey, TValue> : OrderedDictionary<TKey, TValue, LinkedListAsIList<TKey>, Dictionary<TKey, TValue>>, IOrderedDequeDictionary<TKey, TValue>
+    public class OrderedLinkedListDictionary<TKey, TValue> :
+        OrderedDictionary<TKey, TValue, LinkedListAsIList<TKey>, Dictionary<TKey, TValue>>,
+        IOrderedDequeDictionary<TKey, TValue>
     {
         public OrderedLinkedListDictionary()
         {
         }
-        
+
         public OrderedLinkedListDictionary(int capacity) : base(new Dictionary<TKey, TValue>(capacity))
         {
-            
         }
-        
-        public OrderedLinkedListDictionary(IEqualityComparer<TKey> comparer) : base(new Dictionary<TKey, TValue>(comparer))
+
+        public OrderedLinkedListDictionary(IEqualityComparer<TKey> comparer) : base(
+            new Dictionary<TKey, TValue>(comparer))
         {
         }
-        
-        public OrderedLinkedListDictionary(int capacity, IEqualityComparer<TKey> comparer) : base(new Dictionary<TKey, TValue>(capacity, comparer))
+
+        public OrderedLinkedListDictionary(int capacity, IEqualityComparer<TKey> comparer) : base(
+            new Dictionary<TKey, TValue>(capacity, comparer))
         {
         }
-        
+
         public void PushBack(in TKey key, in TValue value)
         {
             Add(key, value);
@@ -62,16 +65,19 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
                 result = default;
                 return false;
             }
+
             var key = Indexes.Last.Value;
             Indexes.RemoveLast();
             if (!Dictionary.TryGetValue(key, out var value))
             {
                 throw new InvalidOperationException();
             }
+
             if (!Dictionary.Remove(key))
             {
                 throw new InvalidOperationException();
             }
+
             Debug.Assert(Dictionary.Count == Indexes.Count);
             result = new KeyValuePair<TKey, TValue>(key, value);
             Version += 1;
@@ -85,6 +91,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
                 result = default;
                 return false;
             }
+
             var key = Indexes.First.Value;
             Indexes.RemoveFirst();
             if (!Dictionary.TryGetValue(key, out var value))
@@ -96,6 +103,7 @@ namespace Maxisoft.Utils.Collections.Dictionaries.Specialized
             {
                 throw new InvalidOperationException();
             }
+
             Debug.Assert(Dictionary.Count == Indexes.Count);
             result = new KeyValuePair<TKey, TValue>(key, value);
             Version += 1;
