@@ -2,7 +2,8 @@
 
 namespace Maxisoft.Utils.Disposables
 {
-    public readonly struct OptionalWeakDisposable : IDisposable, IEquatable<OptionalWeakDisposable>, IEquatable<IDisposable>
+    public readonly struct OptionalWeakDisposable : IDisposable, IEquatable<OptionalWeakDisposable>,
+        IEquatable<IDisposable>
     {
         internal readonly IDisposable? HardRef;
 
@@ -28,7 +29,7 @@ namespace Maxisoft.Utils.Disposables
                 d.Dispose();
             }
         }
-            
+
         public bool IsValid()
         {
             if (!ReferenceEquals(null, WeakReference))
@@ -77,20 +78,19 @@ namespace Maxisoft.Utils.Disposables
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (obj is OptionalWeakDisposable disposable)
+            return obj switch
             {
-                return Equals(disposable);
-            }
-            return obj is IDisposable && Equals((IDisposable) obj);
+                null => false,
+                OptionalWeakDisposable owd => Equals(owd),
+                IDisposable d => Equals(d),
+                _ => throw new InvalidOperationException()
+            };
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return ((HardRef != null ? HardRef.GetHashCode() : 0) * 397) ^ (WeakReference != null ? WeakReference.GetHashCode() : 0);
-            }
+            return (HardRef != null ? HardRef.GetHashCode() : 0) |
+                   (WeakReference != null ? WeakReference.GetHashCode() : 0);
         }
     }
 }
