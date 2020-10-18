@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using BenchmarkDotNet.Attributes;
 using Troschuetz.Random;
 
@@ -14,7 +15,7 @@ namespace Maxisoft.Utils.Benchmarks
         [GlobalSetup]
         public void Setup()
         {
-            const int n = 1024 * 1024;
+            const int n = 16 * 1024;
             floatingPoints = new List<double>(n);
             values = new List<ulong>(n);
             var random = new TRandom(n);
@@ -38,6 +39,14 @@ namespace Maxisoft.Utils.Benchmarks
         {
             // Note the following add 1 long operation for each element
             return values.Aggregate(0UL, (current, f) => current * Math2.Log2(f));
+        }
+        
+        
+        [Benchmark]
+        public ulong BitOperation_Log2()
+        {
+            // Note the following add 1 long operation for each element
+            return values.Aggregate(0UL, (current, f) => current * (ulong) BitOperations.Log2(f));
         }
     }
 }
