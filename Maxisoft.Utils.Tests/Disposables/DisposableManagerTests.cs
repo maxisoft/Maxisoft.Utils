@@ -86,7 +86,7 @@ namespace Maxisoft.Utils.Tests.Disposables
             var disposables = new Mock<LinkedList<OptionalWeakDisposable>> {CallBase = true};
             var dm = new TDisposableManager(disposables.Object);
             var random = new TRandom(seed);
-            const int limit = 128;
+            const int limit = 64;
             dm.AutoCleanup = random.NextBoolean();
 
             var weakDisposableList = new List<WeakReference<IDisposable>>();
@@ -156,7 +156,7 @@ namespace Maxisoft.Utils.Tests.Disposables
                 }
 
 
-                if (i % 32 == 0)
+                if (i % 8 == 0)
                 {
                     if (random.NextBoolean())
                     {
@@ -164,7 +164,7 @@ namespace Maxisoft.Utils.Tests.Disposables
                         //wait the for the GC to cleanup things
                         //try hard mode
                         var prevCount = disposables.Object.Count;
-                        while (prevCount == disposables.Object.Count && count++ < 500)
+                        while (prevCount == disposables.Object.Count && count++ < 6)
                         {
                             dm.CleanupLinkedDisposable();
                             GC.Collect();
@@ -336,7 +336,7 @@ namespace Maxisoft.Utils.Tests.Disposables
         internal class RandomSeedGenerator : IEnumerable<object[]>
         {
             internal virtual RandomThreadSafe Random { get; } = new RandomThreadSafe();
-            internal virtual int NumberOfGen => 16;
+            internal virtual int NumberOfGen => 4;
 
             public IEnumerator<object[]> GetEnumerator()
             {
