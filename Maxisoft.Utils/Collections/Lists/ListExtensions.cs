@@ -76,8 +76,7 @@ namespace Maxisoft.Utils.Collections.Lists
             return res;
         }
 
-        public static int AddSorted<T, TList>(this TList list, in T item, IComparer<T>? comparer = null)
-            where TList : ArrayList<T>
+        public static int AddSorted<T>(this ArrayList<T> list, in T item, IComparer<T>? comparer = null)
         {
             var index = list.BinarySearch(in item, comparer);
             var res = index < 0 ? ~index : index;

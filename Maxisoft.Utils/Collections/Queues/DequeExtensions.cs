@@ -4,7 +4,7 @@ namespace Maxisoft.Utils.Collections.Queues
 {
     public static class DequeExtensions
     {
-        public static CircularDequeWrapper<T, TDeque> ToCircular<T, TDeque>(this TDeque deque, long capacity)
+        public static CircularDequeWrapper<T, TDeque> ToCircular<T, TDeque>(TDeque deque, long capacity)
             where TDeque : IDeque<T>
         {
             return new CircularDequeWrapper<T, TDeque>(deque, capacity);
@@ -15,7 +15,7 @@ namespace Maxisoft.Utils.Collections.Queues
             return new CircularDeque<T>(deque, capacity);
         }
 
-        public static BoundedDequeWrapper<T, TDeque> ToBounded<T, TDeque>(this TDeque deque, long capacity)
+        public static BoundedDequeWrapper<T, TDeque> ToBounded<T, TDeque>(TDeque deque, long capacity)
             where TDeque : IDeque<T>
         {
             return new BoundedDequeWrapper<T, TDeque>(deque, capacity);
