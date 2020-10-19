@@ -9,13 +9,14 @@ namespace Maxisoft.Utils.Disposables
     public class DisposableManager : IDisposableManager, IReadOnlyCollection<OptionalWeakDisposable>
     {
         internal readonly LinkedList<OptionalWeakDisposable> LinkedDisposables;
+        private DisposableManagerBehavior _behavior = DisposableManagerBehavior.Default;
         private LinkedListNode<OptionalWeakDisposable>? _p;
 
-        public DisposableManager() : this(new LinkedList<IDisposable>())
+        public DisposableManager() : this(new LinkedList<OptionalWeakDisposable>())
         {
         }
 
-        public DisposableManager(IEnumerable<IDisposable> disposables) : this(new LinkedList<OptionalWeakDisposable>())
+        public DisposableManager(IEnumerable<IDisposable> disposables) : this()
         {
             foreach (var disposable in disposables)
             {
@@ -32,7 +33,37 @@ namespace Maxisoft.Utils.Disposables
             LinkedDisposables = linkedDisposables;
         }
 
-        public bool AutoCleanup { get; set; } = true;
+        public bool AutoCleanup
+        {
+            get => _behavior.HasFlag(DisposableManagerBehavior.AutoCleanup);
+            set
+            {
+                if (value)
+                {
+                    _behavior |= DisposableManagerBehavior.AutoCleanup;
+                }
+                else
+                {
+                    _behavior &= ~DisposableManagerBehavior.AutoCleanup;
+                }
+            }
+        }
+
+        public bool DisposeOnDeletion
+        {
+            get => _behavior.HasFlag(DisposableManagerBehavior.DisposeOnDeletion);
+            set
+            {
+                if (value)
+                {
+                    _behavior |= DisposableManagerBehavior.DisposeOnDeletion;
+                }
+                else
+                {
+                    _behavior &= ~DisposableManagerBehavior.DisposeOnDeletion;
+                }
+            }
+        }
 
         public void LinkDisposable(IDisposable disposable)
         {
@@ -148,6 +179,11 @@ namespace Maxisoft.Utils.Disposables
 
         protected virtual void Dispose(bool disposing)
         {
+            if (!disposing && !DisposeOnDeletion)
+            {
+                return;
+            }
+
             lock (LinkedDisposables)
             {
                 foreach (var disposable in LinkedDisposables.ReversedIterator())
