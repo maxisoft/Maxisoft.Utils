@@ -164,7 +164,7 @@ namespace Maxisoft.Utils.Tests.Disposables
                         //wait the for the GC to cleanup things
                         //try hard mode
                         var prevCount = disposables.Object.Count;
-                        while (prevCount == disposables.Object.Count && count++ < 6)
+                        while (prevCount == disposables.Object.Count && count++ < 3)
                         {
                             dm.CleanupLinkedDisposable();
                             GC.Collect();
