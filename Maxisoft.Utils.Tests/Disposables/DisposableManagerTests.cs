@@ -294,6 +294,35 @@ namespace Maxisoft.Utils.Tests.Disposables
         }
 
 
+        [Fact]
+        public void Test_Constructors()
+        {
+            var dm = new DisposableManager();
+            Assert.Empty(dm);
+
+            {
+                var disposable = new DisposableTracker();
+                dm = new DisposableManager(disposable);
+                
+                Assert.Single(dm);
+                dm.Dispose();
+                Assert.True(disposable.Value.Value);
+                Assert.Empty(dm);
+            }
+
+            {
+                var disposable = new DisposableTracker();
+                dm = new DisposableManager((IEnumerable<IDisposable>) new []{disposable});
+                
+                Assert.Single(dm);
+                dm.Dispose();
+                Assert.True(disposable.Value.Value);
+                Assert.Empty(dm);
+            }
+            
+        }
+
+
         private static Mock<IDisposable> AddDisposable(IDisposableManager disposableManager)
         {
             var disposable = new Mock<IDisposable>();
