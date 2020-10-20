@@ -7,6 +7,7 @@ namespace Maxisoft.Utils.Disposables
     {
         AutoCleanup = 1 << 0,
         DisposeOnDeletion = 1 << 1,
-        Default = AutoCleanup | DisposeOnDeletion
+        ClearOnDispose = 1 << 2,
+        Default = AutoCleanup | DisposeOnDeletion | ClearOnDispose
     }
 }

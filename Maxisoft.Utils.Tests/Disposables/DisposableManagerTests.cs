@@ -293,6 +293,111 @@ namespace Maxisoft.Utils.Tests.Disposables
             disposable.Verify(mock => mock.Dispose(), Times.Never);
         }
 
+        [Fact]
+        public void Test_DisposeOnDeletion_Property()
+        {
+            var dm = new DisposableManager();
+            Assert.True(dm.DisposeOnDeletion);
+            Assert.True(dm.AutoCleanup);
+
+            dm.DisposeOnDeletion = false;
+            Assert.False(dm.DisposeOnDeletion);
+            Assert.True(dm.AutoCleanup);
+
+            dm.DisposeOnDeletion = true;
+            Assert.True(dm.DisposeOnDeletion);
+            Assert.True(dm.AutoCleanup);
+        }
+
+        [SkippableFact]
+        public void Test_DisposeOnDeletion()
+        {
+            {
+                var d = new DisposableTracker();
+                {
+                    var dm = new DisposableManager(d) {DisposeOnDeletion = true};
+                    Assert.False(d.Value.Value);
+                    Assert.True(dm.DisposeOnDeletion);
+                    dm = null;
+                }
+
+                var c = 0;
+                while (!d.Value.Value && c++ < 512)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                }
+
+                Skip.If(!d.Value.Value, "Cannot delete disposable manager in more than 500 GC iteration");
+                Assert.True(d.Value.Value);
+            }
+
+            {
+                var d = new DisposableTracker();
+                {
+                    var dm = new DisposableManager(d) {DisposeOnDeletion = false};
+                    Assert.False(d.Value.Value);
+                    Assert.False(dm.DisposeOnDeletion);
+                    dm = null;
+                }
+
+                var c = 0;
+                while (c++ < 16)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    Assert.False(d.Value.Value);
+                }
+
+                Assert.False(d.Value.Value);
+            }
+        }
+
+        [Fact]
+        public void Test_ClearOnDispose()
+        {
+            {
+                var disposables = new Mock<LinkedList<OptionalWeakDisposable>> {CallBase = true};
+                var dm = new TDisposableManager(disposables.Object) {ClearOnDispose = true};
+                Assert.True(dm.ClearOnDispose);
+                var disposable = AddDisposable(dm);
+
+                Assert.NotEmpty(disposables.Object);
+                disposable.Verify(mock => mock.Dispose(), Times.Never);
+                dm.Dispose();
+                disposable.Verify(mock => mock.Dispose());
+                Assert.Empty(disposables.Object);
+            }
+
+            {
+                var disposables = new Mock<LinkedList<OptionalWeakDisposable>> {CallBase = true};
+                var dm = new TDisposableManager(disposables.Object) {ClearOnDispose = false};
+                Assert.False(dm.ClearOnDispose);
+                var disposable = AddDisposable(dm);
+
+                Assert.NotEmpty(disposables.Object);
+                disposable.Verify(mock => mock.Dispose(), Times.Never);
+                dm.Dispose();
+                disposable.Verify(mock => mock.Dispose());
+                Assert.NotEmpty(disposables.Object);
+            }
+        }
+
+        [Fact]
+        public void Test_AutoCleanup_Property()
+        {
+            var dm = new DisposableManager();
+            Assert.True(dm.DisposeOnDeletion);
+            Assert.True(dm.AutoCleanup);
+
+            dm.AutoCleanup = false;
+            Assert.True(dm.DisposeOnDeletion);
+            Assert.False(dm.AutoCleanup);
+
+            dm.AutoCleanup = true;
+            Assert.True(dm.DisposeOnDeletion);
+            Assert.True(dm.AutoCleanup);
+        }
 
         [Fact]
         public void Test_Constructors()
@@ -303,7 +408,7 @@ namespace Maxisoft.Utils.Tests.Disposables
             {
                 var disposable = new DisposableTracker();
                 dm = new DisposableManager(disposable);
-                
+
                 Assert.Single(dm);
                 dm.Dispose();
                 Assert.True(disposable.Value.Value);
@@ -312,14 +417,13 @@ namespace Maxisoft.Utils.Tests.Disposables
 
             {
                 var disposable = new DisposableTracker();
-                dm = new DisposableManager((IEnumerable<IDisposable>) new []{disposable});
-                
+                dm = new DisposableManager((IEnumerable<IDisposable>) new[] {disposable});
+
                 Assert.Single(dm);
                 dm.Dispose();
                 Assert.True(disposable.Value.Value);
                 Assert.Empty(dm);
             }
-            
         }
 
 
@@ -346,17 +450,17 @@ namespace Maxisoft.Utils.Tests.Disposables
 
         private class EmptyDisposable : IDisposable
         {
-            public void Dispose()
+            public virtual void Dispose()
             {
             }
         }
 
 
-        internal class DisposableTracker : IDisposable
+        public class DisposableTracker : IDisposable
         {
-            internal AtomicBoolean Value = new AtomicBoolean();
+            public AtomicBoolean Value = new AtomicBoolean();
 
-            public void Dispose()
+            public virtual void Dispose()
             {
                 Value.FalseToTrue();
             }
