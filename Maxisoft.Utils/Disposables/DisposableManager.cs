@@ -49,6 +49,22 @@ namespace Maxisoft.Utils.Disposables
             }
         }
 
+        public bool ClearOnDispose
+        {
+            get => _behavior.HasFlag(DisposableManagerBehavior.ClearOnDispose);
+            set
+            {
+                if (value)
+                {
+                    _behavior |= DisposableManagerBehavior.ClearOnDispose;
+                }
+                else
+                {
+                    _behavior &= ~DisposableManagerBehavior.ClearOnDispose;
+                }
+            }
+        }
+
         public bool DisposeOnDeletion
         {
             get => _behavior.HasFlag(DisposableManagerBehavior.DisposeOnDeletion);
@@ -192,7 +208,10 @@ namespace Maxisoft.Utils.Disposables
                 }
 
                 _p = null;
-                LinkedDisposables.Clear();
+                if (ClearOnDispose)
+                {
+                    LinkedDisposables.Clear();
+                }
             }
         }
 
