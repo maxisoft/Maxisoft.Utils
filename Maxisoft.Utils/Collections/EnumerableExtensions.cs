@@ -86,13 +86,13 @@ namespace Maxisoft.Utils.Collections
 
             return res;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ArrayList<T> ToArrayList<T>(this ReadOnlySpan<T> span)
         {
             return ToArrayList(span.ToArray(), false);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ArrayList<T> ToArrayList<T>(this Span<T> span)
         {

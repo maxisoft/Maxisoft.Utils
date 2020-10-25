@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Maxisoft.Utils.Collections.Lists;
 
@@ -17,12 +16,20 @@ namespace Maxisoft.Utils.Algorithms
             where TComparer : IComparer<T>
         {
             using var enumerator = enumerable.GetEnumerator();
-            if (!enumerator.MoveNext()) return true; // empty is sorted
+            if (!enumerator.MoveNext())
+            {
+                return true; // empty is sorted
+            }
+
             var prev = enumerator.Current;
             while (enumerator.MoveNext())
             {
                 var value = enumerator.Current;
-                if (comparer.Compare(prev, value) > 0) return false;
+                if (comparer.Compare(prev, value) > 0)
+                {
+                    return false;
+                }
+
                 prev = value;
             }
 
@@ -34,13 +41,20 @@ namespace Maxisoft.Utils.Algorithms
             where TList : IList<T>
             where TComparer : IComparer<T>
         {
-            if (list.Count <= 1) return true;
+            if (list.Count <= 1)
+            {
+                return true;
+            }
 
             var prev = list[0];
 
             foreach (var value in list)
             {
-                if (comparer.Compare(prev, value) > 0) return false;
+                if (comparer.Compare(prev, value) > 0)
+                {
+                    return false;
+                }
+
                 prev = value;
             }
 
@@ -58,13 +72,20 @@ namespace Maxisoft.Utils.Algorithms
             where TList : IList<T>
             where T : IComparable<T>
         {
-            if (list.Count <= 1) return true;
+            if (list.Count <= 1)
+            {
+                return true;
+            }
 
             var prev = list[0];
 
             foreach (var value in list)
             {
-                if (prev.CompareTo(value) > 0) return false;
+                if (prev.CompareTo(value) > 0)
+                {
+                    return false;
+                }
+
                 prev = value;
             }
 
@@ -77,14 +98,14 @@ namespace Maxisoft.Utils.Algorithms
         {
             return IsSorted<T, List<T>>(list);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsSorted<T>(this ArrayList<T> list)
             where T : IComparable<T>
         {
             return IsSorted(list.AsSpan());
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsSorted<T, TComparer>(this ArrayList<T> list, TComparer comparer)
             where TComparer : IComparer<T>
@@ -124,12 +145,19 @@ namespace Maxisoft.Utils.Algorithms
         public static bool IsSorted<T>(this ReadOnlySpan<T> span)
             where T : IComparable<T>
         {
-            if (span.Length <= 1) return true;
+            if (span.Length <= 1)
+            {
+                return true;
+            }
 
             var prev = span[0];
             foreach (var value in span.Slice(1))
             {
-                if (prev.CompareTo(value) > 0) return false;
+                if (prev.CompareTo(value) > 0)
+                {
+                    return false;
+                }
+
                 prev = value;
             }
 
@@ -139,12 +167,19 @@ namespace Maxisoft.Utils.Algorithms
         public static bool IsSorted<T, TComparer>(this ReadOnlySpan<T> span, TComparer comparer)
             where TComparer : IComparer<T>
         {
-            if (span.Length <= 1) return true;
+            if (span.Length <= 1)
+            {
+                return true;
+            }
 
             var prev = span[0];
             foreach (var value in span.Slice(1))
             {
-                if (comparer.Compare(prev, value) > 0) return false;
+                if (comparer.Compare(prev, value) > 0)
+                {
+                    return false;
+                }
+
                 prev = value;
             }
 

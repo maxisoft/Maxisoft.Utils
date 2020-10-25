@@ -1,4 +1,6 @@
-﻿using Maxisoft.Utils.Algorithms;
+﻿using System.Collections.Generic;
+using Maxisoft.Utils.Algorithms;
+using Maxisoft.Utils.Objects;
 using Xunit;
 
 namespace Maxisoft.Utils.Tests.Algorithms
@@ -451,6 +453,43 @@ namespace Maxisoft.Utils.Tests.Algorithms
             Assert.Equal((ulong) 1.0, Numbers.Clamp((ulong) 0.0, (ulong) 1.0, (ulong) 10.0));
             Assert.Equal((ulong) 10.0, Numbers.Clamp((ulong) 10.0, (ulong) 1.0, (ulong) 10.0));
             Assert.Equal((ulong) 10.0, Numbers.Clamp((ulong) 11.0, (ulong) 1.0, (ulong) 10.0));
+
+            // ReSharper restore InvokeAsExtensionMethod
+        }
+
+        [Fact]
+        public void Test_Clamp_Boxed_ulong()
+        {
+            // ReSharper disable InvokeAsExtensionMethod
+
+            //  Inside the range, equal to the endpoulongs, and outside the endpoulongs.
+            Assert.Equal((Boxed<ulong>) 3.0,
+                Numbers.Clamp<Boxed<ulong>>((Boxed<ulong>) 3.0, (Boxed<ulong>) 1.0, (ulong) 10.0));
+
+            Assert.Equal((Boxed<ulong>) 1.0,
+                Numbers.Clamp<Boxed<ulong>>((Boxed<ulong>) 1.0, (Boxed<ulong>) 1.0, (Boxed<ulong>) 10.0));
+            Assert.Equal((Boxed<ulong>) 1.0,
+                Numbers.Clamp<Boxed<ulong>>((Boxed<ulong>) 0.0, (Boxed<ulong>) 1.0, (Boxed<ulong>) 10.0));
+            Assert.Equal((Boxed<ulong>) 10.0,
+                Numbers.Clamp<Boxed<ulong>>((Boxed<ulong>) 10.0, (Boxed<ulong>) 1.0, (Boxed<ulong>) 10.0));
+            Assert.Equal((Boxed<ulong>) 10.0,
+                Numbers.Clamp<Boxed<ulong>>((Boxed<ulong>) 11.0, (Boxed<ulong>) 1.0, (Boxed<ulong>) 10.0));
+
+
+            Assert.Equal((ulong) 3.0, Numbers.Clamp((Boxed<ulong>) 3.0, (Boxed<ulong>) 1.0, (ulong) 10.0));
+
+            Assert.Equal((Boxed<ulong>) 1.0,
+                Numbers.Clamp((Boxed<ulong>) 1.0, (Boxed<ulong>) 1.0, (Boxed<ulong>) 10.0,
+                    Comparer<Boxed<ulong>>.Default));
+            Assert.Equal((Boxed<ulong>) 1.0,
+                Numbers.Clamp((Boxed<ulong>) 0.0, (Boxed<ulong>) 1.0, (Boxed<ulong>) 10.0,
+                    Comparer<Boxed<ulong>>.Default));
+            Assert.Equal((Boxed<ulong>) 10.0,
+                Numbers.Clamp((Boxed<ulong>) 10.0, (Boxed<ulong>) 1.0, (Boxed<ulong>) 10.0,
+                    Comparer<Boxed<ulong>>.Default));
+            Assert.Equal((Boxed<ulong>) 10.0,
+                Numbers.Clamp((Boxed<ulong>) 11.0, (Boxed<ulong>) 1.0, (Boxed<ulong>) 10.0,
+                    Comparer<Boxed<ulong>>.Default));
 
             // ReSharper restore InvokeAsExtensionMethod
         }
