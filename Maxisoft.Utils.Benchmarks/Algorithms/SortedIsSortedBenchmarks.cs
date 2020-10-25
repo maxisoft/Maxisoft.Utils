@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using Maxisoft.Utils.Algorithms;
 using Maxisoft.Utils.Collections.Lists;
@@ -11,11 +10,11 @@ namespace Maxisoft.Utils.Benchmarks.Algorithms
     public class SortedIsSortedBenchmarks
     {
         private readonly TRandom _random = new TRandom();
-        
-
-        [Params(10, 100, 1000)] public int N;
         private ArrayList<long> _data = new ArrayList<long>();
         private ArrayList<long> _sortedData = new ArrayList<long>();
+
+
+        [Params(10, 100, 1000)] public int N;
 
         [GlobalSetup]
         public void Setup()
@@ -29,6 +28,7 @@ namespace Maxisoft.Utils.Benchmarks.Algorithms
                 _data.Add(value);
                 _sortedData.Add(value);
             }
+
             _sortedData.Sort();
         }
 
@@ -39,7 +39,7 @@ namespace Maxisoft.Utils.Benchmarks.Algorithms
             var b = _sortedData.AsSpan().IsSorted();
             return a ^ b;
         }
-        
+
         [Benchmark(Baseline = true)]
         public bool Test_IsSorted_Span_With_Comparator()
         {
@@ -48,12 +48,12 @@ namespace Maxisoft.Utils.Benchmarks.Algorithms
             var b = _sortedData.AsSpan().IsSorted(cmp);
             return a ^ b;
         }
-        
+
         [Benchmark]
         public bool Test_IsSorted_IEnumerable()
         {
-            var a = ((IEnumerable<long>)_data).IsSorted();
-            var b = ((IEnumerable<long>)_sortedData).IsSorted();
+            var a = ((IEnumerable<long>) _data).IsSorted();
+            var b = ((IEnumerable<long>) _sortedData).IsSorted();
             return a ^ b;
         }
     }
