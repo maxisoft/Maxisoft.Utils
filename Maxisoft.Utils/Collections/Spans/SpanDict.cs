@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -7,14 +6,12 @@ using System.Runtime.InteropServices;
 
 namespace Maxisoft.Utils.Collections.Spans
 {
-    
     /// <summary>
-    /// 
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <remarks>
-    /// Use <see cref="!:https://en.wikipedia.org/wiki/Open_addressing">Linear probing</see> as collisions resolution
+    ///     Use <see cref="!:https://en.wikipedia.org/wiki/Open_addressing">Linear probing</see> as collisions resolution
     /// </remarks>
     [DebuggerDisplay("Count = {Count}, Capacity = {Capacity}")]
     [DebuggerTypeProxy(typeof(SpanDict<,>.DebuggerTypeProxyImpl))]
@@ -27,9 +24,8 @@ namespace Maxisoft.Utils.Collections.Spans
         public SpanDict(int capacity, IEqualityComparer<TKey>? comparer = null) : this(
             new KeyValuePair<TKey, TValue>[capacity], comparer)
         {
-            
         }
-        
+
         public SpanDict(Span<KeyValuePair<TKey, TValue>> buckets, BitSpan mask,
             IEqualityComparer<TKey>? comparer = null)
         {
@@ -37,6 +33,7 @@ namespace Maxisoft.Utils.Collections.Spans
             {
                 throw new ArgumentException("mask isn't large enough", nameof(mask));
             }
+
             Buckets = buckets;
             Mask = mask;
             Comparer = comparer ?? EqualityComparer<TKey>.Default;
@@ -44,11 +41,10 @@ namespace Maxisoft.Utils.Collections.Spans
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="buckets"></param>
         /// <param name="comparer"></param>
-        /// <remarks>This constructor <b>Allocate</b> an array in order to store the <see cref="Mask"/></remarks>
+        /// <remarks>This constructor <b>Allocate</b> an array in order to store the <see cref="Mask" /></remarks>
         public SpanDict(Span<KeyValuePair<TKey, TValue>> buckets, IEqualityComparer<TKey>? comparer = null) : this(
             buckets, BitSpan.Zeros(buckets.Length), comparer)
         {
@@ -92,15 +88,14 @@ namespace Maxisoft.Utils.Collections.Spans
             Span<KeyValuePair<TKey, TValue>> span = array;
             CopyTo(span.Slice(arrayIndex));
         }
-        
+
         public readonly void CopyTo(Span<KeyValuePair<TKey, TValue>> span)
         {
-
             if (span.Length < Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(span), "Out of bounds");
             }
-            
+
             var c = 0;
             for (var i = 0; i < Capacity; i++)
             {
@@ -135,8 +130,6 @@ namespace Maxisoft.Utils.Collections.Spans
             {
                 throw new InvalidOperationException($"{nameof(Buckets)} full");
             }
-
-            var h = ComputeIndex(in key);
 
             var index = SearchFor(in key);
             if (index >= 0)
@@ -174,6 +167,7 @@ namespace Maxisoft.Utils.Collections.Spans
                 {
                     break;
                 }
+
                 if (Comparer.Equals(Buckets[forward].Key, key))
                 {
                     return forward;
@@ -203,11 +197,25 @@ namespace Maxisoft.Utils.Collections.Spans
 
         public bool Remove(in TKey key)
         {
+            // TODO use RuntimeHelpers.IsReferenceOrContainsReferences when available
+            // Then only reset to default (ie Buckets[i] = default) references
+
+
+            var miniStack = new SpanList<int>(stackalloc int[16]);
+
             var index = IndexOf(in key);
-            if (index < 0) return false;
+            var originalIndex = index;
+            if (index < 0)
+            {
+                return false;
+            }
+
             Mask.Set(index, false);
             Count -= 1;
-            if (Capacity <= 1) return true;
+            if (Capacity <= 1)
+            {
+                return true;
+            }
 
             var forward = (index + 1) % Capacity;
             var c = 0;
@@ -218,27 +226,45 @@ namespace Maxisoft.Utils.Collections.Spans
                 {
                     break;
                 }
+
                 var h = ComputeIndex(Buckets[forward].Key);
                 if (Distance(h, index) <= Distance(h, forward))
                 {
-                    var tmp = Buckets[forward];
+                    Buckets[index] = Buckets[forward];
                     Mask.Set(index, true);
-                    try
+                    Mask.Set(forward, false);
+                    if (miniStack.Capacity == miniStack.Count)
                     {
-                        Remove(tmp.Key); // TODO remove recursion ?
+                        Buckets[forward] = default;
                     }
-                    finally
+                    else
                     {
-                        Mask.Set(index, false);
+                        var fi = miniStack.BinarySearch(forward);
+                        if (fi < 0)
+                        {
+                            miniStack.Insert(~fi, forward);
+                        }
                     }
-                    Add(tmp);
-                    return true;
+
+                    index = forward;
                 }
+
                 forward = (forward + 1) % Capacity;
             } while (c++ < limit);
-            
-            
-            Buckets[index] = default;
+
+            if (!Mask[originalIndex])
+            {
+                Buckets[originalIndex] = default;
+            }
+
+            foreach (var i in miniStack)
+            {
+                if (!Mask[i])
+                {
+                    Buckets[i] = default;
+                }
+            }
+
             return true;
         }
 
@@ -260,7 +286,11 @@ namespace Maxisoft.Utils.Collections.Spans
             get
             {
                 var index = IndexOf(in key);
-                if (index < 0) throw new KeyNotFoundException();
+                if (index < 0)
+                {
+                    throw new KeyNotFoundException();
+                }
+
                 return Buckets[index].Value;
             }
             set
@@ -281,7 +311,8 @@ namespace Maxisoft.Utils.Collections.Spans
 
         public ValueEnumerator Values => new ValueEnumerator(this);
 
-        public static SpanDict<TKey, TValue> CreateFromBuffers<TBucket, TMask>(Span<TBucket> buckets, Span<TMask> mask, IEqualityComparer<TKey>? comparer = null, bool restore = true) where TBucket : struct where TMask : struct
+        public static SpanDict<TKey, TValue> CreateFromBuffers<TBucket, TMask>(Span<TBucket> buckets, Span<TMask> mask,
+            IEqualityComparer<TKey>? comparer = null, bool restore = true) where TBucket : struct where TMask : struct
         {
             var cBucket = MemoryMarshal.Cast<TBucket, KeyValuePair<TKey, TValue>>(buckets);
             var cMask = MemoryMarshal.Cast<TMask, long>(mask);
@@ -300,21 +331,22 @@ namespace Maxisoft.Utils.Collections.Spans
             res.Count = count;
             return res;
         }
-        
-        public static SpanDict<TKey, TValue> CreateFromBuffer<TSpan>(Span<TSpan> buff, IEqualityComparer<TKey>? comparer = null, bool restore = true) where TSpan : unmanaged
+
+        public static SpanDict<TKey, TValue> CreateFromBuffer<TSpan>(Span<TSpan> buff,
+            IEqualityComparer<TKey>? comparer = null, bool restore = true) where TSpan : unmanaged
         {
             unsafe
             {
-                while (buff.Length > 0 && (buff.Length * sizeof(TSpan)) % sizeof(long) != 0)
+                while (buff.Length > 0 && buff.Length * sizeof(TSpan) % sizeof(long) != 0)
                 {
                     buff = buff.Slice(0, buff.Length - 1);
                 }
             }
+
             var kvSpan = MemoryMarshal.Cast<TSpan, KeyValuePair<TKey, TValue>>(buff);
             var reserved = BitSpan.ComputeLongArraySize(kvSpan.Length);
             var longSpan = MemoryMarshal.Cast<TSpan, long>(buff);
             return CreateFromBuffers(longSpan.Slice(reserved), longSpan.Slice(0, reserved), comparer, restore);
         }
-
     }
 }
