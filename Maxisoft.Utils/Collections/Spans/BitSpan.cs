@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Maxisoft.Utils.Collections.Spans
@@ -17,10 +18,13 @@ namespace Maxisoft.Utils.Collections.Spans
 
         public bool this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Get(index);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => Set(index, value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private readonly void ThrowForOutOfBounds(int index)
         {
             if ((uint) index >= LongNumBit * (uint) Span.Length)
@@ -29,12 +33,14 @@ namespace Maxisoft.Utils.Collections.Spans
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool Get(int index)
         {
             ThrowForOutOfBounds(index);
             return (Span[index / LongNumBit] & (1L << (index % LongNumBit))) != 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(int index, bool value)
         {
             ThrowForOutOfBounds(index);
