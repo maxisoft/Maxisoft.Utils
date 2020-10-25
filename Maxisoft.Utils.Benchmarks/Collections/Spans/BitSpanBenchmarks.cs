@@ -7,8 +7,7 @@ using Troschuetz.Random;
 
 namespace Maxisoft.Utils.Benchmarks.Collections.Spans
 {
-    [RPlotExporter]
-    [JsonExporter]
+    [MemoryDiagnoser]
     public class BitSpanBenchmarks
     {
         private const int repeat = 32; 
