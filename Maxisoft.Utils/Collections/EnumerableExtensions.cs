@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Maxisoft.Utils.Collections.LinkedLists;
 using Maxisoft.Utils.Collections.Lists;
 using Maxisoft.Utils.Collections.Queues;
@@ -83,6 +85,18 @@ namespace Maxisoft.Utils.Collections
             }
 
             return res;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ArrayList<T> ToArrayList<T>(this ReadOnlySpan<T> span)
+        {
+            return ToArrayList(span.ToArray(), false);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ArrayList<T> ToArrayList<T>(this Span<T> span)
+        {
+            return ToArrayList((ReadOnlySpan<T>) span);
         }
 
         public static TLinkedList ToLinkedList<T, TLinkedList>(IEnumerable<T> enumerable)
