@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -123,71 +122,55 @@ namespace Maxisoft.Utils.Collections.Spans
             return this;
         }
 
-        public static implicit operator ReadOnlySpan<long>(BitSpan bs)
-        {
-            return bs.Span;
-        }
 
-        public static implicit operator Span<long>(BitSpan bs)
-        {
-            return bs.Span;
-        }
-
-        public static implicit operator BitSpan(Span<long> span)
-        {
-            return new BitSpan(span);
-        }
-
-        public static implicit operator BitSpan(Span<int> span)
-        {
-            return new BitSpan(MemoryMarshal.Cast<int, long>(span));
-        }
-
-        public static explicit operator BitArray(BitSpan span)
-        {
-            return span.ToBitArray();
-        }
-
-        public static implicit operator BitSpan(BitArray bitArray)
-        {
-            var arr = new int[ComputeLongArraySize(bitArray.Count) / (sizeof(long) / sizeof(int))];
-            bitArray.CopyTo(arr, 0);
-            return (Span<int>) arr;
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Span<T> ASpan<T>() where T : unmanaged
         {
             return MemoryMarshal.Cast<long, T>(Span);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly BitArray ToBitArray()
         {
             return new BitArray(ASpan<int>().ToArray());
         }
 
-        public int Length => Span.Length * LongNumBit;
+        public readonly int Length => Span.Length * LongNumBit;
 
-        public int Count => Length;
+        public readonly int Count => Length;
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Enumerator GetEnumerator()
         {
             return new Enumerator(this);
         }
 
-        public static int ComputeLongArraySize(int numBits)
+
+        public override readonly int GetHashCode()
         {
-            var n = numBits / LongNumBit;
-            if (numBits % LongNumBit != 0)
+            var h = Count.GetHashCode();
+
+            foreach (var l in Span)
             {
-                n += 1;
+                unchecked
+                {
+                    h = 31 * h + l.GetHashCode();
+                }
             }
 
-            return n;
+            return h;
         }
 
-        public static BitSpan Zeros(int numBits)
+        public override readonly bool Equals(object? other)
         {
-            return new BitSpan(new long[ComputeLongArraySize(numBits)]);
+            return other switch
+            {
+                null => false,
+                BitSpan bs => Equals(bs),
+                BitArray ba => Equals((BitSpan) ba),
+                _ => false
+            };
         }
     }
 }

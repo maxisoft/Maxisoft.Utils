@@ -1,15 +1,39 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Maxisoft.Utils.Collections.Spans
 {
     public ref partial struct BitSpan
     {
+        public static int ComputeLongArraySize(int numBits)
+        {
+            var n = numBits / LongNumBit;
+            if (numBits % LongNumBit != 0)
+            {
+                n += 1;
+            }
+
+            return n;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static BitSpan Zeros(int numBits)
+        {
+            return new BitSpan(new long[ComputeLongArraySize(numBits)]);
+        }
+
+        public static BitSpan CreateFromBuffer<TSpan>(Span<TSpan> buff) where TSpan : unmanaged
+        {
+            var castedSpan = MemoryMarshal.Cast<TSpan, long>(buff);
+            return new BitSpan(castedSpan);
+        }
 
         public ref struct Enumerator
         {
             /// <summary>The span being enumerated.</summary>
             private readonly BitSpan _bitSpan;
+
             /// <summary>The next index to yield.</summary>
             private int _index;
 
@@ -37,13 +61,11 @@ namespace Maxisoft.Utils.Collections.Spans
             }
 
             /// <summary>Gets the element at the current position of the enumerator.</summary>
-            public bool  Current
+            public bool Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _bitSpan.Get(_index);
             }
         }
-        
-        
     }
 }
