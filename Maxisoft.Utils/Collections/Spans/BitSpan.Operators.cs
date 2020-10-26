@@ -40,7 +40,7 @@ namespace Maxisoft.Utils.Collections.Spans
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator BitSpan(BitArray bitArray)
         {
-            var arr = new int[ComputeLongArraySize(bitArray.Count) / (sizeof(long) / sizeof(int))];
+            var arr = new int[ComputeLongArraySize(bitArray.Count) * (sizeof(long) / sizeof(int))];
             bitArray.CopyTo(arr, 0);
             return (Span<int>) arr;
         }

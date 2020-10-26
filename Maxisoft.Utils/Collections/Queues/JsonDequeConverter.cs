@@ -106,7 +106,6 @@ namespace Maxisoft.Utils.Collections.Queues
                 }
             }
             throw new JsonException();
-            return q;
         }
 
         public override void Write(Utf8JsonWriter writer, Deque<T> value, JsonSerializerOptions options)

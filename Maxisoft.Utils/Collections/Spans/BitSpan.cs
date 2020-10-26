@@ -167,7 +167,6 @@ namespace Maxisoft.Utils.Collections.Spans
             return other switch
             {
                 null => false,
-                BitSpan bs => Equals(bs),
                 BitArray ba => Equals((BitSpan) ba),
                 _ => false
             };

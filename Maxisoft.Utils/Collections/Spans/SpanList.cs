@@ -30,7 +30,7 @@ namespace Maxisoft.Utils.Collections.Spans
             return Span.Slice(0, Count);
         }
 
-        public int Capacity => Span.Length;
+        public readonly int Capacity => Span.Length;
 
         public static implicit operator Span<T>(SpanList<T> list)
         {

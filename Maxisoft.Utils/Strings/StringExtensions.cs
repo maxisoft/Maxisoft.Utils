@@ -52,7 +52,7 @@ namespace Maxisoft.Utils.Strings
                 {
                     var replacement = @"$1{" + i + @"$4}$6";
                     f = Regex.Replace(f, regex, replacement);
-                    arr[i] = kv.Value;
+                    arr[i] = kv.Value!;
                     i++;
                 }
             }
