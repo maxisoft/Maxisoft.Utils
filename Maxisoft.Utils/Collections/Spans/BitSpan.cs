@@ -153,10 +153,7 @@ namespace Maxisoft.Utils.Collections.Spans
 
             foreach (var l in Span)
             {
-                unchecked
-                {
-                    h = 31 * h + l.GetHashCode();
-                }
+                h = unchecked(31 * h + l.GetHashCode());
             }
 
             return h;
@@ -166,7 +163,6 @@ namespace Maxisoft.Utils.Collections.Spans
         {
             return other switch
             {
-                null => false,
                 BitArray ba => Equals((BitSpan) ba),
                 _ => false
             };
