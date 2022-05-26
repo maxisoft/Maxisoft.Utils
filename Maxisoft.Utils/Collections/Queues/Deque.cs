@@ -441,7 +441,7 @@ namespace Maxisoft.Utils.Collections.Queues
             {
                 @sizeof = Marshal.SizeOf<T>();
             }
-            catch (ArgumentException)
+            catch (ArgumentException) // lgtm [cs/empty-catch-block]
             {
             }
 
